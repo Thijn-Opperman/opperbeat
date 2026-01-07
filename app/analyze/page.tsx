@@ -10,6 +10,10 @@ interface AnalysisData {
   durationSeconds: number;
   bpm: number | null;
   key: string | null;
+  confidence?: {
+    bpm: number | null;
+    key: number | null;
+  };
   metadata: {
     artist: string | null;
     album: string | null;
@@ -250,11 +254,13 @@ export default function AnalyzePage() {
               <div className="space-y-4">
                 <AnalysisMetric 
                   label="BPM" 
-                  value={analysisData?.bpm ? analysisData.bpm.toString() : (isUploading ? 'Analyseren...' : '-')} 
+                  value={analysisData?.bpm ? analysisData.bpm.toString() : (isUploading ? 'Analyseren...' : '-')}
+                  confidence={analysisData?.confidence?.bpm}
                 />
                 <AnalysisMetric 
                   label="Key" 
-                  value={analysisData?.key || (isUploading ? 'Analyseren...' : '-')} 
+                  value={analysisData?.key || (isUploading ? 'Analyseren...' : '-')}
+                  confidence={analysisData?.confidence?.key}
                 />
                 <AnalysisMetric label="Energy" value="-" />
                 <AnalysisMetric label="Danceability" value="-" />
@@ -289,16 +295,44 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-function AnalysisMetric({ label, value }: { label: string; value: string }) {
+function AnalysisMetric({ label, value, confidence }: { label: string; value: string; confidence?: number | null }) {
+  const confidencePercent = confidence ? Math.round(confidence * 100) : null;
+  const confidenceColor = confidence 
+    ? confidence >= 0.8 ? 'bg-green-500' 
+    : confidence >= 0.6 ? 'bg-yellow-500' 
+    : 'bg-orange-500'
+    : 'bg-pink-500';
+  
   return (
     <div>
       <div className="flex justify-between items-center mb-2">
         <span className="text-white/80 text-sm">{label}</span>
-        <span className="text-white font-semibold">{value}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-white font-semibold">{value}</span>
+          {confidencePercent !== null && (
+            <span className={`text-xs px-2 py-0.5 rounded ${
+              confidence >= 0.8 ? 'bg-green-500/20 text-green-400' 
+              : confidence >= 0.6 ? 'bg-yellow-500/20 text-yellow-400' 
+              : 'bg-orange-500/20 text-orange-400'
+            }`}>
+              {confidencePercent}%
+            </span>
+          )}
+        </div>
       </div>
       <div className="w-full bg-black/20 rounded-full h-2">
-        <div className="bg-pink-500 h-2 rounded-full" style={{ width: '0%' }}></div>
+        <div 
+          className={`${confidenceColor} h-2 rounded-full transition-all duration-300`} 
+          style={{ width: confidencePercent ? `${confidencePercent}%` : '0%' }}
+        ></div>
       </div>
+      {confidencePercent !== null && (
+        <div className="mt-1 text-xs text-white/50">
+          {confidence >= 0.8 ? 'Zeer accuraat' 
+           : confidence >= 0.6 ? 'Accuraat' 
+           : 'Matig accuraat'}
+        </div>
+      )}
     </div>
   );
 }

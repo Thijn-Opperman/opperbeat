@@ -61,66 +61,73 @@ export async function POST(request: NextRequest) {
       // Stuur eerst een partial response met metadata (als streaming mogelijk was)
       // Voor nu gaan we door met de volledige analyse
 
-      // Als BPM of key niet in metadata zit, gebruik librosa voor analyse
-      if (!bpm || !key) {
-        console.log('BPM of key niet in metadata, start librosa analyse...');
-        try {
-          // Roep Python script aan met librosa
-          const scriptPath = path.join(process.cwd(), 'scripts', 'analyze_audio.py');
-          console.log(`Aanroepen Python script: ${scriptPath}`);
-          
-          const { stdout, stderr } = await execAsync(`python3 "${scriptPath}" "${tempFilePath}"`);
-          
-          if (stderr) {
-            console.error('Python stderr:', stderr);
-          }
-          
-          const librosaResult = JSON.parse(stdout);
-          console.log('Librosa resultaat:', librosaResult);
-          
-          if (librosaResult.success) {
-            if (!bpm && librosaResult.bpm) {
-              bpm = librosaResult.bpm;
-              console.log(`BPM gedetecteerd met librosa: ${bpm}`);
-            }
-            
-            if (!key && librosaResult.key) {
-              key = librosaResult.key;
-              console.log(`Key gedetecteerd met librosa: ${key}`);
-            }
-          } else {
-            console.error('Librosa analyse gefaald:', librosaResult.error);
-          }
-        } catch (librosaError: any) {
-          console.error('Fout bij librosa analyse:', librosaError);
-          // Als Python/librosa niet beschikbaar is, val terug op oude methode
-          if (librosaError.message?.includes('python3') || librosaError.message?.includes('No such file')) {
-            console.log('Python/librosa niet beschikbaar, probeer alternatieve methode...');
-            // BPM en key blijven null als analyse faalt
-          }
+      // Gebruik de standalone analyzer voor volledige analyse
+      let analyzerResult: any = null;
+      try {
+        console.log('Start music analyzer standalone analyse...');
+        const analyzerPath = path.join(process.cwd(), 'app', 'music_analyzer_standalone.py');
+        
+        // Importeer de analyzer module en roep aan
+        const { stdout, stderr } = await execAsync(
+          `python3 -c "import sys; sys.path.insert(0, '${path.join(process.cwd(), 'app')}'); from music_analyzer_standalone import analyze_audio_simple; import json; result = analyze_audio_simple('${tempFilePath}', include_waveform=True); print(json.dumps(result))"`
+        );
+        
+        if (stderr && !stderr.includes('FutureWarning')) {
+          console.warn('Python stderr:', stderr);
         }
-      } else {
-        console.log('BPM en key al in metadata gevonden');
+        
+        analyzerResult = JSON.parse(stdout);
+        console.log('Analyzer resultaat:', analyzerResult);
+        
+        // Update BPM en key als ze niet in metadata zaten
+        if (!bpm && analyzerResult.bpm) {
+          bpm = analyzerResult.bpm;
+        }
+        
+        if (!key && analyzerResult.key) {
+          key = analyzerResult.key;
+        }
+        
+        // Note: analyzerResult bevat al bpm_confidence en key_confidence
+        // Deze worden gebruikt in de response
+        
+      } catch (analyzerError: any) {
+        console.error('Fout bij analyzer:', analyzerError);
+        // Als analyzer faalt, gebruik metadata waarden
       }
 
       // Verwijder het tijdelijke bestand
       await fs.unlink(tempFilePath).catch(() => {});
 
+      // Gebruik analyzer resultaten waar beschikbaar
+      // Analyzer retourneert bitrate al in kbps, metadata in bps
+      const finalBitrate = analyzerResult?.bitrate || (metadata.format.bitrate ? Math.round(metadata.format.bitrate / 1000) : null);
+      const finalTitle = analyzerResult?.song_name || title;
+      const finalDuration = analyzerResult?.duration_formatted || formattedDuration;
+      const finalDurationSeconds = analyzerResult?.duration || duration;
+      
       return NextResponse.json({
         success: true,
         data: {
-          title,
-          duration: formattedDuration,
-          durationSeconds: duration,
+          title: finalTitle,
+          duration: finalDuration,
+          durationSeconds: finalDurationSeconds,
           bpm: bpm || null,
           key: key || null,
+          // Voeg confidence scores toe
+          confidence: {
+            bpm: analyzerResult?.bpm_confidence || null,
+            key: analyzerResult?.key_confidence || null,
+          },
           metadata: {
             artist: metadata.common.artist || null,
             album: metadata.common.album || null,
             genre: metadata.common.genre ? (Array.isArray(metadata.common.genre) ? metadata.common.genre[0] : metadata.common.genre) : null,
-            bitrate: metadata.format.bitrate || null,
+            bitrate: finalBitrate,
             sampleRate: metadata.format.sampleRate || null,
           },
+          // Voeg waveform toe als beschikbaar
+          ...(analyzerResult?.waveform && { waveform: analyzerResult.waveform }),
         },
       });
     } catch (error) {
