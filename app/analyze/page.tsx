@@ -309,7 +309,7 @@ function AnalysisMetric({ label, value, confidence }: { label: string; value: st
         <span className="text-white/80 text-sm">{label}</span>
         <div className="flex items-center gap-2">
           <span className="text-white font-semibold">{value}</span>
-          {confidencePercent !== null && (
+          {confidence != null && (
             <span className={`text-xs px-2 py-0.5 rounded ${
               confidence >= 0.8 ? 'bg-green-500/20 text-green-400' 
               : confidence >= 0.6 ? 'bg-yellow-500/20 text-yellow-400' 
@@ -326,7 +326,7 @@ function AnalysisMetric({ label, value, confidence }: { label: string; value: st
           style={{ width: confidencePercent ? `${confidencePercent}%` : '0%' }}
         ></div>
       </div>
-      {confidencePercent !== null && (
+      {confidence != null && (
         <div className="mt-1 text-xs text-white/50">
           {confidence >= 0.8 ? 'Zeer accuraat' 
            : confidence >= 0.6 ? 'Accuraat' 
