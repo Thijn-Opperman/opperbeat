@@ -1,5 +1,5 @@
 """
-Vercel Serverless API endpoint voor audio analyse
+Python Analyzer API voor Railway/Fly.io deployment
 Gebruikt FastAPI voor serverless deployment
 """
 
@@ -7,11 +7,21 @@ import os
 import tempfile
 import base64
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from python.music_analyzer import analyze_audio_simple
 
 app = FastAPI()
+
+# CORS middleware voor cross-origin requests van Vercel frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In productie: specifieke origins zoals ["https://your-app.vercel.app"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class AnalyzeRequest(BaseModel):
@@ -21,7 +31,13 @@ class AnalyzeRequest(BaseModel):
     include_waveform: bool = True
 
 
-@app.post("/")
+@app.get("/")
+async def root():
+    """Health check endpoint"""
+    return {"status": "ok", "service": "Python Audio Analyzer API"}
+
+
+@app.post("/api/analyze")
 async def analyze(request: AnalyzeRequest):
     """
     Analyseer audio bestand

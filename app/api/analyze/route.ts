@@ -37,25 +37,19 @@ export async function POST(request: NextRequest) {
       // Converteer file naar base64 voor Python API
       const base64Data = buffer.toString('base64');
 
-      // Roep Python serverless API aan
+      // Roep externe Python analyzer API aan (Railway/Fly.io)
       let analyzerResult: any = null;
       try {
         console.log('Roep Python analyzer API aan...');
         
-        // Bepaal API URL
-        // Op Vercel: gebruik absolute URL met VERCEL_URL
-        // In development: gebruik localhost of relatieve URL
-        let apiUrl: string;
-        if (process.env.VERCEL_URL) {
-          // Production/preview op Vercel
-          apiUrl = `https://${process.env.VERCEL_URL}/api/analyze`;
-        } else if (process.env.NODE_ENV === 'development') {
-          // Local development - probeer eerst localhost, anders relatief
-          const port = process.env.PORT || '3000';
-          apiUrl = `http://localhost:${port}/api/analyze`;
-        } else {
-          // Fallback naar relatief pad
-          apiUrl = '/api/analyze';
+        // Gebruik environment variable voor externe API URL
+        // Zet PYTHON_API_URL in Vercel environment variables
+        // Bijvoorbeeld: https://your-app.railway.app/api/analyze
+        const apiUrl = process.env.PYTHON_API_URL || process.env.NEXT_PUBLIC_PYTHON_API_URL;
+        
+        if (!apiUrl) {
+          console.warn('PYTHON_API_URL niet ingesteld, skip analyzer (gebruik alleen metadata)');
+          throw new Error('Python analyzer API URL niet geconfigureerd');
         }
         
         const response = await fetch(apiUrl, {

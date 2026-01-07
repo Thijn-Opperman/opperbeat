@@ -1,6 +1,7 @@
 # FastAPI voor serverless endpoints
 fastapi>=0.104.0
 pydantic>=2.0.0
+uvicorn[standard]>=0.24.0
 
 # Core audio processing
 librosa>=0.10.0
@@ -9,5 +10,3 @@ scipy>=1.2.0,<1.12.0
 
 # Metadata en bitrate extractie
 mutagen>=1.47.0
-
-

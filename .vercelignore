@@ -1,0 +1,27 @@
+# Vercel ignore file - Exclude Python code from Vercel builds
+# Python analyzer wordt gedeployed op Railway/Fly.io, niet op Vercel
+
+# Python API code (voor Railway) - belangrijkste uitsluiting
+# Dit voorkomt dat Vercel Python serverless functions detecteert
+/api/
+/python/
+
+# Python dependencies (voor Railway, niet voor Vercel)
+requirements.txt
+Procfile
+
+# Python test files
+test_*.py
+*_test.py
+
+# Python scripts
+/scripts/
+
+# Python examples
+/examples/
+
+# Standalone Python files (oude versie)
+app/music_analyzer_standalone.py
+app/requirements_standalone.txt
+app/README_STANDALONE.md
+
