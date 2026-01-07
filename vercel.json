@@ -1,7 +1,6 @@
 {
   "functions": {
-    "api/*.py": {
-      "runtime": "python3.11",
+    "api/analyze.py": {
       "maxDuration": 60
     }
   }
