@@ -61,6 +61,11 @@ async def root():
     """Health check endpoint"""
     return {"status": "ok", "service": "Python Audio Analyzer API"}
 
+@app.get("/health")
+async def health():
+    """Health check endpoint voor Railway"""
+    return {"status": "healthy", "service": "Python Audio Analyzer API"}
+
 
 @app.post("/api/analyze")
 async def analyze(request: Request):
@@ -77,9 +82,14 @@ async def analyze(request: Request):
     try:
         logger.info("Received analyze request")
         
-        # Parse request body
+        # Parse request body - gebruik raw body om Pydantic validatie te vermijden
         try:
-            body = await request.json()
+            # Lees raw body eerst
+            raw_body = await request.body()
+            logger.info(f"Raw body received, length: {len(raw_body)}")
+            
+            # Parse JSON
+            body = json.loads(raw_body)
             logger.info(f"Request body parsed, keys: {list(body.keys())}")
         except json.JSONDecodeError as e:
             logger.error(f"JSON decode error: {str(e)}")
@@ -87,14 +97,28 @@ async def analyze(request: Request):
                 status_code=400,
                 detail=f"Ongeldige JSON: {str(e)}"
             )
+        except Exception as e:
+            logger.error(f"Error parsing request: {str(e)}")
+            logger.error(traceback.format_exc())
+            raise HTTPException(
+                status_code=400,
+                detail=f"Fout bij parsen request: {str(e)}"
+            )
         
         # Haal waarden direct uit body (skip strikte Pydantic validatie voor base64)
         file_data = body.get("file_data")
         file_path = body.get("file_path")
         include_waveform = body.get("include_waveform", True)
         
+        logger.info(f"Request body keys: {list(body.keys())}")
+        logger.info(f"file_data present: {file_data is not None}")
+        logger.info(f"file_data type: {type(file_data)}")
+        if file_data:
+            logger.info(f"file_data length: {len(str(file_data))}")
+        
         # Check of file_data is gegeven
         if not file_data and not file_path:
+            logger.error("No file_data or file_path provided")
             raise HTTPException(
                 status_code=400,
                 detail="file_path of file_data is vereist"

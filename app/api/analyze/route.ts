@@ -52,19 +52,31 @@ export async function POST(request: NextRequest) {
           throw new Error('Python analyzer API URL niet geconfigureerd');
         }
         
+        console.log('API URL:', apiUrl);
+        console.log('Base64 data length:', base64Data.length);
+        
+        // Maak request body
+        const requestBody = {
+          file_data: base64Data,
+          include_waveform: true,
+        };
+        
+        console.log('Sending request to Railway...');
+        
         const response = await fetch(apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            file_data: base64Data,
-            include_waveform: true,
-          }),
+          body: JSON.stringify(requestBody),
         });
+
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
 
         if (!response.ok) {
           const errorText = await response.text();
+          console.error('Railway API error response:', errorText);
           throw new Error(`Python API error: ${response.status} - ${errorText}`);
         }
 
@@ -73,6 +85,8 @@ export async function POST(request: NextRequest) {
         
       } catch (analyzerError: any) {
         console.error('Fout bij Python analyzer API:', analyzerError);
+        console.error('Error message:', analyzerError.message);
+        console.error('Error stack:', analyzerError.stack);
         // Als analyzer faalt, gebruik metadata waarden als fallback
         if (!metadata) {
           throw analyzerError;
