@@ -34,6 +34,8 @@ class AnalyzeRequest(BaseModel):
     class Config:
         # Maak validatie minder strikt voor grote base64 strings
         str_strip_whitespace = False
+        # Geen pattern validatie voor base64 strings
+        extra = "allow"
 
 
 @app.get("/")
@@ -64,27 +66,26 @@ async def analyze(request: Request):
                 detail=f"Ongeldige JSON: {str(e)}"
             )
         
-        # Valideer met Pydantic (maar vang errors op)
-        try:
-            analyze_request = AnalyzeRequest(**body)
-        except ValidationError as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Validatie error: {str(e)}"
-            )
+        # Haal waarden direct uit body (skip strikte Pydantic validatie voor base64)
+        file_data = body.get("file_data")
+        file_path = body.get("file_path")
+        include_waveform = body.get("include_waveform", True)
         
         # Check of file_data is gegeven
-        if not analyze_request.file_data and not analyze_request.file_path:
+        if not file_data and not file_path:
             raise HTTPException(
                 status_code=400,
                 detail="file_path of file_data is vereist"
             )
         
         # Als we file_data hebben (base64), schrijf naar temp file
-        if analyze_request.file_data:
+        if file_data:
             # Decode base64
             try:
-                audio_bytes = base64.b64decode(analyze_request.file_data)
+                # Zorg dat file_data een string is
+                if not isinstance(file_data, str):
+                    raise ValueError("file_data moet een string zijn")
+                audio_bytes = base64.b64decode(file_data)
             except Exception as e:
                 raise HTTPException(
                     status_code=400,
@@ -101,8 +102,9 @@ async def analyze(request: Request):
             file_path = temp_file_path
             should_cleanup = True
             
-        elif analyze_request.file_path:
-            file_path = analyze_request.file_path
+        elif file_path:
+            # file_path is al gezet hierboven
+            pass
             
             # Check of file bestaat
             if not os.path.exists(file_path):
@@ -120,7 +122,7 @@ async def analyze(request: Request):
         try:
             result = analyze_audio_simple(
                 file_path,
-                include_waveform=analyze_request.include_waveform
+                include_waveform=include_waveform
             )
             
             return result
