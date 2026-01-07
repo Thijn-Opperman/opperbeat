@@ -34,17 +34,12 @@ export async function POST(request: NextRequest) {
         console.warn('Metadata parsing gefaald, doorgaan met analyzer:', metaError);
       }
 
-      // Converteer file naar base64 voor Python API
-      const base64Data = buffer.toString('base64');
-
-      // Roep externe Python analyzer API aan (Railway/Fly.io)
+      // Roep externe Python analyzer API aan (Railway)
       let analyzerResult: any = null;
       try {
         console.log('Roep Python analyzer API aan...');
         
         // Gebruik environment variable voor externe API URL
-        // Zet PYTHON_API_URL in Vercel environment variables
-        // Bijvoorbeeld: https://your-app.railway.app/api/analyze
         const apiUrl = process.env.PYTHON_API_URL || process.env.NEXT_PUBLIC_PYTHON_API_URL;
         
         if (!apiUrl) {
@@ -53,25 +48,20 @@ export async function POST(request: NextRequest) {
         }
         
         console.log('API URL:', apiUrl);
-        console.log('Base64 data length:', base64Data.length);
+        console.log('File size:', buffer.length, 'bytes');
         
-        // Maak request body
-        const requestBody = {
-          file_data: base64Data,
-          include_waveform: true,
-        };
+        // Gebruik FormData voor efficiënte file upload
+        const uploadFormData = new FormData();
+        const blob = new Blob([buffer], { type: file.type || 'audio/mpeg' });
+        uploadFormData.append('file', blob, file.name);
+        // include_waveform moet als string "true" of "false" worden verzonden
+        uploadFormData.append('include_waveform', String(true));
         
         console.log('Sending request to Railway...');
         
-        // Gebruik FormData in plaats van JSON voor grote bestanden
-        const formData = new FormData();
-        const blob = new Blob([buffer], { type: file.type || 'audio/mpeg' });
-        formData.append('file', blob, file.name);
-        formData.append('include_waveform', 'true');
-        
         const response = await fetch(apiUrl, {
           method: 'POST',
-          body: formData,
+          body: uploadFormData,
         });
 
         console.log('Response status:', response.status);
@@ -89,7 +79,6 @@ export async function POST(request: NextRequest) {
       } catch (analyzerError: any) {
         console.error('Fout bij Python analyzer API:', analyzerError);
         console.error('Error message:', analyzerError.message);
-        console.error('Error stack:', analyzerError.stack);
         // Als analyzer faalt, gebruik metadata waarden als fallback
         if (!metadata) {
           throw analyzerError;
@@ -100,6 +89,7 @@ export async function POST(request: NextRequest) {
       await fs.unlink(tempFilePath).catch(() => {});
 
       // Combineer metadata en analyzer resultaten
+      // Railway retourneert: bpm, bpm_confidence, key (key_full), key_confidence, song_name, duration, duration_formatted, bitrate, waveform
       const title = analyzerResult?.song_name || 
                    metadata?.common?.title || 
                    file.name.replace(/\.[^/.]+$/, '') || 
@@ -114,6 +104,7 @@ export async function POST(request: NextRequest) {
       const bpm = analyzerResult?.bpm || 
                  (metadata?.common?.bpm ? (Array.isArray(metadata.common.bpm) ? metadata.common.bpm[0] : metadata.common.bpm) : null);
       
+      // Railway retourneert 'key' als key_full (bijv. "C major")
       const key = analyzerResult?.key || 
                  (metadata?.common?.key ? (Array.isArray(metadata.common.key) ? metadata.common.key[0] : metadata.common.key) : null);
       

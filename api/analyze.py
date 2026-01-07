@@ -71,7 +71,7 @@ async def health():
 async def analyze(
     file: Optional[UploadFile] = File(None),
     file_path: Optional[str] = Form(None),
-    include_waveform: bool = Form(True)
+    include_waveform: str = Form("true")
 ):
     """
     Analyseer audio bestand
@@ -134,10 +134,12 @@ async def analyze(
         
         # Analyseer audio
         try:
-            logger.info(f"Starting audio analysis for: {file_path}")
+            # Converteer include_waveform string naar boolean
+            include_waveform_bool = include_waveform.lower() in ('true', '1', 'yes', 'on')
+            logger.info(f"Starting audio analysis for: {file_path}, include_waveform: {include_waveform_bool}")
             result = analyze_audio_simple(
                 file_path,
-                include_waveform=include_waveform
+                include_waveform=include_waveform_bool
             )
             logger.info(f"Audio analysis complete, BPM: {result.get('bpm')}, Key: {result.get('key')}")
             return result
