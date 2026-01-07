@@ -1,3 +1,5 @@
+'use client';
+
 import Sidebar from './components/Sidebar';
 import GenresCard from './components/GenresCard';
 import LibraryCard from './components/LibraryCard';
