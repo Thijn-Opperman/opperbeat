@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
 import { parseFile } from 'music-metadata';
+import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Maak een tijdelijk bestand aan
+    // Maak een tijdelijk bestand aan voor metadata parsing
     const tempDir = os.tmpdir();
     const tempFilePath = path.join(tempDir, `audio-${Date.now()}-${file.name}`);
     
@@ -30,101 +26,108 @@ export async function POST(request: NextRequest) {
     await fs.writeFile(tempFilePath, buffer);
 
     try {
-      // Parse metadata met music-metadata
-      const metadata = await parseFile(tempFilePath);
-
-      // Haal de benodigde informatie op
-      const title = metadata.common.title || file.name.replace(/\.[^/.]+$/, '') || 'Onbekend';
-      const duration = metadata.format.duration ? Math.round(metadata.format.duration) : 0;
-      
-      // Formatteer duur als MM:SS
-      const minutes = Math.floor(duration / 60);
-      const seconds = duration % 60;
-      const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-      // Probeer eerst BPM en key uit metadata te halen
-      let bpm: number | null = null;
-      let key: string | null = null;
-
-      if (metadata.common.bpm) {
-        bpm = Array.isArray(metadata.common.bpm) 
-          ? metadata.common.bpm[0] 
-          : metadata.common.bpm;
+      // Parse metadata met music-metadata (voor snelle metadata)
+      let metadata: any = null;
+      try {
+        metadata = await parseFile(tempFilePath);
+      } catch (metaError) {
+        console.warn('Metadata parsing gefaald, doorgaan met analyzer:', metaError);
       }
 
-      if (metadata.common.key) {
-        key = Array.isArray(metadata.common.key)
-          ? metadata.common.key[0]
-          : metadata.common.key;
-      }
+      // Converteer file naar base64 voor Python API
+      const base64Data = buffer.toString('base64');
 
-      // Stuur eerst een partial response met metadata (als streaming mogelijk was)
-      // Voor nu gaan we door met de volledige analyse
-
-      // Gebruik de standalone analyzer voor volledige analyse
+      // Roep Python serverless API aan
       let analyzerResult: any = null;
       try {
-        console.log('Start music analyzer standalone analyse...');
-        const analyzerPath = path.join(process.cwd(), 'app', 'music_analyzer_standalone.py');
+        console.log('Roep Python analyzer API aan...');
         
-        // Importeer de analyzer module en roep aan
-        const { stdout, stderr } = await execAsync(
-          `python3 -c "import sys; sys.path.insert(0, '${path.join(process.cwd(), 'app')}'); from music_analyzer_standalone import analyze_audio_simple; import json; result = analyze_audio_simple('${tempFilePath}', include_waveform=True); print(json.dumps(result))"`
-        );
-        
-        if (stderr && !stderr.includes('FutureWarning')) {
-          console.warn('Python stderr:', stderr);
+        // Bepaal API URL
+        // Op Vercel: gebruik absolute URL met VERCEL_URL
+        // In development: gebruik localhost of relatieve URL
+        let apiUrl: string;
+        if (process.env.VERCEL_URL) {
+          // Production/preview op Vercel
+          apiUrl = `https://${process.env.VERCEL_URL}/api/analyze`;
+        } else if (process.env.NODE_ENV === 'development') {
+          // Local development - probeer eerst localhost, anders relatief
+          const port = process.env.PORT || '3000';
+          apiUrl = `http://localhost:${port}/api/analyze`;
+        } else {
+          // Fallback naar relatief pad
+          apiUrl = '/api/analyze';
         }
         
-        analyzerResult = JSON.parse(stdout);
-        console.log('Analyzer resultaat:', analyzerResult);
-        
-        // Update BPM en key als ze niet in metadata zaten
-        if (!bpm && analyzerResult.bpm) {
-          bpm = analyzerResult.bpm;
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            file_data: base64Data,
+            include_waveform: true,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Python API error: ${response.status} - ${errorText}`);
         }
-        
-        if (!key && analyzerResult.key) {
-          key = analyzerResult.key;
-        }
-        
-        // Note: analyzerResult bevat al bpm_confidence en key_confidence
-        // Deze worden gebruikt in de response
+
+        analyzerResult = await response.json();
+        console.log('Analyzer resultaat ontvangen:', analyzerResult);
         
       } catch (analyzerError: any) {
-        console.error('Fout bij analyzer:', analyzerError);
-        // Als analyzer faalt, gebruik metadata waarden
+        console.error('Fout bij Python analyzer API:', analyzerError);
+        // Als analyzer faalt, gebruik metadata waarden als fallback
+        if (!metadata) {
+          throw analyzerError;
+        }
       }
 
       // Verwijder het tijdelijke bestand
       await fs.unlink(tempFilePath).catch(() => {});
 
-      // Gebruik analyzer resultaten waar beschikbaar
-      // Analyzer retourneert bitrate al in kbps, metadata in bps
-      const finalBitrate = analyzerResult?.bitrate || (metadata.format.bitrate ? Math.round(metadata.format.bitrate / 1000) : null);
-      const finalTitle = analyzerResult?.song_name || title;
-      const finalDuration = analyzerResult?.duration_formatted || formattedDuration;
-      const finalDurationSeconds = analyzerResult?.duration || duration;
+      // Combineer metadata en analyzer resultaten
+      const title = analyzerResult?.song_name || 
+                   metadata?.common?.title || 
+                   file.name.replace(/\.[^/.]+$/, '') || 
+                   'Onbekend';
+      
+      const duration = analyzerResult?.duration || 
+                      (metadata?.format?.duration ? Math.round(metadata.format.duration) : 0);
+      
+      const durationFormatted = analyzerResult?.duration_formatted || 
+                               (duration ? `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}` : '0:00');
+      
+      const bpm = analyzerResult?.bpm || 
+                 (metadata?.common?.bpm ? (Array.isArray(metadata.common.bpm) ? metadata.common.bpm[0] : metadata.common.bpm) : null);
+      
+      const key = analyzerResult?.key || 
+                 (metadata?.common?.key ? (Array.isArray(metadata.common.key) ? metadata.common.key[0] : metadata.common.key) : null);
+      
+      const finalBitrate = analyzerResult?.bitrate || 
+                          (metadata?.format?.bitrate ? Math.round(metadata.format.bitrate / 1000) : null);
       
       return NextResponse.json({
         success: true,
         data: {
-          title: finalTitle,
-          duration: finalDuration,
-          durationSeconds: finalDurationSeconds,
-          bpm: bpm || null,
-          key: key || null,
+          title: title,
+          duration: durationFormatted,
+          durationSeconds: duration,
+          bpm: bpm,
+          key: key,
           // Voeg confidence scores toe
           confidence: {
             bpm: analyzerResult?.bpm_confidence || null,
             key: analyzerResult?.key_confidence || null,
           },
           metadata: {
-            artist: metadata.common.artist || null,
-            album: metadata.common.album || null,
-            genre: metadata.common.genre ? (Array.isArray(metadata.common.genre) ? metadata.common.genre[0] : metadata.common.genre) : null,
+            artist: metadata?.common?.artist || null,
+            album: metadata?.common?.album || null,
+            genre: metadata?.common?.genre ? (Array.isArray(metadata.common.genre) ? metadata.common.genre[0] : metadata.common.genre) : null,
             bitrate: finalBitrate,
-            sampleRate: metadata.format.sampleRate || null,
+            sampleRate: metadata?.format?.sampleRate || null,
           },
           // Voeg waveform toe als beschikbaar
           ...(analyzerResult?.waveform && { waveform: analyzerResult.waveform }),
@@ -136,14 +139,14 @@ export async function POST(request: NextRequest) {
       
       console.error('Fout bij het analyseren van audio:', error);
       return NextResponse.json(
-        { error: 'Fout bij het analyseren van het audio bestand' },
+        { error: 'Fout bij het analyseren van het audio bestand', details: error instanceof Error ? error.message : String(error) },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error('Fout bij het verwerken van de upload:', error);
     return NextResponse.json(
-      { error: 'Fout bij het verwerken van de upload' },
+      { error: 'Fout bij het verwerken van de upload', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
