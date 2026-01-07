@@ -6,12 +6,18 @@ Gebruikt FastAPI voor serverless deployment
 import os
 import tempfile
 import base64
+import traceback
+import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 from typing import Optional
 from python.music_analyzer import analyze_audio_simple
 import json
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -23,6 +29,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Startup event voor logging
+@app.on_event("startup")
+async def startup_event():
+    logger.info("FastAPI application starting up...")
+    try:
+        # Test import
+        from python.music_analyzer import analyze_audio_simple
+        logger.info("Successfully imported analyze_audio_simple")
+    except Exception as e:
+        logger.error(f"Failed to import analyze_audio_simple: {str(e)}")
+        logger.error(traceback.format_exc())
 
 
 class AnalyzeRequest(BaseModel):
@@ -57,10 +75,14 @@ async def analyze(request: Request):
     temp_file_path = None
     
     try:
+        logger.info("Received analyze request")
+        
         # Parse request body
         try:
             body = await request.json()
+            logger.info(f"Request body parsed, keys: {list(body.keys())}")
         except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {str(e)}")
             raise HTTPException(
                 status_code=400,
                 detail=f"Ongeldige JSON: {str(e)}"
@@ -80,13 +102,18 @@ async def analyze(request: Request):
         
         # Als we file_data hebben (base64), schrijf naar temp file
         if file_data:
+            logger.info(f"Processing file_data, length: {len(file_data) if file_data else 0}")
             # Decode base64
             try:
                 # Zorg dat file_data een string is
                 if not isinstance(file_data, str):
                     raise ValueError("file_data moet een string zijn")
+                logger.info("Decoding base64...")
                 audio_bytes = base64.b64decode(file_data)
+                logger.info(f"Base64 decoded, audio size: {len(audio_bytes)} bytes")
             except Exception as e:
+                logger.error(f"Base64 decode error: {str(e)}")
+                logger.error(traceback.format_exc())
                 raise HTTPException(
                     status_code=400,
                     detail=f"Ongeldige base64 data: {str(e)}"
@@ -95,12 +122,14 @@ async def analyze(request: Request):
             # Maak temp file
             temp_dir = tempfile.gettempdir()
             temp_file_path = os.path.join(temp_dir, f"audio_{os.urandom(8).hex()}.tmp")
+            logger.info(f"Writing temp file: {temp_file_path}")
             
             with open(temp_file_path, 'wb') as f:
                 f.write(audio_bytes)
             
             file_path = temp_file_path
             should_cleanup = True
+            logger.info(f"Temp file created: {file_path}")
             
         elif file_path:
             # file_path is al gezet hierboven
@@ -120,14 +149,17 @@ async def analyze(request: Request):
         
         # Analyseer audio
         try:
+            logger.info(f"Starting audio analysis for: {file_path}")
             result = analyze_audio_simple(
                 file_path,
                 include_waveform=include_waveform
             )
-            
+            logger.info(f"Audio analysis complete, BPM: {result.get('bpm')}, Key: {result.get('key')}")
             return result
             
         except Exception as e:
+            logger.error(f"Audio analysis error: {str(e)}")
+            logger.error(traceback.format_exc())
             raise HTTPException(
                 status_code=500,
                 detail=f"Fout bij audio analyse: {str(e)}"
@@ -137,6 +169,8 @@ async def analyze(request: Request):
         # Re-raise HTTP exceptions
         raise
     except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        logger.error(traceback.format_exc())
         raise HTTPException(
             status_code=500,
             detail=f"Server error: {str(e)}"
