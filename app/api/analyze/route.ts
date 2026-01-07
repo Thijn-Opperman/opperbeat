@@ -63,12 +63,15 @@ export async function POST(request: NextRequest) {
         
         console.log('Sending request to Railway...');
         
+        // Gebruik FormData in plaats van JSON voor grote bestanden
+        const formData = new FormData();
+        const blob = new Blob([buffer], { type: file.type || 'audio/mpeg' });
+        formData.append('file', blob, file.name);
+        formData.append('include_waveform', 'true');
+        
         const response = await fetch(apiUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
+          body: formData,
         });
 
         console.log('Response status:', response.status);

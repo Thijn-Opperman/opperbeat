@@ -8,7 +8,7 @@ import tempfile
 import base64
 import traceback
 import logging
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 from typing import Optional
@@ -68,88 +68,49 @@ async def health():
 
 
 @app.post("/api/analyze")
-async def analyze(request: Request):
+async def analyze(
+    file: Optional[UploadFile] = File(None),
+    file_path: Optional[str] = Form(None),
+    include_waveform: bool = Form(True)
+):
     """
     Analyseer audio bestand
     
     Accepteert:
-    - file_path: pad naar audio bestand (als al op server)
-    - file_data: base64 encoded audio data
+    - file: UploadFile (multipart/form-data)
+    - file_path: pad naar audio bestand (als al op server) - via form field
+    - include_waveform: boolean via form field
     """
     should_cleanup = False
     temp_file_path = None
     
     try:
         logger.info("Received analyze request")
+        logger.info(f"File provided: {file is not None}")
+        logger.info(f"File path provided: {file_path is not None}")
         
-        # Parse request body - gebruik raw body om Pydantic validatie te vermijden
-        try:
-            # Lees raw body eerst
-            raw_body = await request.body()
-            logger.info(f"Raw body received, length: {len(raw_body)}")
-            
-            # Parse JSON
-            body = json.loads(raw_body)
-            logger.info(f"Request body parsed, keys: {list(body.keys())}")
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON decode error: {str(e)}")
+        # Check of file of file_path is gegeven
+        if not file and not file_path:
+            logger.error("No file or file_path provided")
             raise HTTPException(
                 status_code=400,
-                detail=f"Ongeldige JSON: {str(e)}"
-            )
-        except Exception as e:
-            logger.error(f"Error parsing request: {str(e)}")
-            logger.error(traceback.format_exc())
-            raise HTTPException(
-                status_code=400,
-                detail=f"Fout bij parsen request: {str(e)}"
+                detail="file of file_path is vereist"
             )
         
-        # Haal waarden direct uit body (skip strikte Pydantic validatie voor base64)
-        file_data = body.get("file_data")
-        file_path = body.get("file_path")
-        include_waveform = body.get("include_waveform", True)
-        
-        logger.info(f"Request body keys: {list(body.keys())}")
-        logger.info(f"file_data present: {file_data is not None}")
-        logger.info(f"file_data type: {type(file_data)}")
-        if file_data:
-            logger.info(f"file_data length: {len(str(file_data))}")
-        
-        # Check of file_data is gegeven
-        if not file_data and not file_path:
-            logger.error("No file_data or file_path provided")
-            raise HTTPException(
-                status_code=400,
-                detail="file_path of file_data is vereist"
-            )
-        
-        # Als we file_data hebben (base64), schrijf naar temp file
-        if file_data:
-            logger.info(f"Processing file_data, length: {len(file_data) if file_data else 0}")
-            # Decode base64
-            try:
-                # Zorg dat file_data een string is
-                if not isinstance(file_data, str):
-                    raise ValueError("file_data moet een string zijn")
-                logger.info("Decoding base64...")
-                audio_bytes = base64.b64decode(file_data)
-                logger.info(f"Base64 decoded, audio size: {len(audio_bytes)} bytes")
-            except Exception as e:
-                logger.error(f"Base64 decode error: {str(e)}")
-                logger.error(traceback.format_exc())
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Ongeldige base64 data: {str(e)}"
-                )
+        # Als we een uploaded file hebben
+        if file:
+            logger.info(f"Processing uploaded file: {file.filename}, content_type: {file.content_type}")
             
             # Maak temp file
             temp_dir = tempfile.gettempdir()
             temp_file_path = os.path.join(temp_dir, f"audio_{os.urandom(8).hex()}.tmp")
             logger.info(f"Writing temp file: {temp_file_path}")
             
+            # Schrijf uploaded file naar temp file
             with open(temp_file_path, 'wb') as f:
-                f.write(audio_bytes)
+                content = await file.read()
+                f.write(content)
+                logger.info(f"File written, size: {len(content)} bytes")
             
             file_path = temp_file_path
             should_cleanup = True
