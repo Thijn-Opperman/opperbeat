@@ -6,11 +6,12 @@ Gebruikt FastAPI voor serverless deployment
 import os
 import tempfile
 import base64
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from typing import Optional
 from python.music_analyzer import analyze_audio_simple
+import json
 
 app = FastAPI()
 
@@ -29,6 +30,10 @@ class AnalyzeRequest(BaseModel):
     file_path: Optional[str] = None
     file_data: Optional[str] = None  # base64 encoded audio
     include_waveform: bool = True
+    
+    class Config:
+        # Maak validatie minder strikt voor grote base64 strings
+        str_strip_whitespace = False
 
 
 @app.get("/")
@@ -38,7 +43,7 @@ async def root():
 
 
 @app.post("/api/analyze")
-async def analyze(request: AnalyzeRequest):
+async def analyze(request: Request):
     """
     Analyseer audio bestand
     
@@ -50,11 +55,36 @@ async def analyze(request: AnalyzeRequest):
     temp_file_path = None
     
     try:
+        # Parse request body
+        try:
+            body = await request.json()
+        except json.JSONDecodeError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ongeldige JSON: {str(e)}"
+            )
+        
+        # Valideer met Pydantic (maar vang errors op)
+        try:
+            analyze_request = AnalyzeRequest(**body)
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Validatie error: {str(e)}"
+            )
+        
+        # Check of file_data is gegeven
+        if not analyze_request.file_data and not analyze_request.file_path:
+            raise HTTPException(
+                status_code=400,
+                detail="file_path of file_data is vereist"
+            )
+        
         # Als we file_data hebben (base64), schrijf naar temp file
-        if request.file_data:
+        if analyze_request.file_data:
             # Decode base64
             try:
-                audio_bytes = base64.b64decode(request.file_data)
+                audio_bytes = base64.b64decode(analyze_request.file_data)
             except Exception as e:
                 raise HTTPException(
                     status_code=400,
@@ -71,8 +101,8 @@ async def analyze(request: AnalyzeRequest):
             file_path = temp_file_path
             should_cleanup = True
             
-        elif request.file_path:
-            file_path = request.file_path
+        elif analyze_request.file_path:
+            file_path = analyze_request.file_path
             
             # Check of file bestaat
             if not os.path.exists(file_path):
@@ -90,7 +120,7 @@ async def analyze(request: AnalyzeRequest):
         try:
             result = analyze_audio_simple(
                 file_path,
-                include_waveform=request.include_waveform
+                include_waveform=analyze_request.include_waveform
             )
             
             return result
