@@ -1,20 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Deep dark backgrounds with subtle purple tint */
-  --background: #0a0714;
-  --background-gradient: linear-gradient(135deg, #0a0714 0%, #0f0a1f 100%);
-  --foreground: #f5f3ff;
-  --surface: #151020;
-  --surface-elevated: #1d1628;
-  --surface-hover: #241b32;
-  
-  /* Borders with purple glow */
-  --border: rgba(139, 92, 246, 0.15);
-  --border-hover: rgba(139, 92, 246, 0.35);
-  --border-glow: rgba(139, 92, 246, 0.2);
-  
-  /* Primary: Purple to Magenta gradient */
+  /* Primary colors (same for both themes) */
   --primary: #8B5CF6;
   --primary-dark: #6D28D9;
   --primary-light: #A78BFA;
@@ -22,30 +9,71 @@
   --primary-gradient: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
   --primary-gradient-hover: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%);
   
-  /* Accent: Cyan/Blue */
+  /* Accent colors (same for both themes) */
   --accent: #00F5FF;
   --accent-dark: #06B6D4;
   --accent-glow: rgba(0, 245, 255, 0.3);
   --accent-gradient: linear-gradient(135deg, #00F5FF 0%, #6366F1 100%);
   
-  /* Secondary accent: Pink */
+  /* Secondary accent (same for both themes) */
   --secondary: #EC4899;
   --secondary-dark: #DB2777;
   --secondary-glow: rgba(236, 72, 153, 0.3);
   
-  /* Status colors with glow */
+  /* Status colors (same for both themes) */
   --success: #10F59E;
   --success-glow: rgba(16, 245, 158, 0.3);
   --warning: #F59E0B;
   --warning-glow: rgba(245, 158, 11, 0.3);
   --error: #EF4444;
   --error-glow: rgba(239, 68, 68, 0.3);
+}
+
+/* Dark theme (default) */
+:root,
+:root.dark {
+  --background: #0a0714;
+  --background-gradient: linear-gradient(135deg, #0a0714 0%, #0f0a1f 100%);
+  --foreground: #f5f3ff;
+  --surface: #151020;
+  --surface-elevated: #1d1628;
+  --surface-hover: #241b32;
   
-  /* Text colors */
+  --border: rgba(139, 92, 246, 0.15);
+  --border-hover: rgba(139, 92, 246, 0.35);
+  --border-glow: rgba(139, 92, 246, 0.2);
+  
   --text-primary: #f5f3ff;
   --text-secondary: rgba(245, 243, 255, 0.75);
   --text-tertiary: rgba(245, 243, 255, 0.55);
   --text-muted: rgba(245, 243, 255, 0.4);
+}
+
+/* Light theme */
+:root.light {
+  --background: #ffffff;
+  --background-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  --foreground: #1a1a1a;
+  --surface: #f5f5f7;
+  --surface-elevated: #ffffff;
+  --surface-hover: #e8e8ed;
+  
+  --border: rgba(139, 92, 246, 0.2);
+  --border-hover: rgba(139, 92, 246, 0.4);
+  --border-glow: rgba(139, 92, 246, 0.15);
+  
+  --text-primary: #1a1a1a;
+  --text-secondary: rgba(26, 26, 26, 0.75);
+  --text-tertiary: rgba(26, 26, 26, 0.55);
+  --text-muted: rgba(26, 26, 26, 0.4);
+  
+  /* Adjust glow effects for light mode */
+  --primary-glow: rgba(139, 92, 246, 0.25);
+  --accent-glow: rgba(0, 245, 255, 0.2);
+  --secondary-glow: rgba(236, 72, 153, 0.2);
+  --success-glow: rgba(16, 245, 158, 0.2);
+  --warning-glow: rgba(245, 158, 11, 0.2);
+  --error-glow: rgba(239, 68, 68, 0.2);
 }
 
 @theme inline {
@@ -158,4 +186,45 @@ h1 {
 
 .card-glow:hover::before {
   opacity: 0.6;
+}
+
+/* Theme-aware utility classes */
+.bg-background {
+  background-color: var(--background);
+}
+
+.bg-surface {
+  background-color: var(--surface);
+}
+
+.bg-surface-elevated {
+  background-color: var(--surface-elevated);
+}
+
+.bg-surface-hover {
+  background-color: var(--surface-hover);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.border-theme {
+  border-color: var(--border);
+}
+
+.border-theme-hover {
+  border-color: var(--border-hover);
 }

@@ -13,7 +13,7 @@ export default function LanguageSwitch() {
   return (
     <button
       onClick={toggleLanguage}
-      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#f5f3ff]/70 hover:text-[#f5f3ff] hover:bg-gradient-to-r hover:from-[#8B5CF6]/10 hover:to-[#EC4899]/10 transition-all hover:shadow-md hover:shadow-[#8B5CF6]/20"
+      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-secondary hover:text-primary hover:bg-gradient-to-r hover:from-[var(--primary)]/10 hover:to-[var(--secondary)]/10 transition-all hover:shadow-md hover:shadow-[var(--primary-glow)]"
       aria-label="Toggle language"
     >
       <Languages className="w-4 h-4" />

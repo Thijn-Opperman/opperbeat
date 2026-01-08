@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Home, BarChart3, Music, Settings, LogOut, Headphones, TrendingUp, ListMusic, Volume2, FileSearch, Menu, X, Library } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 import LanguageSwitch from './LanguageSwitch';
+import ThemeToggle from './ThemeToggle';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -32,16 +33,16 @@ export default function Sidebar() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <Link href="/" className="p-4 md:p-6 flex items-center gap-3 border-b border-[#8B5CF6]/15 hover:bg-[#8B5CF6]/5 transition-all group relative">
-        <div className="p-2 bg-[#8B5CF6]/20 rounded-lg group-hover:bg-[#8B5CF6]/30 transition-all group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-[#8B5CF6]/30">
-          <Headphones className="w-5 h-5 text-[#8B5CF6] group-hover:text-[#EC4899] transition-colors" />
+      <Link href="/" className="p-4 md:p-6 flex items-center gap-3 border-b border-[var(--border)] hover:bg-[var(--primary)]/5 transition-all group relative">
+        <div className="p-2 bg-[var(--primary)]/20 rounded-lg group-hover:bg-[var(--primary)]/30 transition-all group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-[var(--primary-glow)]">
+          <Headphones className="w-5 h-5 text-[var(--primary)] group-hover:text-[var(--secondary)] transition-colors" />
         </div>
         <span className="text-lg font-bold tracking-tight gradient-text">Opperbeat</span>
       </Link>
 
       {/* Dashboard/Home */}
-      <div className="p-3 md:p-4 border-b border-[#8B5CF6]/15">
-        <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-[#f5f3ff]/75 hover:text-[#f5f3ff] hover:bg-[#8B5CF6]/10 transition-all text-sm font-medium hover:shadow-lg hover:shadow-[#8B5CF6]/20">
+      <div className="p-3 md:p-4 border-b border-[var(--border)]">
+        <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--primary)]/10 transition-all text-sm font-medium hover:shadow-lg hover:shadow-[var(--primary-glow)]">
           <Home className="w-4 h-4" />
           <span>{t.nav.dashboard}</span>
         </Link>
@@ -59,15 +60,18 @@ export default function Sidebar() {
         <NavItem href="/profile" icon={<Settings className="w-4 h-4" />} label={t.nav.profileSettings} active={pathname === '/profile'} />
       </div>
 
-      {/* Language Switch */}
-      <div className="p-3 md:p-4 border-t border-[#8B5CF6]/15">
+      {/* Language Switch & Theme Toggle */}
+      <div className="p-3 md:p-4 border-t border-[var(--border)] space-y-3">
         <div className="px-3">
           <LanguageSwitch />
+        </div>
+        <div className="px-3">
+          <ThemeToggle />
         </div>
       </div>
 
       {/* Logout */}
-      <div className="p-3 md:p-4 border-t border-[#8B5CF6]/15">
+      <div className="p-3 md:p-4 border-t border-[var(--border)]">
         <NavItem href="#" icon={<LogOut className="w-4 h-4" />} label={t.nav.logout} />
       </div>
     </>
@@ -78,7 +82,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[#1d1628] border border-[#8B5CF6]/20 rounded-lg text-[#f5f3ff] hover:bg-[#241b32] hover:border-[#8B5CF6]/40 transition-all shadow-lg shadow-[#8B5CF6]/10 hover:shadow-[#8B5CF6]/20"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-hover)] transition-all shadow-lg shadow-[var(--primary-glow)] hover:shadow-[var(--primary-glow)]"
         aria-label="Toggle menu"
       >
         {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -87,19 +91,19 @@ export default function Sidebar() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/70 z-40 backdrop-blur-md"
+          className="lg:hidden fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-40 backdrop-blur-md"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar - Desktop */}
-      <div className="hidden lg:flex h-screen w-64 bg-[#151020] border-r border-[#8B5CF6]/15 flex-col shadow-2xl shadow-[#8B5CF6]/5">
+      <div className="hidden lg:flex h-screen w-64 bg-[var(--surface)] border-r border-[var(--border)] flex-col shadow-2xl shadow-[var(--primary-glow)]">
         {sidebarContent}
       </div>
 
       {/* Sidebar - Mobile */}
       <div
-        className={`lg:hidden fixed top-0 left-0 h-screen w-64 bg-[#151020] border-r border-[#8B5CF6]/15 flex flex-col shadow-2xl shadow-[#8B5CF6]/10 z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`lg:hidden fixed top-0 left-0 h-screen w-64 bg-[var(--surface)] border-r border-[var(--border)] flex flex-col shadow-2xl shadow-[var(--primary-glow)] z-50 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -113,18 +117,18 @@ function NavItem({ href, icon, label, badge, active }: { href: string; icon: Rea
   const content = (
     <div className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 relative ${
       active 
-        ? 'bg-[#8B5CF6]/20 text-[#f5f3ff] shadow-lg shadow-[#8B5CF6]/20' 
-        : 'text-[#f5f3ff]/70 hover:bg-[#8B5CF6]/10 hover:text-[#f5f3ff] hover:shadow-md hover:shadow-[#8B5CF6]/10'
+        ? 'bg-[var(--primary)]/20 text-[var(--text-primary)] shadow-lg shadow-[var(--primary-glow)]' 
+        : 'text-[var(--text-secondary)] hover:bg-[var(--primary)]/10 hover:text-[var(--text-primary)] hover:shadow-md hover:shadow-[var(--primary-glow)]'
     }`}>
       <div className="flex items-center gap-3">
-        <span className={active ? 'text-[#8B5CF6] drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]' : 'text-[#f5f3ff]/50'}>{icon}</span>
+        <span className={active ? 'text-[var(--primary)] drop-shadow-[0_0_8px_var(--primary-glow)]' : 'text-[var(--text-muted)]'}>{icon}</span>
         <span className="text-sm font-medium">{label}</span>
       </div>
       {badge && (
         <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
           active 
-            ? 'bg-[#8B5CF6] text-[#f5f3ff] shadow-lg shadow-[#8B5CF6]/40' 
-            : 'bg-[#8B5CF6]/20 text-[#f5f3ff]/70 border border-[#8B5CF6]/30'
+            ? 'bg-[var(--primary)] text-white shadow-lg shadow-[var(--primary-glow)]' 
+            : 'bg-[var(--primary)]/20 text-[var(--text-secondary)] border border-[var(--primary)]/30'
         }`}>
           {badge}
         </span>

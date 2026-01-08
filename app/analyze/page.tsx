@@ -290,26 +290,26 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#0a0714] overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="mb-6 lg:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2 tracking-tight gradient-text">{t.analyze.title}</h1>
-            <p className="text-[#f5f3ff]/75 text-sm">{t.analyze.subtitle}</p>
+            <p className="text-secondary text-sm">{t.analyze.subtitle}</p>
           </div>
 
           {/* Upload Section */}
-          <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 lg:p-8 border border-[#8B5CF6]/20 mb-4 sm:mb-6 shadow-xl hover:shadow-2xl hover:shadow-[#8B5CF6]/20 transition-all">
+          <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 lg:p-8 border border-theme mb-4 sm:mb-6 shadow-xl hover:shadow-2xl hover:shadow-[var(--primary-glow)] transition-all">
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               className={`flex flex-col items-center justify-center py-8 sm:py-12 lg:py-16 border-2 border-dashed rounded-xl transition-all ${
                 isDragging
-                  ? 'border-[#8B5CF6] bg-[#8B5CF6]/10 shadow-lg shadow-[#8B5CF6]/30'
-                  : 'border-[#8B5CF6]/30 hover:border-[#8B5CF6]/60 hover:bg-[#8B5CF6]/5'
+                  ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-lg shadow-[var(--primary-glow)]'
+                  : 'border-[var(--primary)]/30 hover:border-[var(--primary)]/60 hover:bg-[var(--primary)]/5'
               }`}
             >
               <input
@@ -321,30 +321,30 @@ export default function AnalyzePage() {
               />
               {isUploading ? (
                 <>
-                  <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-[#8B5CF6] mb-4 animate-spin drop-shadow-[0_0_12px_rgba(139,92,246,0.6)]" />
-                  <h3 className="text-lg sm:text-xl font-bold text-[#f5f3ff] mb-2 text-center px-4">{t.analyze.analyzing}</h3>
-                  <p className="text-[#f5f3ff]/75 text-xs sm:text-sm mb-2 text-center px-4">{t.analyze.analyzingDescription}</p>
+                  <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-[var(--primary)] mb-4 animate-spin drop-shadow-[0_0_12px_var(--primary-glow)]" />
+                  <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 text-center px-4">{t.analyze.analyzing}</h3>
+                  <p className="text-secondary text-xs sm:text-sm mb-2 text-center px-4">{t.analyze.analyzingDescription}</p>
                   {elapsedTime > 25 && (
-                    <div className="mt-2 px-4 py-2 bg-[#F59E0B]/20 rounded-lg border border-[#F59E0B]/30 shadow-lg shadow-[#F59E0B]/20">
-                      <p className="text-[#F59E0B] text-xs font-medium">
+                    <div className="mt-2 px-4 py-2 bg-[var(--warning)]/20 rounded-lg border border-[var(--warning)]/30 shadow-lg shadow-[var(--warning-glow)]">
+                      <p className="text-[var(--warning)] text-xs font-medium">
                         {t.analyze.analysisTimeout}
                       </p>
                     </div>
                   )}
-                  <div className="mt-4 px-4 py-2 bg-[#8B5CF6]/20 rounded-lg border border-[#8B5CF6]/30 shadow-lg shadow-[#8B5CF6]/20">
-                    <p className="text-[#8B5CF6] text-sm font-bold">
-                      {t.analyze.elapsedTime}: <span className="text-[#EC4899]">{formatTime(elapsedTime)}</span>
+                  <div className="mt-4 px-4 py-2 bg-[var(--primary)]/20 rounded-lg border border-[var(--primary)]/30 shadow-lg shadow-[var(--primary-glow)]">
+                    <p className="text-[var(--primary)] text-sm font-bold">
+                      {t.analyze.elapsedTime}: <span className="text-[var(--secondary)]">{formatTime(elapsedTime)}</span>
                     </p>
                   </div>
                 </>
               ) : (
                 <>
-                  <Upload className="w-12 h-12 sm:w-16 sm:h-16 text-[#f5f3ff]/30 mb-4" />
-                  <h3 className="text-lg sm:text-xl font-bold text-[#f5f3ff] mb-2 text-center px-4">{t.analyze.uploadMusicFile}</h3>
-                  <p className="text-[#f5f3ff]/75 text-xs sm:text-sm mb-6 text-center px-4">{t.analyze.dragDropOrClick}</p>
+                  <Upload className="w-12 h-12 sm:w-16 sm:h-16 text-muted mb-4" />
+                  <h3 className="text-lg sm:text-xl font-bold text-primary mb-2 text-center px-4">{t.analyze.uploadMusicFile}</h3>
+                  <p className="text-secondary text-xs sm:text-sm mb-6 text-center px-4">{t.analyze.dragDropOrClick}</p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-[#f5f3ff] font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg transition-all shadow-lg shadow-[#8B5CF6]/30 hover:shadow-xl hover:shadow-[#8B5CF6]/40 hover:scale-105 text-sm sm:text-base"
+                    className="bg-[var(--primary)] hover:opacity-90 text-white font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg transition-all shadow-lg shadow-[var(--primary-glow)] hover:shadow-xl hover:scale-105 text-sm sm:text-base"
                   >
                     {t.analyze.selectFile}
                   </button>
@@ -354,19 +354,19 @@ export default function AnalyzePage() {
                       id="saveToDatabase"
                       checked={saveToDatabase}
                       onChange={(e) => setSaveToDatabase(e.target.checked)}
-                      className="w-4 h-4 text-[#8B5CF6] bg-[#1d1628] border-[#8B5CF6]/30 rounded focus:ring-[#8B5CF6] focus:ring-2"
+                      className="w-4 h-4 text-[var(--primary)] bg-surface-elevated border-[var(--primary)]/30 rounded focus:ring-[var(--primary)] focus:ring-2"
                     />
-                    <label htmlFor="saveToDatabase" className="text-[#f5f3ff]/75 text-sm cursor-pointer">
+                    <label htmlFor="saveToDatabase" className="text-secondary text-sm cursor-pointer">
                       {t.analyze.saveToDatabase}
                     </label>
                   </div>
-                  <p className="text-[#f5f3ff]/50 text-xs mt-4">{t.analyze.supportedFormats}</p>
+                  <p className="text-muted text-xs mt-4">{t.analyze.supportedFormats}</p>
                 </>
               )}
             </div>
             {error && (
-              <div className="mt-4 p-4 bg-[#EF4444]/20 border border-[#EF4444]/30 rounded-lg shadow-lg shadow-[#EF4444]/20">
-                <p className="text-[#EF4444] text-sm font-medium">{error}</p>
+              <div className="mt-4 p-4 bg-[var(--error)]/20 border border-[var(--error)]/30 rounded-lg shadow-lg shadow-[var(--error-glow)]">
+                <p className="text-[var(--error)] text-sm font-medium">{error}</p>
               </div>
             )}
           </div>
@@ -374,25 +374,25 @@ export default function AnalyzePage() {
           {/* Analysis Results Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Audio Waveform */}
-            <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-xl hover:shadow-2xl hover:shadow-[#8B5CF6]/20 transition-all card-glow">
+            <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-xl hover:shadow-2xl hover:shadow-[var(--primary-glow)] transition-all card-glow">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#8B5CF6]/20 rounded-lg shadow-lg shadow-[#8B5CF6]/20">
-                  <Waves className="w-5 h-5 text-[#8B5CF6] drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
+                <div className="p-2 bg-[var(--primary)]/20 rounded-lg shadow-lg shadow-[var(--primary-glow)]">
+                  <Waves className="w-5 h-5 text-[var(--primary)] drop-shadow-[0_0_8px_var(--primary-glow)]" />
                 </div>
-                <h3 className="text-[#f5f3ff] font-bold">{t.analyze.audioWaveform}</h3>
+                <h3 className="text-primary font-bold">{t.analyze.audioWaveform}</h3>
               </div>
-              <div className="h-48 bg-[#151020] rounded-lg border border-[#8B5CF6]/15 flex items-center justify-center">
-                <p className="text-[#f5f3ff]/40 text-sm">{t.analyze.waveformPlaceholder}</p>
+              <div className="h-48 bg-surface rounded-lg border border-theme flex items-center justify-center">
+                <p className="text-muted text-sm">{t.analyze.waveformPlaceholder}</p>
               </div>
             </div>
 
             {/* Track Information */}
-            <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-xl hover:shadow-2xl hover:shadow-[#8B5CF6]/20 transition-all card-glow">
+            <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-xl hover:shadow-2xl hover:shadow-[var(--primary-glow)] transition-all card-glow">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#00F5FF]/20 rounded-lg shadow-lg shadow-[#00F5FF]/20">
-                  <FileAudio className="w-5 h-5 text-[#00F5FF] drop-shadow-[0_0_8px_rgba(0,245,255,0.6)]" />
+                <div className="p-2 bg-[var(--accent)]/20 rounded-lg shadow-lg shadow-[var(--accent-glow)]">
+                  <FileAudio className="w-5 h-5 text-[var(--accent)] drop-shadow-[0_0_8px_var(--accent-glow)]" />
                 </div>
-                <h3 className="text-[#f5f3ff] font-bold">{t.analyze.trackInfo}</h3>
+                <h3 className="text-primary font-bold">{t.analyze.trackInfo}</h3>
               </div>
               <div className="space-y-3">
                 <InfoRow label={t.analyze.titleLabel} value={analysisData?.title || '-'} />
@@ -412,16 +412,16 @@ export default function AnalyzePage() {
             </div>
 
             {/* Audio Analysis */}
-            <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-xl hover:shadow-2xl hover:shadow-[#8B5CF6]/20 transition-all card-glow">
+            <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-xl hover:shadow-2xl hover:shadow-[var(--primary-glow)] transition-all card-glow">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#8B5CF6]/20 rounded-lg shadow-lg shadow-[#8B5CF6]/20">
-                  <BarChart3 className="w-5 h-5 text-[#8B5CF6] drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
+                <div className="p-2 bg-[var(--primary)]/20 rounded-lg shadow-lg shadow-[var(--primary-glow)]">
+                  <BarChart3 className="w-5 h-5 text-[var(--primary)] drop-shadow-[0_0_8px_var(--primary-glow)]" />
                 </div>
-                <h3 className="text-[#f5f3ff] font-bold">{t.analyze.audioAnalysis}</h3>
+                <h3 className="text-primary font-bold">{t.analyze.audioAnalysis}</h3>
                 {isUploading && (
                   <div className="ml-auto flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-[#8B5CF6] animate-spin drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]" />
-                    <span className="text-[#f5f3ff]/75 text-xs font-medium">{formatTime(elapsedTime)}</span>
+                    <Loader2 className="w-4 h-4 text-[var(--primary)] animate-spin drop-shadow-[0_0_8px_var(--primary-glow)]" />
+                    <span className="text-secondary text-xs font-medium">{formatTime(elapsedTime)}</span>
                   </div>
                 )}
               </div>
@@ -444,15 +444,15 @@ export default function AnalyzePage() {
             </div>
 
             {/* Spectral Analysis */}
-            <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-xl hover:shadow-2xl hover:shadow-[#8B5CF6]/20 transition-all card-glow">
+            <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-xl hover:shadow-2xl hover:shadow-[var(--primary-glow)] transition-all card-glow">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-[#EC4899]/20 rounded-lg shadow-lg shadow-[#EC4899]/20">
-                  <Music className="w-5 h-5 text-[#EC4899] drop-shadow-[0_0_8px_rgba(236,72,153,0.6)]" />
+                <div className="p-2 bg-[var(--secondary)]/20 rounded-lg shadow-lg shadow-[var(--secondary-glow)]">
+                  <Music className="w-5 h-5 text-[var(--secondary)] drop-shadow-[0_0_8px_var(--secondary-glow)]" />
                 </div>
-                <h3 className="text-[#f5f3ff] font-bold">{t.analyze.audioAnalysis}</h3>
+                <h3 className="text-primary font-bold">{t.analyze.audioAnalysis}</h3>
               </div>
-              <div className="h-64 bg-[#151020] rounded-lg border border-[#8B5CF6]/15 flex items-center justify-center">
-                <p className="text-[#f5f3ff]/40 text-sm">{t.analyze.waveformPlaceholder}</p>
+              <div className="h-64 bg-surface rounded-lg border border-theme flex items-center justify-center">
+                <p className="text-muted text-sm">{t.analyze.waveformPlaceholder}</p>
               </div>
             </div>
           </div>
@@ -464,9 +464,9 @@ export default function AnalyzePage() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center py-2.5 border-b border-[#8B5CF6]/10 last:border-0">
-      <span className="text-[#f5f3ff]/75 text-sm font-medium">{label}</span>
-      <span className="text-[#f5f3ff] font-bold text-sm">{value}</span>
+    <div className="flex justify-between items-center py-2.5 border-b border-theme last:border-0">
+      <span className="text-secondary text-sm font-medium">{label}</span>
+      <span className="text-primary font-bold text-sm">{value}</span>
     </div>
   );
 }
@@ -475,36 +475,36 @@ function AnalysisMetric({ label, value, confidence }: { label: string; value: st
   const { t } = useI18n();
   const confidencePercent = confidence ? Math.round(confidence * 100) : null;
   const confidenceColor = confidence 
-    ? confidence >= 0.8 ? 'bg-[#10F59E]' 
-    : confidence >= 0.6 ? 'bg-[#F59E0B]' 
-    : 'bg-[#EF4444]'
-    : 'bg-[#8B5CF6]';
+    ? confidence >= 0.8 ? 'bg-[var(--success)]' 
+    : confidence >= 0.6 ? 'bg-[var(--warning)]' 
+    : 'bg-[var(--error)]'
+    : 'bg-[var(--primary)]';
   
   return (
     <div>
       <div className="flex justify-between items-center mb-2.5">
-        <span className="text-[#f5f3ff]/90 text-sm font-bold">{label}</span>
+        <span className="text-primary text-sm font-bold">{label}</span>
         <div className="flex items-center gap-2">
-          <span className="text-[#f5f3ff] font-bold">{value}</span>
+          <span className="text-primary font-bold">{value}</span>
           {confidence != null && (
             <span className={`text-xs px-2 py-0.5 rounded-md font-bold border ${
-              confidence >= 0.8 ? 'bg-[#10F59E]/20 text-[#10F59E] border-[#10F59E]/30 shadow-sm shadow-[#10F59E]/20' 
-              : confidence >= 0.6 ? 'bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/30 shadow-sm shadow-[#F59E0B]/20' 
-              : 'bg-[#EF4444]/20 text-[#EF4444] border-[#EF4444]/30 shadow-sm shadow-[#EF4444]/20'
+              confidence >= 0.8 ? 'bg-[var(--success)]/20 text-[var(--success)] border-[var(--success)]/30 shadow-sm shadow-[var(--success-glow)]' 
+              : confidence >= 0.6 ? 'bg-[var(--warning)]/20 text-[var(--warning)] border-[var(--warning)]/30 shadow-sm shadow-[var(--warning-glow)]' 
+              : 'bg-[var(--error)]/20 text-[var(--error)] border-[var(--error)]/30 shadow-sm shadow-[var(--error-glow)]'
             }`}>
               {confidencePercent}%
             </span>
           )}
         </div>
       </div>
-      <div className="w-full bg-[#151020] rounded-full h-2 shadow-inner">
+      <div className="w-full bg-surface rounded-full h-2 shadow-inner">
         <div 
           className={`${confidenceColor} h-2 rounded-full transition-all duration-300 shadow-lg`} 
           style={{ width: confidencePercent ? `${confidencePercent}%` : '0%' }}
         ></div>
       </div>
       {confidence != null && (
-        <div className="mt-1.5 text-xs text-[#f5f3ff]/55 font-medium">
+        <div className="mt-1.5 text-xs text-tertiary font-medium">
           {confidence >= 0.8 ? t.analyze.veryAccurate
            : confidence >= 0.6 ? t.analyze.accurate
            : t.analyze.moderatelyAccurate}

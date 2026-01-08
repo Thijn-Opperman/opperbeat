@@ -13,10 +13,10 @@ const libraryData = [
 
 export default function LibraryCard() {
   return (
-    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-[#8B5CF6]/30">
+    <div className="bg-surface-elevated rounded-lg p-4 sm:p-6 border border-theme">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
-        <h3 className="text-[#f5f3ff] font-semibold text-sm sm:text-base">Music Library Insights</h3>
-        <select className="bg-white/5 border border-[#8B5CF6]/30 rounded px-2 sm:px-3 py-1 text-[#f5f3ff] text-xs sm:text-sm w-full sm:w-auto">
+        <h3 className="text-primary font-semibold text-sm sm:text-base">Music Library Insights</h3>
+        <select className="bg-surface border border-theme rounded px-2 sm:px-3 py-1 text-primary text-xs sm:text-sm w-full sm:w-auto">
           <option>Day</option>
           <option>Week</option>
           <option>Month</option>
@@ -24,22 +24,22 @@ export default function LibraryCard() {
       </div>
 
       <div className="mb-4">
-        <div className="text-2xl sm:text-4xl font-bold text-pink-500 mb-1">3,560</div>
-        <p className="text-[#f5f3ff]/60 text-xs sm:text-sm">Total Tracks in Library</p>
+        <div className="text-2xl sm:text-4xl font-bold text-[var(--secondary)] mb-1">3,560</div>
+        <p className="text-secondary text-xs sm:text-sm">Total Tracks in Library</p>
       </div>
 
       <div className="h-32">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={libraryData}>
-            <Bar dataKey="tracks" fill="#ec4899" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="tracks" fill="var(--secondary)" radius={[4, 4, 0, 0]} />
             <XAxis dataKey="month" hide />
             <YAxis hide />
             <Tooltip 
               contentStyle={{ 
-                backgroundColor: '#1a1a1a', 
-                border: '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: 'var(--surface-elevated)', 
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
-                color: '#fff'
+                color: 'var(--text-primary)'
               }}
             />
           </BarChart>
