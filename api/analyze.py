@@ -142,28 +142,37 @@ async def analyze(
         
         # Analyseer audio
         try:
+            # Check bestandsgrootte EERST voor optimalisatie
+            file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+            logger.info(f"File size: {file_size_mb:.2f} MB")
+            
             # Converteer include_waveform string naar boolean (veilige conversie)
-            # Default naar False voor grote bestanden (wordt later overschreven)
             if include_waveform is None or include_waveform == "":
                 include_waveform_bool = False  # Default False voor performance
             else:
                 include_waveform_str = str(include_waveform).lower().strip()
                 include_waveform_bool = include_waveform_str in ('true', '1', 'yes', 'on')
             
-            # Check bestandsgrootte voor optimalisatie
-            file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
-            logger.info(f"File size: {file_size_mb:.2f} MB")
-            
-            # Voor grote bestanden (>10MB): gebruik lagere sample rate, geen waveform, en beperk duur
-            if file_size_mb > 10:
-                logger.info("Large file detected, optimizing analysis...")
+            # Voor bestanden >5MB: gebruik optimalisaties om Railway timeout te voorkomen
+            # Railway heeft een timeout van ~30 seconden, dus we moeten sneller zijn
+            if file_size_mb > 5:
+                logger.info("Large file detected (>5MB), optimizing analysis for Railway timeout...")
                 sample_rate = 22050  # Lagere sample rate voor snellere analyse
-                include_waveform_bool = False  # Geen waveform voor grote bestanden
+                include_waveform_bool = False  # FORCEER geen waveform voor grote bestanden (sneller)
                 max_duration = 120  # Analyseer alleen eerste 2 minuten voor grote bestanden
                 logger.info(f"Using optimized settings: sample_rate={sample_rate}, waveform={include_waveform_bool}, max_duration={max_duration}s")
+            elif file_size_mb > 3:
+                # Voor middelgrote bestanden (3-5MB): gebruik lagere sample rate maar wel waveform
+                logger.info("Medium file detected (3-5MB), using medium optimization...")
+                sample_rate = 22050  # Lagere sample rate
+                # Behoud waveform setting van request
+                max_duration = None  # Analyseer volledig bestand
+                logger.info(f"Using medium optimization: sample_rate={sample_rate}, waveform={include_waveform_bool}")
             else:
+                # Kleine bestanden (<3MB): volledige analyse
                 sample_rate = 44100  # Standaard sample rate
                 max_duration = None  # Analyseer volledig bestand
+                logger.info(f"Small file, using full analysis: sample_rate={sample_rate}, waveform={include_waveform_bool}")
             
             logger.info(f"Starting audio analysis for: {file_path}, sample_rate: {sample_rate}, include_waveform: {include_waveform_bool}, max_duration: {max_duration}")
             result = analyze_audio_simple(

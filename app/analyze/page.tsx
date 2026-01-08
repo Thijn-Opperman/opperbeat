@@ -107,11 +107,11 @@ export default function AnalyzePage() {
         }
         
         // Stuur direct naar Railway
-        // Voor grote bestanden: gebruik geen waveform om sneller te zijn
+        // Voor bestanden >5MB: gebruik geen waveform om Railway timeout te voorkomen
         const formData = new FormData();
         formData.append('file', file);
-        // Geen waveform voor grote bestanden (sneller)
-        formData.append('include_waveform', fileSizeMB > 10 ? 'false' : 'true');
+        // Geen waveform voor bestanden >5MB (sneller, voorkomt timeout)
+        formData.append('include_waveform', fileSizeMB > 5 ? 'false' : 'true');
         
         // Verhoog timeout naar 5 minuten voor grote bestanden
         const timeoutMs = 300000; // 5 minuten
