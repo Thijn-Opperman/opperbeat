@@ -13,7 +13,13 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const saveToDatabase = formData.get('save') === 'true'; // Optional: save to database
+    const saveParam = formData.get('save');
+    const saveToDatabase = saveParam === 'true'; // Optional: save to database
+    
+    console.log('📥 API Request ontvangen:');
+    console.log('   - File name:', file?.name);
+    console.log('   - File size:', file?.size, 'bytes');
+    console.log('   - Save parameter:', saveParam, '(saveToDatabase:', saveToDatabase, ')');
 
     if (!file) {
       return NextResponse.json(
@@ -25,16 +31,12 @@ export async function POST(request: NextRequest) {
     // Haal user ID op (optioneel - voor development kan anon gebruikt worden)
     let userId: string | null = null;
     try {
-      const fetchedUserId = await getUserId(request, true); // allowAnonymous = true voor development
-      userId = fetchedUserId;
+      userId = await getUserId(request, true); // allowAnonymous = true voor development
+      console.log('📝 User ID:', userId || 'null (anonymous)');
     } catch (authError) {
-      if (saveToDatabase) {
-        return NextResponse.json(
-          { error: 'Authenticatie vereist om analyse op te slaan' },
-          { status: 401 }
-        );
-      }
-      // Voor development: gebruik null (database kolom is nullable)
+      // getUserId met allowAnonymous=true zou geen error moeten gooien
+      // Maar voor de zekerheid: gebruik null
+      console.warn('⚠️ Auth error (using null):', authError);
       userId = null;
     }
 
@@ -212,6 +214,12 @@ export async function POST(request: NextRequest) {
           );
 
           // 3. Sla analyse op in database
+          console.log('💾 Opslaan in database...');
+          console.log('   - User ID:', userId || 'null');
+          console.log('   - Title:', title);
+          console.log('   - File size:', buffer.length);
+          console.log('   - Audio path:', audioResult.path);
+          
           const { data: dbData, error: dbError } = await supabaseAdmin
             .from('music_analyses')
             .insert({
@@ -241,7 +249,11 @@ export async function POST(request: NextRequest) {
             .single();
 
           if (dbError) {
-            console.error('❌ Fout bij opslaan in database:', dbError);
+            console.error('❌ Fout bij opslaan in database:');
+            console.error('   - Error code:', dbError.code);
+            console.error('   - Error message:', dbError.message);
+            console.error('   - Error details:', dbError.details);
+            console.error('   - Error hint:', dbError.hint);
             // Als opslaan faalt, probeer uploads te verwijderen
             try {
               if (audioResult.path) {

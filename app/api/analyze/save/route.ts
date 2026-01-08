@@ -51,8 +51,10 @@ export async function POST(request: NextRequest) {
     let userId: string | null = null;
     try {
       userId = await getUserId(request, true);
+      console.log('📝 User ID:', userId || 'null (anonymous)');
     } catch (authError) {
       // Voor development: gebruik null
+      console.warn('⚠️ Auth error (using null):', authError);
       userId = null;
     }
 
@@ -103,6 +105,12 @@ export async function POST(request: NextRequest) {
                                analysisData.duration_formatted ||
                                (duration ? `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}` : '0:00');
 
+      console.log('💾 Opslaan in database...');
+      console.log('   - User ID:', userId || 'null');
+      console.log('   - Title:', title);
+      console.log('   - File size:', buffer.length);
+      console.log('   - Audio path:', audioResult.path);
+      
       const { data: dbData, error: dbError } = await supabaseAdmin
         .from('music_analyses')
         .insert({
@@ -132,7 +140,11 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (dbError) {
-        console.error('❌ Fout bij opslaan in database:', dbError);
+        console.error('❌ Fout bij opslaan in database:');
+        console.error('   - Error code:', dbError.code);
+        console.error('   - Error message:', dbError.message);
+        console.error('   - Error details:', dbError.details);
+        console.error('   - Error hint:', dbError.hint);
         
         // Cleanup: verwijder uploads
         try {
