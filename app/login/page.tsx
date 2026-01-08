@@ -3,8 +3,10 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Headphones, Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { useI18n } from '@/lib/i18n-context';
 
 function LoginForm() {
+  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -18,9 +20,9 @@ function LoginForm() {
   useEffect(() => {
     // Check of gebruiker net geregistreerd is
     if (searchParams.get('registered') === 'true') {
-      setSuccess('Account succesvol aangemaakt! Je kunt nu inloggen.');
+      setSuccess(t.auth.accountCreated);
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +44,7 @@ function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Er ging iets mis bij het inloggen');
+        throw new Error(data.error || t.errors.loginFailed);
       }
 
       // Sla gebruikersinformatie op in localStorage
@@ -53,34 +55,34 @@ function LoginForm() {
       // Redirect naar dashboard na succesvolle login
       router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Er ging iets mis');
+      setError(err instanceof Error ? err.message : t.errors.somethingWentWrong);
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a0714] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#3b82f6]/10 rounded-2xl mb-4">
-            <Headphones className="w-8 h-8 text-[#3b82f6]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#8B5CF6]/10 rounded-2xl mb-4">
+            <Headphones className="w-8 h-8 text-[#8B5CF6]" />
           </div>
-          <h1 className="text-3xl font-semibold text-white mb-2 tracking-tight">Opperbeat</h1>
-          <p className="text-[#f5f5f7]/70 text-sm">Welkom terug! Log in om door te gaan</p>
+          <h1 className="text-3xl font-semibold text-[#f5f3ff] mb-2 tracking-tight">Opperbeat</h1>
+          <p className="text-[#f5f3ff]/70 text-sm">{t.auth.welcomeBack}</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-[#1a1a22] rounded-2xl p-8 border border-white/8 shadow-2xl">
+        <div className="bg-[#1d1628] rounded-2xl p-8 border border-[#8B5CF6]/20 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-[#f5f5f7]/90 text-sm font-medium mb-2">
-                E-mailadres
+              <label htmlFor="email" className="block text-[#f5f3ff]/90 text-sm font-medium mb-2">
+                {t.auth.email}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-[#f5f5f7]/40" />
+                  <Mail className="w-5 h-5 text-[#f5f3ff]/40" />
                 </div>
                 <input
                   id="email"
@@ -89,19 +91,19 @@ function LoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="naam@voorbeeld.nl"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-[#14141a] border border-white/8 rounded-lg text-white placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#3b82f6]/50 focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-[#151020] border border-[#8B5CF6]/20 rounded-lg text-[#f5f3ff] placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#8B5CF6]/50 focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-[#f5f5f7]/90 text-sm font-medium mb-2">
-                Wachtwoord
+              <label htmlFor="password" className="block text-[#f5f3ff]/90 text-sm font-medium mb-2">
+                {t.auth.password}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-[#f5f5f7]/40" />
+                  <Lock className="w-5 h-5 text-[#f5f3ff]/40" />
                 </div>
                 <input
                   id="password"
@@ -110,12 +112,12 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-12 pr-12 py-3 bg-[#14141a] border border-white/8 rounded-lg text-white placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#3b82f6]/50 focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-[#151020] border border-[#8B5CF6]/20 rounded-lg text-[#f5f3ff] placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#8B5CF6]/50 focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#f5f5f7]/40 hover:text-[#f5f5f7]/70 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#f5f3ff]/40 hover:text-[#f5f3ff]/70 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -135,18 +137,18 @@ function LoginForm() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="relative w-11 h-6 bg-[#14141a] rounded-full peer-focus:outline-none peer peer-checked:bg-[#3b82f6] transition-colors">
+                <div className="relative w-11 h-6 bg-[#151020] rounded-full peer-focus:outline-none peer peer-checked:bg-[#8B5CF6] transition-colors">
                   <div className={`absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full transition-transform ${rememberMe ? 'translate-x-5' : 'translate-x-0'}`}></div>
                 </div>
-                <span className="ml-3 text-sm text-[#f5f5f7]/70 group-hover:text-[#f5f5f7]/90 transition-colors">
-                  Onthoud mij
+                <span className="ml-3 text-sm text-[#f5f3ff]/70 group-hover:text-[#f5f3ff]/90 transition-colors">
+                  {t.auth.rememberMe}
                 </span>
               </label>
               <a
                 href="#"
-                className="text-sm text-[#3b82f6] hover:text-[#60a5fa] transition-colors font-medium"
+                className="text-sm text-[#8B5CF6] hover:text-[#60a5fa] transition-colors font-medium"
               >
-                Wachtwoord vergeten?
+                {t.auth.forgotPassword}
               </a>
             </div>
 
@@ -168,31 +170,31 @@ function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#3b82f6] hover:bg-[#2563eb] disabled:bg-[#3b82f6]/50 disabled:cursor-not-allowed text-white font-medium px-6 py-3.5 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:bg-[#8B5CF6]/50 disabled:cursor-not-allowed text-[#f5f3ff] font-medium px-6 py-3.5 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Inloggen...</span>
+                  <span>{t.auth.loggingIn}</span>
                 </>
               ) : (
                 <>
                   <LogIn className="w-5 h-5" />
-                  <span>Inloggen</span>
+                  <span>{t.auth.login}</span>
                 </>
               )}
             </button>
           </form>
 
           {/* Sign Up Link */}
-          <div className="mt-6 pt-6 border-t border-white/8 text-center">
-            <p className="text-[#f5f5f7]/70 text-sm">
-              Nog geen account?{' '}
+          <div className="mt-6 pt-6 border-t border-[#8B5CF6]/20 text-center">
+            <p className="text-[#f5f3ff]/70 text-sm">
+              {t.auth.noAccount}{' '}
               <a
                 href="/register"
-                className="text-[#3b82f6] hover:text-[#60a5fa] font-medium transition-colors"
+                className="text-[#8B5CF6] hover:text-[#60a5fa] font-medium transition-colors"
               >
-                Maak een account aan
+                {t.auth.createAccount}
               </a>
             </p>
           </div>
@@ -200,14 +202,14 @@ function LoginForm() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-[#f5f5f7]/50 text-xs">
-            Door in te loggen ga je akkoord met onze{' '}
-            <a href="#" className="text-[#3b82f6] hover:underline">
-              Servicevoorwaarden
+          <p className="text-[#f5f3ff]/50 text-xs">
+            {t.auth.termsAgreement}{' '}
+            <a href="#" className="text-[#8B5CF6] hover:underline">
+              {t.auth.termsOfService}
             </a>{' '}
             en{' '}
-            <a href="#" className="text-[#3b82f6] hover:underline">
-              Privacybeleid
+            <a href="#" className="text-[#8B5CF6] hover:underline">
+              {t.auth.privacyPolicy}
             </a>
           </p>
         </div>
@@ -219,7 +221,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0714] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#3b82f6]/30 border-t-[#3b82f6] rounded-full animate-spin"></div>
       </div>
     }>

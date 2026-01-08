@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Headphones, Mail, Lock, User, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { useI18n } from '@/lib/i18n-context';
 
 export default function RegisterPage() {
+  const { t, language } = useI18n();
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
@@ -31,12 +33,12 @@ export default function RegisterPage() {
 
     // Validatie
     if (formData.password !== formData.confirmPassword) {
-      setError('Wachtwoorden komen niet overeen');
+      setError(t.errors.passwordsDoNotMatch);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Wachtwoord moet minimaal 6 tekens lang zijn');
+      setError(t.errors.passwordTooShort);
       return;
     }
 
@@ -58,40 +60,40 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Er ging iets mis bij het aanmaken van je account');
+        throw new Error(data.error || t.errors.registerFailed);
       }
 
       // Redirect naar login pagina
       router.push('/login?registered=true');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Er ging iets mis');
+      setError(err instanceof Error ? err.message : t.errors.somethingWentWrong);
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#0a0714] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#3b82f6]/10 rounded-2xl mb-4">
-            <Headphones className="w-8 h-8 text-[#3b82f6]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#8B5CF6]/10 rounded-2xl mb-4">
+            <Headphones className="w-8 h-8 text-[#8B5CF6]" />
           </div>
-          <h1 className="text-3xl font-semibold text-white mb-2 tracking-tight">Opperbeat</h1>
-          <p className="text-[#f5f5f7]/70 text-sm">Maak een account aan om te beginnen</p>
+          <h1 className="text-3xl font-semibold text-[#f5f3ff] mb-2 tracking-tight">Opperbeat</h1>
+          <p className="text-[#f5f3ff]/70 text-sm">{t.auth.createAccount}</p>
         </div>
 
         {/* Register Card */}
-        <div className="bg-[#1a1a22] rounded-2xl p-8 border border-white/8 shadow-2xl">
+        <div className="bg-[#1d1628] rounded-2xl p-8 border border-[#8B5CF6]/20 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name Field */}
             <div>
-              <label htmlFor="name" className="block text-[#f5f5f7]/90 text-sm font-medium mb-2">
-                Volledige Naam
+              <label htmlFor="name" className="block text-[#f5f3ff]/90 text-sm font-medium mb-2">
+                {t.profile.fullName}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <User className="w-5 h-5 text-[#f5f5f7]/40" />
+                  <User className="w-5 h-5 text-[#f5f3ff]/40" />
                 </div>
                 <input
                   id="name"
@@ -101,19 +103,19 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   placeholder="Jan Jansen"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-[#14141a] border border-white/8 rounded-lg text-white placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#3b82f6]/50 focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-[#151020] border border-[#8B5CF6]/20 rounded-lg text-[#f5f3ff] placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#8B5CF6]/50 focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
                 />
               </div>
             </div>
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-[#f5f5f7]/90 text-sm font-medium mb-2">
-                E-mailadres
+              <label htmlFor="email" className="block text-[#f5f3ff]/90 text-sm font-medium mb-2">
+                {t.auth.email}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-[#f5f5f7]/40" />
+                  <Mail className="w-5 h-5 text-[#f5f3ff]/40" />
                 </div>
                 <input
                   id="email"
@@ -123,19 +125,19 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   placeholder="naam@voorbeeld.nl"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-[#14141a] border border-white/8 rounded-lg text-white placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#3b82f6]/50 focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-[#151020] border border-[#8B5CF6]/20 rounded-lg text-[#f5f3ff] placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#8B5CF6]/50 focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-[#f5f5f7]/90 text-sm font-medium mb-2">
-                Wachtwoord
+              <label htmlFor="password" className="block text-[#f5f3ff]/90 text-sm font-medium mb-2">
+                {t.auth.password}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-[#f5f5f7]/40" />
+                  <Lock className="w-5 h-5 text-[#f5f3ff]/40" />
                 </div>
                 <input
                   id="password"
@@ -146,12 +148,12 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full pl-12 pr-12 py-3 bg-[#14141a] border border-white/8 rounded-lg text-white placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#3b82f6]/50 focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-[#151020] border border-[#8B5CF6]/20 rounded-lg text-[#f5f3ff] placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#8B5CF6]/50 focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#f5f5f7]/40 hover:text-[#f5f5f7]/70 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#f5f3ff]/40 hover:text-[#f5f3ff]/70 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -164,12 +166,12 @@ export default function RegisterPage() {
 
             {/* Confirm Password Field */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-[#f5f5f7]/90 text-sm font-medium mb-2">
-                Bevestig Wachtwoord
+              <label htmlFor="confirmPassword" className="block text-[#f5f3ff]/90 text-sm font-medium mb-2">
+                {t.auth.confirmPassword}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-[#f5f5f7]/40" />
+                  <Lock className="w-5 h-5 text-[#f5f3ff]/40" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -179,12 +181,12 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-12 pr-12 py-3 bg-[#14141a] border border-white/8 rounded-lg text-white placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#3b82f6]/50 focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-[#151020] border border-[#8B5CF6]/20 rounded-lg text-[#f5f3ff] placeholder-[#f5f5f7]/40 focus:outline-none focus:border-[#8B5CF6]/50 focus:ring-2 focus:ring-[#8B5CF6]/20 transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#f5f5f7]/40 hover:text-[#f5f5f7]/70 transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#f5f3ff]/40 hover:text-[#f5f3ff]/70 transition-colors"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -206,31 +208,31 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#3b82f6] hover:bg-[#2563eb] disabled:bg-[#3b82f6]/50 disabled:cursor-not-allowed text-white font-medium px-6 py-3.5 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] disabled:bg-[#8B5CF6]/50 disabled:cursor-not-allowed text-[#f5f3ff] font-medium px-6 py-3.5 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  <span>Account aanmaken...</span>
+                  <span>{t.auth.registering}</span>
                 </>
               ) : (
                 <>
                   <UserPlus className="w-5 h-5" />
-                  <span>Account Aanmaken</span>
+                  <span>{t.auth.register}</span>
                 </>
               )}
             </button>
           </form>
 
           {/* Login Link */}
-          <div className="mt-6 pt-6 border-t border-white/8 text-center">
-            <p className="text-[#f5f5f7]/70 text-sm">
-              Al een account?{' '}
+          <div className="mt-6 pt-6 border-t border-[#8B5CF6]/20 text-center">
+            <p className="text-[#f5f3ff]/70 text-sm">
+              {t.auth.hasAccount}{' '}
               <a
                 href="/login"
-                className="text-[#3b82f6] hover:text-[#60a5fa] font-medium transition-colors"
+                className="text-[#8B5CF6] hover:text-[#60a5fa] font-medium transition-colors"
               >
-                Log hier in
+                {t.auth.loginHere}
               </a>
             </p>
           </div>
@@ -238,14 +240,14 @@ export default function RegisterPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-[#f5f5f7]/50 text-xs">
-            Door een account aan te maken ga je akkoord met onze{' '}
-            <a href="#" className="text-[#3b82f6] hover:underline">
-              Servicevoorwaarden
+          <p className="text-[#f5f3ff]/50 text-xs">
+            {t.auth.termsAgreement}{' '}
+            <a href="#" className="text-[#8B5CF6] hover:underline">
+              {t.auth.termsOfService}
             </a>{' '}
             en{' '}
-            <a href="#" className="text-[#3b82f6] hover:underline">
-              Privacybeleid
+            <a href="#" className="text-[#8B5CF6] hover:underline">
+              {t.auth.privacyPolicy}
             </a>
           </p>
         </div>

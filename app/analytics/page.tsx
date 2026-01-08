@@ -1,105 +1,299 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { TrendingUp, Music, Clock, Users, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, Music, Clock, Users, BarChart3, ArrowUpRight, ArrowDownRight, Loader2, AlertCircle } from 'lucide-react';
+import { useI18n } from '@/lib/i18n-context';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid } from 'recharts';
+
+interface AnalyticsData {
+  totalTracks: number;
+  totalDuration: number;
+  totalDurationFormatted: string;
+  avgDuration: number;
+  avgDurationFormatted: string;
+  genreDistribution: Array<{ genre: string; count: number; percentage: number }>;
+  bpmDistribution: Array<{ range: string; count: number; percentage: number }>;
+  keyDistribution: Array<{ key: string; count: number; percentage: number }>;
+  activityTimeline: Array<{ month: string; count: number }>;
+  totalMixes: number;
+}
+
+const genreColors = [
+  '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', 
+  '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1'
+];
 
 export default function AnalyticsPage() {
-  const stats = [
-    { label: 'Totaal Tracks', value: '3,456', change: '+12.5%', trend: 'up', icon: Music },
-    { label: 'Totaal Mixes', value: '48', change: '+4', trend: 'up', icon: BarChart3 },
-    { label: 'Gem. Duur', value: '2h 34m', change: '+8m', trend: 'up', icon: Clock },
-    { label: 'Actieve Gebruikers', value: '1,234', change: '-2.1%', trend: 'down', icon: Users },
-  ];
+  const { t } = useI18n();
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch('/api/analytics');
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Fout bij ophalen van analytics');
+        }
+
+        setAnalyticsData(data.data);
+      } catch (err) {
+        console.error('Error fetching analytics:', err);
+        setError(err instanceof Error ? err.message : 'Onbekende fout');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('nl-NL');
+  };
+
+  const stats = analyticsData ? [
+    { 
+      label: t.analytics.totalTracks, 
+      value: formatNumber(analyticsData.totalTracks), 
+      change: '', 
+      trend: 'up' as const, 
+      icon: Music 
+    },
+    { 
+      label: t.analytics.totalMixes, 
+      value: formatNumber(analyticsData.totalMixes), 
+      change: '', 
+      trend: 'up' as const, 
+      icon: BarChart3 
+    },
+    { 
+      label: t.analytics.avgDuration, 
+      value: analyticsData.avgDurationFormatted, 
+      change: '', 
+      trend: 'up' as const, 
+      icon: Clock 
+    },
+    { 
+      label: t.analytics.activeUsers, 
+      value: '—', 
+      change: '', 
+      trend: 'up' as const, 
+      icon: Users 
+    },
+  ] : [];
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-[#0a0714] overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 text-[#8B5CF6] animate-spin mx-auto mb-4" />
+            <p className="text-[#f5f3ff]/60">{t.common.loading}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen bg-[#0a0714] overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-[#f5f3ff] font-medium mb-2">{t.common.error}</h3>
+            <p className="text-[#f5f3ff]/60 text-sm">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-screen bg-[#0a0a0f] overflow-hidden">
+    <div className="flex h-screen bg-[#0a0714] overflow-hidden">
       <Sidebar />
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           <div className="mb-6 lg:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2 tracking-tight">Analytics</h1>
-            <p className="text-[#f5f5f7]/70 text-sm">Inzichten en statistieken over je muziek collectie</p>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-[#f5f3ff] mb-2 tracking-tight">{t.analytics.title}</h1>
+            <p className="text-[#f5f3ff]/70 text-sm">{t.analytics.subtitle}</p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 lg:mb-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <div
-                  key={index}
-                  className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-2.5 bg-[#3b82f6]/10 rounded-lg">
-                      <Icon className="w-5 h-5 text-[#3b82f6]" />
+          {analyticsData && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 lg:mb-8">
+                {stats.map((stat, index) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div
+                      key={index}
+                      className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-lg"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-2.5 bg-[#8B5CF6]/10 rounded-lg">
+                          <Icon className="w-5 h-5 text-[#8B5CF6]" />
+                        </div>
+                        {stat.change && (
+                          <div className={`flex items-center gap-1 text-xs font-medium ${
+                            stat.trend === 'up' ? 'text-[#10b981]' : 'text-[#ef4444]'
+                          }`}>
+                            {stat.trend === 'up' ? (
+                              <ArrowUpRight className="w-3 h-3" />
+                            ) : (
+                              <ArrowDownRight className="w-3 h-3" />
+                            )}
+                            <span>{stat.change}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-2xl font-semibold text-[#f5f3ff] mb-1">{stat.value}</p>
+                        <p className="text-[#f5f3ff]/60 text-sm">{stat.label}</p>
+                      </div>
                     </div>
-                    <div className={`flex items-center gap-1 text-xs font-medium ${
-                      stat.trend === 'up' ? 'text-[#10b981]' : 'text-[#ef4444]'
-                    }`}>
-                      {stat.trend === 'up' ? (
-                        <ArrowUpRight className="w-3 h-3" />
-                      ) : (
-                        <ArrowDownRight className="w-3 h-3" />
-                      )}
-                      <span>{stat.change}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-white mb-1">{stat.value}</p>
-                    <p className="text-[#f5f5f7]/60 text-sm">{stat.label}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  );
+                })}
+              </div>
 
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Genre Distribution */}
-            <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
-                  <TrendingUp className="w-5 h-5 text-[#3b82f6]" />
-                </div>
-                <h3 className="text-white font-semibold">Genre Verdeling</h3>
-              </div>
-              <div className="space-y-4">
-                {[
-                  { genre: 'House', percentage: 35, color: '#3b82f6' },
-                  { genre: 'Techno', percentage: 28, color: '#06b6d4' },
-                  { genre: 'Hip-Hop', percentage: 20, color: '#10b981' },
-                  { genre: 'Electronic', percentage: 17, color: '#f59e0b' },
-                ].map((item, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[#f5f5f7]/90 text-sm font-medium">{item.genre}</span>
-                      <span className="text-white text-sm font-semibold">{item.percentage}%</span>
+              {/* Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                {/* Genre Distribution */}
+                <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-lg">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-[#8B5CF6]/10 rounded-lg">
+                      <TrendingUp className="w-5 h-5 text-[#8B5CF6]" />
                     </div>
-                    <div className="w-full bg-[#14141a] rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${item.percentage}%`, backgroundColor: item.color }}
-                      />
-                    </div>
+                    <h3 className="text-[#f5f3ff] font-semibold">{t.analytics.genreDistribution}</h3>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Activity Timeline */}
-            <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
-                  <BarChart3 className="w-5 h-5 text-[#3b82f6]" />
+                  {analyticsData.genreDistribution.length > 0 ? (
+                    <div className="space-y-4">
+                      {analyticsData.genreDistribution.map((item, index) => (
+                        <div key={index}>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-[#f5f3ff]/90 text-sm font-medium">{item.genre}</span>
+                            <span className="text-[#f5f3ff] text-sm font-semibold">
+                              {item.percentage}% ({item.count})
+                            </span>
+                          </div>
+                          <div className="w-full bg-[#151020] rounded-full h-2">
+                            <div
+                              className="h-2 rounded-full transition-all duration-500"
+                              style={{ 
+                                width: `${item.percentage}%`, 
+                                backgroundColor: genreColors[index % genreColors.length] 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[#f5f3ff]/40 text-sm text-center py-8">
+                      Geen genre data beschikbaar
+                    </p>
+                  )}
                 </div>
-                <h3 className="text-white font-semibold">Activiteit</h3>
+
+                {/* Activity Timeline */}
+                <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-lg">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-[#8B5CF6]/10 rounded-lg">
+                      <BarChart3 className="w-5 h-5 text-[#8B5CF6]" />
+                    </div>
+                    <h3 className="text-[#f5f3ff] font-semibold">{t.analytics.activity}</h3>
+                  </div>
+                  {analyticsData.activityTimeline && analyticsData.activityTimeline.length > 0 ? (
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={analyticsData.activityTimeline}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                          <XAxis 
+                            dataKey="month" 
+                            stroke="#f5f3ff60"
+                            style={{ fontSize: '12px' }}
+                            angle={-45}
+                            textAnchor="end"
+                            height={60}
+                          />
+                          <YAxis 
+                            stroke="#f5f3ff60"
+                            style={{ fontSize: '12px' }}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: '#1a1a1a', 
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '8px',
+                              color: '#fff'
+                            }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="count" 
+                            stroke="#8B5CF6" 
+                            strokeWidth={2}
+                            dot={{ fill: '#8B5CF6', r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : (
+                    <div className="h-64 bg-[#151020] rounded-lg border border-[#8B5CF6]/15 flex items-center justify-center">
+                      <p className="text-[#f5f3ff]/40 text-sm">{t.analytics.activityChartPlaceholder}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="h-64 bg-[#14141a] rounded-lg border border-white/5 flex items-center justify-center">
-                <p className="text-[#f5f5f7]/40 text-sm">Activiteit grafiek komt hier</p>
-              </div>
-            </div>
-          </div>
+
+              {/* BPM Distribution */}
+              {analyticsData.bpmDistribution && analyticsData.bpmDistribution.some(b => b.count > 0) && (
+                <div className="bg-[#1d1628] rounded-xl p-4 sm:p-6 border border-[#8B5CF6]/20 shadow-lg mb-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-[#8B5CF6]/10 rounded-lg">
+                      <Music className="w-5 h-5 text-[#8B5CF6]" />
+                    </div>
+                    <h3 className="text-[#f5f3ff] font-semibold">BPM Distributie</h3>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analyticsData.bpmDistribution}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                        <XAxis 
+                          dataKey="range" 
+                          stroke="#f5f3ff60"
+                          style={{ fontSize: '12px' }}
+                        />
+                        <YAxis 
+                          stroke="#f5f3ff60"
+                          style={{ fontSize: '12px' }}
+                        />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1a1a1a', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '8px',
+                            color: '#fff'
+                          }}
+                        />
+                        <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -3,18 +3,18 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 
 const genresData = [
-  { name: 'House', value: 35, color: '#ec4899', change: '+88%' },
-  { name: 'Techno', value: 30, color: '#a855f7', change: '+74%' },
-  { name: 'Hip-Hop', value: 20, color: '#3b82f6', change: '+60%' },
-  { name: 'Other', value: 15, color: '#6b7280', change: '+45%' },
+  { name: 'House', value: 35, color: '#EC4899', change: '+88%' },
+  { name: 'Techno', value: 30, color: '#8B5CF6', change: '+74%' },
+  { name: 'Hip-Hop', value: 20, color: '#00F5FF', change: '+60%' },
+  { name: 'Other', value: 15, color: '#6366F1', change: '+45%' },
 ];
 
 export default function GenresCard() {
   return (
-    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-white/10">
+    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-[#8B5CF6]/30">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
-        <h3 className="text-white font-semibold text-sm sm:text-base">Genres Breakdown</h3>
-        <select className="bg-white/5 border border-white/10 rounded px-2 sm:px-3 py-1 text-white text-xs sm:text-sm w-full sm:w-auto">
+        <h3 className="text-[#f5f3ff] font-semibold text-sm sm:text-base">Genres Breakdown</h3>
+        <select className="bg-white/5 border border-[#8B5CF6]/30 rounded px-2 sm:px-3 py-1 text-[#f5f3ff] text-xs sm:text-sm w-full sm:w-auto">
           <option>Day</option>
           <option>Week</option>
           <option>Month</option>
@@ -51,9 +51,9 @@ export default function GenresCard() {
                   className="w-3 h-3 rounded-full" 
                   style={{ backgroundColor: genre.color }}
                 />
-                <span className="text-white/80 text-sm">{genre.name}</span>
+                <span className="text-[#f5f3ff]/80 text-sm">{genre.name}</span>
               </div>
-              <span className="text-white font-semibold text-sm">{genre.change}</span>
+              <span className="text-[#f5f3ff] font-semibold text-sm">{genre.change}</span>
             </div>
           ))}
         </div>
