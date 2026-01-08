@@ -103,6 +103,19 @@ export default function AnalyzePage() {
       if (result.success && result.data) {
         console.log('Analysis Data:', result.data);
         setAnalysisData(result.data);
+        
+        // Sla analyse op in localStorage voor overview widget
+        try {
+          localStorage.setItem('lastAnalysis', JSON.stringify(result.data));
+          const currentCount = localStorage.getItem('analysisCount');
+          const newCount = currentCount ? parseInt(currentCount, 10) + 1 : 1;
+          localStorage.setItem('analysisCount', newCount.toString());
+          
+          // Dispatch custom event om widgets te updaten
+          window.dispatchEvent(new Event('analysisUpdated'));
+        } catch (e) {
+          console.warn('Kon analyse niet opslaan in localStorage:', e);
+        }
       } else {
         throw new Error('Geen data ontvangen van de server');
       }
@@ -141,26 +154,26 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="flex h-screen bg-black overflow-hidden">
+    <div className="flex h-screen bg-[#0a0a0f] overflow-hidden">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Muziek Analyse</h1>
-            <p className="text-white/60">Upload en analyseer je muziekstukken voor gedetailleerde inzichten</p>
+            <h1 className="text-3xl font-semibold text-white mb-2 tracking-tight">Muziek Analyse</h1>
+            <p className="text-[#f5f5f7]/70 text-sm">Upload en analyseer je muziekstukken voor gedetailleerde inzichten</p>
           </div>
 
           {/* Upload Section */}
-          <div className="bg-white/5 rounded-lg p-8 border border-white/10 mb-6">
+          <div className="bg-[#1a1a22] rounded-xl p-8 border border-white/8 mb-6 shadow-lg">
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              className={`flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-lg transition-colors ${
+              className={`flex flex-col items-center justify-center py-16 border-2 border-dashed rounded-xl transition-all ${
                 isDragging
-                  ? 'border-pink-500 bg-pink-500/10'
-                  : 'border-white/20 hover:border-pink-500/50'
+                  ? 'border-[#3b82f6] bg-[#3b82f6]/5'
+                  : 'border-white/10 hover:border-[#3b82f6]/40'
               }`}
             >
               <input
@@ -172,33 +185,33 @@ export default function AnalyzePage() {
               />
               {isUploading ? (
                 <>
-                  <Loader2 className="w-16 h-16 text-pink-500 mb-4 animate-spin" />
+                  <Loader2 className="w-16 h-16 text-[#3b82f6] mb-4 animate-spin" />
                   <h3 className="text-xl font-semibold text-white mb-2">Bestand wordt geanalyseerd...</h3>
-                  <p className="text-white/60 text-sm mb-2">Dit kan even duren, vooral voor BPM en key detectie</p>
-                  <div className="mt-4 px-4 py-2 bg-pink-500/20 rounded-lg border border-pink-500/30">
-                    <p className="text-pink-400 text-sm font-medium">
-                      Verstreken tijd: <span className="text-pink-300">{formatTime(elapsedTime)}</span>
+                  <p className="text-[#f5f5f7]/70 text-sm mb-2">Dit kan even duren, vooral voor BPM en key detectie</p>
+                  <div className="mt-4 px-4 py-2 bg-[#3b82f6]/10 rounded-lg border border-[#3b82f6]/20">
+                    <p className="text-[#3b82f6] text-sm font-medium">
+                      Verstreken tijd: <span className="text-[#60a5fa]">{formatTime(elapsedTime)}</span>
                     </p>
                   </div>
                 </>
               ) : (
                 <>
-                  <Upload className="w-16 h-16 text-white/40 mb-4" />
+                  <Upload className="w-16 h-16 text-[#f5f5f7]/30 mb-4" />
                   <h3 className="text-xl font-semibold text-white mb-2">Upload Muziekbestand</h3>
-                  <p className="text-white/60 text-sm mb-4">Sleep een bestand hierheen of klik om te selecteren</p>
+                  <p className="text-[#f5f5f7]/70 text-sm mb-6">Sleep een bestand hierheen of klik om te selecteren</p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-pink-500 hover:bg-pink-600 text-white font-medium px-6 py-3 rounded-lg transition-colors"
+                    className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium px-6 py-3 rounded-lg transition-all shadow-sm hover:shadow-md"
                   >
                     Bestand Selecteren
                   </button>
-                  <p className="text-white/40 text-xs mt-4">Ondersteunde formaten: MP3, WAV, FLAC, M4A</p>
+                  <p className="text-[#f5f5f7]/50 text-xs mt-4">Ondersteunde formaten: MP3, WAV, FLAC, M4A</p>
                 </>
               )}
             </div>
             {error && (
-              <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
-                <p className="text-red-400 text-sm">{error}</p>
+              <div className="mt-4 p-4 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-lg">
+                <p className="text-[#ef4444] text-sm">{error}</p>
               </div>
             )}
           </div>
@@ -206,20 +219,24 @@ export default function AnalyzePage() {
           {/* Analysis Results Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Audio Waveform */}
-            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <Waves className="w-5 h-5 text-pink-500" />
+                <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
+                  <Waves className="w-5 h-5 text-[#3b82f6]" />
+                </div>
                 <h3 className="text-white font-semibold">Audio Waveform</h3>
               </div>
-              <div className="h-48 bg-black/20 rounded flex items-center justify-center">
-                <p className="text-white/40 text-sm">Waveform visualisatie verschijnt hier</p>
+              <div className="h-48 bg-[#14141a] rounded-lg border border-white/5 flex items-center justify-center">
+                <p className="text-[#f5f5f7]/40 text-sm">Waveform visualisatie verschijnt hier</p>
               </div>
             </div>
 
             {/* Track Information */}
-            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <FileAudio className="w-5 h-5 text-pink-500" />
+                <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
+                  <FileAudio className="w-5 h-5 text-[#3b82f6]" />
+                </div>
                 <h3 className="text-white font-semibold">Track Informatie</h3>
               </div>
               <div className="space-y-3">
@@ -240,14 +257,16 @@ export default function AnalyzePage() {
             </div>
 
             {/* Audio Analysis */}
-            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <BarChart3 className="w-5 h-5 text-pink-500" />
+                <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
+                  <BarChart3 className="w-5 h-5 text-[#3b82f6]" />
+                </div>
                 <h3 className="text-white font-semibold">Audio Analyse</h3>
                 {isUploading && (
                   <div className="ml-auto flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 text-pink-500 animate-spin" />
-                    <span className="text-white/60 text-xs">{formatTime(elapsedTime)}</span>
+                    <Loader2 className="w-4 h-4 text-[#3b82f6] animate-spin" />
+                    <span className="text-[#f5f5f7]/70 text-xs">{formatTime(elapsedTime)}</span>
                   </div>
                 )}
               </div>
@@ -270,13 +289,15 @@ export default function AnalyzePage() {
             </div>
 
             {/* Spectral Analysis */}
-            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
-                <Music className="w-5 h-5 text-pink-500" />
+                <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
+                  <Music className="w-5 h-5 text-[#3b82f6]" />
+                </div>
                 <h3 className="text-white font-semibold">Spectrale Analyse</h3>
               </div>
-              <div className="h-64 bg-black/20 rounded flex items-center justify-center">
-                <p className="text-white/40 text-sm">Spectrogram verschijnt hier</p>
+              <div className="h-64 bg-[#14141a] rounded-lg border border-white/5 flex items-center justify-center">
+                <p className="text-[#f5f5f7]/40 text-sm">Spectrogram verschijnt hier</p>
               </div>
             </div>
           </div>
@@ -288,8 +309,8 @@ export default function AnalyzePage() {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-white/5">
-      <span className="text-white/60 text-sm">{label}</span>
+    <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0">
+      <span className="text-[#f5f5f7]/70 text-sm font-medium">{label}</span>
       <span className="text-white font-medium text-sm">{value}</span>
     </div>
   );
@@ -298,36 +319,36 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function AnalysisMetric({ label, value, confidence }: { label: string; value: string; confidence?: number | null }) {
   const confidencePercent = confidence ? Math.round(confidence * 100) : null;
   const confidenceColor = confidence 
-    ? confidence >= 0.8 ? 'bg-green-500' 
-    : confidence >= 0.6 ? 'bg-yellow-500' 
-    : 'bg-orange-500'
-    : 'bg-pink-500';
+    ? confidence >= 0.8 ? 'bg-[#10b981]' 
+    : confidence >= 0.6 ? 'bg-[#f59e0b]' 
+    : 'bg-[#ef4444]'
+    : 'bg-[#3b82f6]';
   
   return (
     <div>
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-white/80 text-sm">{label}</span>
+      <div className="flex justify-between items-center mb-2.5">
+        <span className="text-[#f5f5f7]/90 text-sm font-medium">{label}</span>
         <div className="flex items-center gap-2">
           <span className="text-white font-semibold">{value}</span>
           {confidence != null && (
-            <span className={`text-xs px-2 py-0.5 rounded ${
-              confidence >= 0.8 ? 'bg-green-500/20 text-green-400' 
-              : confidence >= 0.6 ? 'bg-yellow-500/20 text-yellow-400' 
-              : 'bg-orange-500/20 text-orange-400'
+            <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${
+              confidence >= 0.8 ? 'bg-[#10b981]/10 text-[#10b981]' 
+              : confidence >= 0.6 ? 'bg-[#f59e0b]/10 text-[#f59e0b]' 
+              : 'bg-[#ef4444]/10 text-[#ef4444]'
             }`}>
               {confidencePercent}%
             </span>
           )}
         </div>
       </div>
-      <div className="w-full bg-black/20 rounded-full h-2">
+      <div className="w-full bg-[#14141a] rounded-full h-1.5">
         <div 
-          className={`${confidenceColor} h-2 rounded-full transition-all duration-300`} 
+          className={`${confidenceColor} h-1.5 rounded-full transition-all duration-300`} 
           style={{ width: confidencePercent ? `${confidencePercent}%` : '0%' }}
         ></div>
       </div>
       {confidence != null && (
-        <div className="mt-1 text-xs text-white/50">
+        <div className="mt-1.5 text-xs text-[#f5f5f7]/50">
           {confidence >= 0.8 ? 'Zeer accuraat' 
            : confidence >= 0.6 ? 'Accuraat' 
            : 'Matig accuraat'}

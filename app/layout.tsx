@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DJ COMMAND - Dashboard",
+  title: "Opperbeat - Dashboard",
   description: "DJ analytics and performance dashboard",
 };
 

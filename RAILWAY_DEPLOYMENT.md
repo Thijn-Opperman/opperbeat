@@ -266,3 +266,4 @@ Als alles werkt, heb je nu:
 
 **Problemen?** Check de Troubleshooting sectie hierboven of de logs in Railway/Vercel.
 
+
