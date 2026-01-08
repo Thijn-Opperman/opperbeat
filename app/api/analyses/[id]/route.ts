@@ -9,10 +9,10 @@ import { deleteAnalysisFiles } from '@/lib/storage-helpers';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -22,23 +22,28 @@ export async function GET(
     }
 
     // Haal user ID op
-    let userId: string;
+    let userId: string | null = null;
     try {
       userId = await getUserId(request, true);
     } catch (authError) {
-      return NextResponse.json(
-        { error: 'Authenticatie vereist' },
-        { status: 401 }
-      );
+      // Voor development: gebruik null
+      userId = null;
     }
 
     // Haal analyse op (RLS zorgt ervoor dat alleen eigen analyses worden opgehaald)
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('music_analyses')
       .select('*')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single();
+      .eq('id', id);
+    
+    // Als userId null is, gebruik een query die null user_id toestaat
+    if (userId) {
+      query = query.eq('user_id', userId);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data, error } = await query.single();
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -98,10 +103,10 @@ export async function GET(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -111,7 +116,7 @@ export async function DELETE(
     }
 
     // Haal user ID op
-    let userId: string;
+    let userId: string | null = null;
     try {
       userId = await getUserId(request, true);
     } catch (authError) {
@@ -122,12 +127,19 @@ export async function DELETE(
     }
 
     // Haal eerst analyse op om storage paths te krijgen
-    const { data: analysis, error: fetchError } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('music_analyses')
       .select('id, audio_file_url, artwork_url, original_filename')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single();
+      .eq('id', id);
+    
+    // Als userId null is, gebruik een query die null user_id toestaat
+    if (userId) {
+      query = query.eq('user_id', userId);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    const { data: analysis, error: fetchError } = await query.single();
 
     if (fetchError || !analysis) {
       if (fetchError?.code === 'PGRST116') {
@@ -162,11 +174,18 @@ export async function DELETE(
     }
 
     // Verwijder uit database
-    const { error: deleteError } = await supabaseAdmin
+    let deleteQuery = supabaseAdmin
       .from('music_analyses')
       .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+      .eq('id', id);
+    
+    if (userId) {
+      deleteQuery = deleteQuery.eq('user_id', userId);
+    } else {
+      deleteQuery = deleteQuery.is('user_id', null);
+    }
+    
+    const { error: deleteError } = await deleteQuery;
 
     if (deleteError) {
       console.error('Error deleting analysis:', deleteError);

@@ -102,8 +102,7 @@ async function testSave() {
       await supabaseAdmin
         .from('music_analyses')
         .delete()
-        .eq('id', insertData.id)
-        .catch(() => {});
+        .eq('id', insertData.id);
       
       throw uploadError;
     }

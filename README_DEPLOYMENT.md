@@ -11,12 +11,23 @@ Deze applicatie bestaat uit twee delen:
 2. Ga naar [Vercel Dashboard](https://vercel.com)
 3. Importeer je GitHub repository
 4. Vercel detecteert automatisch Next.js
-5. **Belangrijk**: Voeg environment variable toe:
-   - **Naam**: `PYTHON_API_URL`
-   - **Waarde**: De URL van je Python API (bijv. `https://your-app.railway.app/api/analyze`)
+5. **BELANGRIJK**: Voeg environment variables toe:
+
+   **Supabase (VERPLICHT):**
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   
+   **Python API (Als gebruikt):**
+   - `PYTHON_API_URL`
+   - `NEXT_PUBLIC_PYTHON_API_URL`
+
+   **Voor alle environments:** Production, Preview, Development
 6. Klik "Deploy"
 
 ✅ Frontend is nu live op Vercel!
+
+**Zie `VERCEL_DEPLOYMENT.md` voor complete instructies met Supabase setup.**
 
 ---
 

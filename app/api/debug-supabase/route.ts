@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
         diagnostics.tests.storageUpload = {
           status: 'error',
           error: uploadError.message,
-          code: uploadError.statusCode,
+          code: (uploadError as any).statusCode || 'unknown',
         };
         diagnostics.errors.push(`Storage upload error: ${uploadError.message}`);
         

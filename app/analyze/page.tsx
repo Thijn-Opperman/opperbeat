@@ -89,7 +89,7 @@ export default function AnalyzePage() {
       const fileSizeMB = file.size / (1024 * 1024);
       const isLargeFile = fileSizeMB > 4; // Vercel limit is ~4.5MB
       
-      let result;
+      let result: any;
       
       if (isLargeFile) {
         // Voor grote bestanden: stuur direct naar Railway om Vercel's body size limit te omzeilen

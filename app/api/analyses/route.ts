@@ -17,14 +17,12 @@ import { getUserId } from '@/lib/auth-helpers';
 export async function GET(request: NextRequest) {
   try {
     // Haal user ID op
-    let userId: string;
+    let userId: string | null = null;
     try {
       userId = await getUserId(request, true); // allowAnonymous voor development
     } catch (authError) {
-      return NextResponse.json(
-        { error: 'Authenticatie vereist' },
-        { status: 401 }
-      );
+      // Voor development: gebruik null
+      userId = null;
     }
 
     // Parse query parameters
@@ -39,9 +37,16 @@ export async function GET(request: NextRequest) {
     // Start query builder
     let query = supabaseAdmin
       .from('music_analyses')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .select('*');
+    
+    // Filter op user_id (of null voor anonymous)
+    if (userId) {
+      query = query.eq('user_id', userId);
+    } else {
+      query = query.is('user_id', null);
+    }
+    
+    query = query.order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     // Filters toevoegen
@@ -73,10 +78,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Haal totaal aantal op (voor paginatie)
-    const { count: totalCount } = await supabaseAdmin
+    let countQuery = supabaseAdmin
       .from('music_analyses')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .select('*', { count: 'exact', head: true });
+    
+    if (userId) {
+      countQuery = countQuery.eq('user_id', userId);
+    } else {
+      countQuery = countQuery.is('user_id', null);
+    }
+    
+    const { count: totalCount } = await countQuery;
 
     return NextResponse.json({
       success: true,
@@ -105,14 +117,12 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Haal user ID op
-    let userId: string;
+    let userId: string | null = null;
     try {
       userId = await getUserId(request, true);
     } catch (authError) {
-      return NextResponse.json(
-        { error: 'Authenticatie vereist' },
-        { status: 401 }
-      );
+      // Voor development: gebruik null
+      userId = null;
     }
 
     const body = await request.json();
@@ -126,12 +136,18 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Verwijder analyses (RLS zorgt ervoor dat alleen eigen analyses verwijderd worden)
-    const { data, error } = await supabaseAdmin
+    let deleteQuery = supabaseAdmin
       .from('music_analyses')
       .delete()
-      .in('id', ids)
-      .eq('user_id', userId)
-      .select();
+      .in('id', ids);
+    
+    if (userId) {
+      deleteQuery = deleteQuery.eq('user_id', userId);
+    } else {
+      deleteQuery = deleteQuery.is('user_id', null);
+    }
+    
+    const { data, error } = await deleteQuery.select();
 
     if (error) {
       console.error('Error deleting analyses:', error);
