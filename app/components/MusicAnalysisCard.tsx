@@ -69,19 +69,19 @@ export default function MusicAnalysisCard() {
   }, []);
 
   return (
-    <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg hover:border-white/12 transition-all">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg hover:border-white/12 transition-all">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-[#3b82f6]/10 rounded-lg">
-            <Music className="w-5 h-5 text-[#3b82f6]" />
+          <div className="p-2 sm:p-2.5 bg-[#3b82f6]/10 rounded-lg">
+            <Music className="w-4 h-4 sm:w-5 sm:h-5 text-[#3b82f6]" />
           </div>
-          <h3 className="text-white font-semibold text-base">Muziek Analyse</h3>
+          <h3 className="text-white font-semibold text-sm sm:text-base">Muziek Analyse</h3>
         </div>
         <Link
           href="/analyze"
-          className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium px-4 py-2 rounded-lg transition-all text-sm flex items-center gap-2 shadow-sm hover:shadow-md"
+          className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all text-xs sm:text-sm flex items-center gap-2 shadow-sm hover:shadow-md w-full sm:w-auto justify-center"
         >
-          <Upload className="w-4 h-4" />
+          <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           Analyseren
         </Link>
       </div>

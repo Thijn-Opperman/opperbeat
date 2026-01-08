@@ -6,19 +6,19 @@ export default function SetLengthCard() {
   const offset = circumference - (progress / 60) * circumference;
 
   return (
-    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-semibold">Average DJ Set Length</h3>
-        <select className="bg-white/5 border border-white/10 rounded px-3 py-1 text-white text-sm">
+    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+        <h3 className="text-white font-semibold text-sm sm:text-base">Average DJ Set Length</h3>
+        <select className="bg-white/5 border border-white/10 rounded px-2 sm:px-3 py-1 text-white text-xs sm:text-sm w-full sm:w-auto">
           <option>Day</option>
           <option>Week</option>
           <option>Month</option>
         </select>
       </div>
 
-      <div className="flex items-center justify-center h-48">
-        <div className="relative w-32 h-32">
-          <svg className="transform -rotate-90 w-32 h-32">
+      <div className="flex items-center justify-center h-36 sm:h-48">
+        <div className="relative w-24 h-24 sm:w-32 sm:h-32">
+          <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 128 128">
             <circle
               cx="64"
               cy="64"
@@ -41,8 +41,8 @@ export default function SetLengthCard() {
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">37</div>
-              <div className="text-sm text-white/60">min</div>
+              <div className="text-xl sm:text-3xl font-bold text-white">37</div>
+              <div className="text-xs sm:text-sm text-white/60">min</div>
             </div>
           </div>
         </div>

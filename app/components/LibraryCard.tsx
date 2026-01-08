@@ -13,10 +13,10 @@ const libraryData = [
 
 export default function LibraryCard() {
   return (
-    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-semibold">Music Library Insights</h3>
-        <select className="bg-white/5 border border-white/10 rounded px-3 py-1 text-white text-sm">
+    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+        <h3 className="text-white font-semibold text-sm sm:text-base">Music Library Insights</h3>
+        <select className="bg-white/5 border border-white/10 rounded px-2 sm:px-3 py-1 text-white text-xs sm:text-sm w-full sm:w-auto">
           <option>Day</option>
           <option>Week</option>
           <option>Month</option>
@@ -24,8 +24,8 @@ export default function LibraryCard() {
       </div>
 
       <div className="mb-4">
-        <div className="text-4xl font-bold text-pink-500 mb-1">3,560</div>
-        <p className="text-white/60 text-sm">Total Tracks in Library</p>
+        <div className="text-2xl sm:text-4xl font-bold text-pink-500 mb-1">3,560</div>
+        <p className="text-white/60 text-xs sm:text-sm">Total Tracks in Library</p>
       </div>
 
       <div className="h-32">

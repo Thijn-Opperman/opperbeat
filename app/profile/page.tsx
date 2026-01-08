@@ -7,26 +7,26 @@ export default function ProfilePage() {
   return (
     <div className="flex h-screen bg-[#0a0a0f] overflow-hidden">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-white mb-2 tracking-tight">Profile & Settings</h1>
+      <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+          <div className="mb-6 lg:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2 tracking-tight">Profile & Settings</h1>
             <p className="text-[#f5f5f7]/70 text-sm">Beheer je profiel en account instellingen</p>
           </div>
 
           {/* Profile Section */}
-          <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg mb-6">
-            <div className="flex items-center gap-6 mb-8">
+          <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 sm:mb-8">
               <div className="relative">
-                <div className="w-24 h-24 bg-[#14141a] rounded-full border border-white/8 flex items-center justify-center">
-                  <User className="w-12 h-12 text-[#f5f5f7]/30" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#14141a] rounded-full border border-white/8 flex items-center justify-center">
+                  <User className="w-10 h-10 sm:w-12 sm:h-12 text-[#f5f5f7]/30" />
                 </div>
                 <button className="absolute bottom-0 right-0 p-2 bg-[#3b82f6] rounded-full border-2 border-[#1a1a22] hover:bg-[#2563eb] transition-colors">
                   <Camera className="w-4 h-4 text-white" />
                 </button>
               </div>
-              <div>
-                <h2 className="text-xl font-semibold text-white mb-1">DJ Naam</h2>
+              <div className="text-center sm:text-left">
+                <h2 className="text-lg sm:text-xl font-semibold text-white mb-1">DJ Naam</h2>
                 <p className="text-[#f5f5f7]/60 text-sm">dj@example.com</p>
               </div>
             </div>
@@ -60,7 +60,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Account Info */}
-          <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg mb-6">
+          <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg mb-4 sm:mb-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
                 <Calendar className="w-5 h-5 text-[#3b82f6]" />
@@ -90,7 +90,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Preferences */}
-          <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
+          <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg">
             <h3 className="text-white font-semibold mb-6">Voorkeuren</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-[#14141a] rounded-lg border border-white/5">
@@ -117,8 +117,8 @@ export default function ProfilePage() {
           </div>
 
           {/* Save Button */}
-          <div className="mt-6 flex justify-end">
-            <button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium px-6 py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center gap-2">
+          <div className="mt-4 sm:mt-6 flex justify-end">
+            <button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm sm:text-base w-full sm:w-auto justify-center">
               <Save className="w-4 h-4" />
               Wijzigingen Opslaan
             </button>

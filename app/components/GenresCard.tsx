@@ -11,18 +11,18 @@ const genresData = [
 
 export default function GenresCard() {
   return (
-    <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-semibold">Genres Breakdown</h3>
-        <select className="bg-white/5 border border-white/10 rounded px-3 py-1 text-white text-sm">
+    <div className="bg-white/5 rounded-lg p-4 sm:p-6 border border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
+        <h3 className="text-white font-semibold text-sm sm:text-base">Genres Breakdown</h3>
+        <select className="bg-white/5 border border-white/10 rounded px-2 sm:px-3 py-1 text-white text-xs sm:text-sm w-full sm:w-auto">
           <option>Day</option>
           <option>Week</option>
           <option>Month</option>
         </select>
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="w-32 h-32">
+      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+        <div className="w-24 h-24 sm:w-32 sm:h-32">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

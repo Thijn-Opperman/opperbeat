@@ -290,21 +290,21 @@ export default function AnalyzePage() {
   return (
     <div className="flex h-screen bg-[#0a0a0f] overflow-hidden">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-8">
+      <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-white mb-2 tracking-tight">Muziek Analyse</h1>
+          <div className="mb-6 lg:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-white mb-2 tracking-tight">Muziek Analyse</h1>
             <p className="text-[#f5f5f7]/70 text-sm">Upload en analyseer je muziekstukken voor gedetailleerde inzichten</p>
           </div>
 
           {/* Upload Section */}
-          <div className="bg-[#1a1a22] rounded-xl p-8 border border-white/8 mb-6 shadow-lg">
+          <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 lg:p-8 border border-white/8 mb-4 sm:mb-6 shadow-lg">
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              className={`flex flex-col items-center justify-center py-16 border-2 border-dashed rounded-xl transition-all ${
+              className={`flex flex-col items-center justify-center py-8 sm:py-12 lg:py-16 border-2 border-dashed rounded-xl transition-all ${
                 isDragging
                   ? 'border-[#3b82f6] bg-[#3b82f6]/5'
                   : 'border-white/10 hover:border-[#3b82f6]/40'
@@ -319,9 +319,9 @@ export default function AnalyzePage() {
               />
               {isUploading ? (
                 <>
-                  <Loader2 className="w-16 h-16 text-[#3b82f6] mb-4 animate-spin" />
-                  <h3 className="text-xl font-semibold text-white mb-2">Bestand wordt geanalyseerd...</h3>
-                  <p className="text-[#f5f5f7]/70 text-sm mb-2">Dit kan even duren, vooral voor BPM en key detectie</p>
+                  <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-[#3b82f6] mb-4 animate-spin" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 text-center px-4">Bestand wordt geanalyseerd...</h3>
+                  <p className="text-[#f5f5f7]/70 text-xs sm:text-sm mb-2 text-center px-4">Dit kan even duren, vooral voor BPM en key detectie</p>
                   {elapsedTime > 25 && (
                     <div className="mt-2 px-4 py-2 bg-[#f59e0b]/10 rounded-lg border border-[#f59e0b]/20">
                       <p className="text-[#f59e0b] text-xs">
@@ -337,12 +337,12 @@ export default function AnalyzePage() {
                 </>
               ) : (
                 <>
-                  <Upload className="w-16 h-16 text-[#f5f5f7]/30 mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">Upload Muziekbestand</h3>
-                  <p className="text-[#f5f5f7]/70 text-sm mb-6">Sleep een bestand hierheen of klik om te selecteren</p>
+                  <Upload className="w-12 h-12 sm:w-16 sm:h-16 text-[#f5f5f7]/30 mb-4" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 text-center px-4">Upload Muziekbestand</h3>
+                  <p className="text-[#f5f5f7]/70 text-xs sm:text-sm mb-6 text-center px-4">Sleep een bestand hierheen of klik om te selecteren</p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium px-6 py-3 rounded-lg transition-all shadow-sm hover:shadow-md"
+                    className="bg-[#3b82f6] hover:bg-[#2563eb] text-white font-medium px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg transition-all shadow-sm hover:shadow-md text-sm sm:text-base"
                   >
                     Bestand Selecteren
                   </button>
@@ -370,9 +370,9 @@ export default function AnalyzePage() {
           </div>
 
           {/* Analysis Results Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Audio Waveform */}
-            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
+            <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
                   <Waves className="w-5 h-5 text-[#3b82f6]" />
@@ -385,7 +385,7 @@ export default function AnalyzePage() {
             </div>
 
             {/* Track Information */}
-            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
+            <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
                   <FileAudio className="w-5 h-5 text-[#3b82f6]" />
@@ -410,7 +410,7 @@ export default function AnalyzePage() {
             </div>
 
             {/* Audio Analysis */}
-            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
+            <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
                   <BarChart3 className="w-5 h-5 text-[#3b82f6]" />
@@ -442,7 +442,7 @@ export default function AnalyzePage() {
             </div>
 
             {/* Spectral Analysis */}
-            <div className="bg-[#1a1a22] rounded-xl p-6 border border-white/8 shadow-lg">
+            <div className="bg-[#1a1a22] rounded-xl p-4 sm:p-6 border border-white/8 shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[#3b82f6]/10 rounded-lg">
                   <Music className="w-5 h-5 text-[#3b82f6]" />
