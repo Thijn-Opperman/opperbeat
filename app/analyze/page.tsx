@@ -107,19 +107,25 @@ export default function AnalyzePage() {
         }
         
         // Stuur direct naar Railway
+        // Voor grote bestanden: gebruik geen waveform om sneller te zijn
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('include_waveform', 'true');
+        // Geen waveform voor grote bestanden (sneller)
+        formData.append('include_waveform', fileSizeMB > 10 ? 'false' : 'true');
         
-        const timeoutMs = 120000; // 2 minuten
+        // Verhoog timeout naar 5 minuten voor grote bestanden
+        const timeoutMs = 300000; // 5 minuten
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         
         try {
+          console.log(`Uploading to Railway (timeout: ${timeoutMs / 1000}s)...`);
           const railwayResponse = await fetch(railwayUrl, {
             method: 'POST',
             body: formData,
             signal: controller.signal,
+            // Geen timeout headers - laat de browser de timeout bepalen
+            keepalive: false, // Disable keepalive voor lange requests
           });
           
           clearTimeout(timeoutId);
@@ -157,7 +163,11 @@ export default function AnalyzePage() {
         } catch (fetchError: any) {
           clearTimeout(timeoutId);
           if (fetchError.name === 'AbortError') {
-            throw new Error('Analyse timeout: Het bestand is te groot of de analyse duurt te lang.');
+            throw new Error('Analyse timeout: De analyse duurt te lang. Probeer een kleiner bestand of korter nummer (max 2 minuten voor grote bestanden).');
+          }
+          // Check voor network errors
+          if (fetchError.message && fetchError.message.includes('Load failed')) {
+            throw new Error('Verbinding met Railway verloren. Dit kan gebeuren bij zeer grote bestanden. Probeer een kleiner bestand of wacht even en probeer opnieuw.');
           }
           throw fetchError;
         }
@@ -270,6 +280,13 @@ export default function AnalyzePage() {
                   <Loader2 className="w-16 h-16 text-[#3b82f6] mb-4 animate-spin" />
                   <h3 className="text-xl font-semibold text-white mb-2">Bestand wordt geanalyseerd...</h3>
                   <p className="text-[#f5f5f7]/70 text-sm mb-2">Dit kan even duren, vooral voor BPM en key detectie</p>
+                  {elapsedTime > 25 && (
+                    <div className="mt-2 px-4 py-2 bg-[#f59e0b]/10 rounded-lg border border-[#f59e0b]/20">
+                      <p className="text-[#f59e0b] text-xs">
+                        ⚠️ Analyse duurt langer dan verwacht. Voor grote bestanden wordt alleen het begin geanalyseerd.
+                      </p>
+                    </div>
+                  )}
                   <div className="mt-4 px-4 py-2 bg-[#3b82f6]/10 rounded-lg border border-[#3b82f6]/20">
                     <p className="text-[#3b82f6] text-sm font-medium">
                       Verstreken tijd: <span className="text-[#60a5fa]">{formatTime(elapsedTime)}</span>
