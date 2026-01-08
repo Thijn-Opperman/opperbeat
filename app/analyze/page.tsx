@@ -29,6 +29,7 @@ export default function AnalyzePage() {
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [saveToDatabase, setSaveToDatabase] = useState(true); // Standaard opslaan
   const fileInputRef = useRef<HTMLInputElement>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -160,6 +161,41 @@ export default function AnalyzePage() {
               ...(railwayResult.waveform && { waveform: railwayResult.waveform }),
             },
           };
+
+          // Als saveToDatabase = true, sla op in Supabase
+          if (saveToDatabase) {
+            try {
+              console.log('💾 Opslaan in Supabase...');
+              
+              const saveFormData = new FormData();
+              saveFormData.append('file', file);
+              saveFormData.append('analysisData', JSON.stringify(result.data));
+
+              const saveResponse = await fetch('/api/analyze/save', {
+                method: 'POST',
+                body: saveFormData,
+              });
+
+              if (saveResponse.ok) {
+                const saveResult = await saveResponse.json();
+                console.log('✅ Analyse opgeslagen met ID:', saveResult.analysisId);
+                
+                // Voeg save info toe aan result
+                result.saved = true;
+                result.analysisId = saveResult.analysisId;
+                if (result.data) {
+                  result.data.id = saveResult.analysisId;
+                }
+              } else {
+                const saveError = await saveResponse.json();
+                console.warn('⚠️ Opslaan mislukt:', saveError.error);
+                result.saveWarning = saveError.error || 'Kon niet opslaan in database';
+              }
+            } catch (saveError: any) {
+              console.warn('⚠️ Fout bij opslaan:', saveError.message);
+              result.saveWarning = 'Kon niet opslaan in database: ' + saveError.message;
+            }
+          }
         } catch (fetchError: any) {
           clearTimeout(timeoutId);
           if (fetchError.name === 'AbortError') {
@@ -177,6 +213,7 @@ export default function AnalyzePage() {
         
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('save', saveToDatabase ? 'true' : 'false'); // Voeg save parameter toe
 
         const response = await fetch('/api/analyze', {
           method: 'POST',
@@ -195,6 +232,11 @@ export default function AnalyzePage() {
       if (result.success && result.data) {
         console.log('Analysis Data:', result.data);
         setAnalysisData(result.data);
+        
+        // Toon succesmelding als opgeslagen
+        if (result.saved && result.analysisId) {
+          console.log('✅ Analyse opgeslagen met ID:', result.analysisId);
+        }
         
         // Sla analyse op in localStorage voor overview widget
         try {
@@ -304,6 +346,18 @@ export default function AnalyzePage() {
                   >
                     Bestand Selecteren
                   </button>
+                  <div className="mt-4 flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="saveToDatabase"
+                      checked={saveToDatabase}
+                      onChange={(e) => setSaveToDatabase(e.target.checked)}
+                      className="w-4 h-4 text-[#3b82f6] bg-[#1a1a22] border-white/20 rounded focus:ring-[#3b82f6] focus:ring-2"
+                    />
+                    <label htmlFor="saveToDatabase" className="text-[#f5f5f7]/70 text-sm cursor-pointer">
+                      Opslaan in database na analyse
+                    </label>
+                  </div>
                   <p className="text-[#f5f5f7]/50 text-xs mt-4">Ondersteunde formaten: MP3, WAV, FLAC, M4A</p>
                 </>
               )}

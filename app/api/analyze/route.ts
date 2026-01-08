@@ -3,17 +3,39 @@ import { parseFile } from 'music-metadata';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
+import { randomUUID } from 'crypto';
+import { extractArtwork } from '@/lib/extract-artwork';
+import { uploadAudioFile, uploadArtwork } from '@/lib/storage-helpers';
+import { supabaseAdmin } from '@/lib/supabase';
+import { getUserId } from '@/lib/auth-helpers';
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const saveToDatabase = formData.get('save') === 'true'; // Optional: save to database
 
     if (!file) {
       return NextResponse.json(
         { error: 'Geen bestand geüpload' },
         { status: 400 }
       );
+    }
+
+    // Haal user ID op (optioneel - voor development kan anon gebruikt worden)
+    let userId: string | null = null;
+    try {
+      const fetchedUserId = await getUserId(request, true); // allowAnonymous = true voor development
+      userId = fetchedUserId;
+    } catch (authError) {
+      if (saveToDatabase) {
+        return NextResponse.json(
+          { error: 'Authenticatie vereist om analyse op te slaan' },
+          { status: 401 }
+        );
+      }
+      // Voor development: gebruik null (database kolom is nullable)
+      userId = null;
     }
 
     // Maak een tijdelijk bestand aan voor metadata parsing
@@ -114,8 +136,8 @@ export async function POST(request: NextRequest) {
         console.warn('⚠️ Gebruik metadata als fallback (geen BPM/key analyse)');
       }
 
-      // Verwijder het tijdelijke bestand
-      await fs.unlink(tempFilePath).catch(() => {});
+      // VERWIJDER TEMP FILE NIET HIER - we hebben het nog nodig voor artwork extractie!
+      // Het wordt verwijderd na de opslag (of in de finally block)
 
       // Combineer metadata en analyzer resultaten
       // Railway retourneert: bpm, bpm_confidence, key (key_full), key_confidence, song_name, duration, duration_formatted, bitrate, waveform
@@ -139,34 +161,135 @@ export async function POST(request: NextRequest) {
       
       const finalBitrate = analyzerResult?.bitrate || 
                           (metadata?.format?.bitrate ? Math.round(metadata.format.bitrate / 1000) : null);
+
+      // Combineer alle data voor response
+      const analysisData = {
+        title: title,
+        duration: durationFormatted,
+        durationSeconds: duration,
+        bpm: bpm,
+        key: key,
+        confidence: {
+          bpm: analyzerResult?.bpm_confidence || null,
+          key: analyzerResult?.key_confidence || null,
+        },
+        metadata: {
+          artist: metadata?.common?.artist || null,
+          album: metadata?.common?.album || null,
+          genre: metadata?.common?.genre ? (Array.isArray(metadata.common.genre) ? metadata.common.genre[0] : metadata.common.genre) : null,
+          bitrate: finalBitrate,
+          sampleRate: metadata?.format?.sampleRate || null,
+        },
+        waveform: analyzerResult?.waveform || null,
+      };
+
+      // Als saveToDatabase = true, sla alles op in Supabase
+      let savedAnalysisId: string | null = null;
+      if (saveToDatabase) {
+        try {
+          // Genereer unieke ID voor deze analyse
+          const fileId = randomUUID();
+          
+          // 1. Extraheer artwork
+          let artworkResult = null;
+          try {
+            const artwork = await extractArtwork(tempFilePath);
+            if (artwork) {
+              artworkResult = await uploadArtwork(userId, fileId, artwork.buffer, artwork.mimeType);
+            }
+          } catch (artworkError) {
+            console.warn('⚠️ Kon artwork niet extraheren/uploaden:', artworkError);
+            // Ga door zonder artwork
+          }
+
+          // 2. Upload audio bestand naar storage
+          const audioResult = await uploadAudioFile(
+            userId,
+            fileId,
+            buffer,
+            file.name,
+            file.type || 'audio/mpeg'
+          );
+
+          // 3. Sla analyse op in database
+          const { data: dbData, error: dbError } = await supabaseAdmin
+            .from('music_analyses')
+            .insert({
+              user_id: userId,
+              title: title,
+              original_filename: file.name,
+              file_size_bytes: buffer.length,
+              mime_type: file.type || 'audio/mpeg',
+              audio_file_url: audioResult.path,
+              audio_file_public_url: audioResult.publicUrl,
+              artwork_url: artworkResult?.path || null,
+              artwork_public_url: artworkResult?.publicUrl || null,
+              duration_seconds: Math.round(duration),
+              duration_formatted: durationFormatted,
+              bpm: bpm,
+              bpm_confidence: analyzerResult?.bpm_confidence || null,
+              key: key,
+              key_confidence: analyzerResult?.key_confidence || null,
+              artist: metadata?.common?.artist || null,
+              album: metadata?.common?.album || null,
+              genre: metadata?.common?.genre ? (Array.isArray(metadata.common.genre) ? metadata.common.genre[0] : metadata.common.genre) : null,
+              bitrate: finalBitrate,
+              sample_rate: metadata?.format?.sampleRate || null,
+              waveform: analyzerResult?.waveform ? analyzerResult.waveform : null,
+            })
+            .select('id')
+            .single();
+
+          if (dbError) {
+            console.error('❌ Fout bij opslaan in database:', dbError);
+            // Als opslaan faalt, probeer uploads te verwijderen
+            try {
+              if (audioResult.path) {
+                await supabaseAdmin.storage.from('audio-files').remove([audioResult.path]);
+              }
+              if (artworkResult?.path) {
+                await supabaseAdmin.storage.from('album-artwork').remove([artworkResult.path]);
+              }
+            } catch (cleanupError) {
+              console.error('Fout bij cleanup:', cleanupError);
+            }
+            throw new Error(`Database error: ${dbError.message}`);
+          }
+
+          savedAnalysisId = dbData.id;
+          console.log('✅ Analyse opgeslagen in database met ID:', savedAnalysisId);
+
+        } catch (saveError: any) {
+          console.error('❌ Fout bij opslaan van analyse:', saveError);
+          // Return analysis data maar zonder database ID
+          return NextResponse.json({
+            success: true,
+            data: analysisData,
+            warning: 'Analyse voltooid, maar opslaan in database is mislukt',
+            error: saveError.message,
+          }, { status: 200 });
+        } finally {
+          // Verwijder temp file na opslag (ook bij errors)
+          await fs.unlink(tempFilePath).catch(() => {});
+        }
+      } else {
+        // Verwijder temp file als we niet opslaan
+        await fs.unlink(tempFilePath).catch(() => {});
+      }
       
       return NextResponse.json({
         success: true,
         data: {
-          title: title,
-          duration: durationFormatted,
-          durationSeconds: duration,
-          bpm: bpm,
-          key: key,
-          // Voeg confidence scores toe
-          confidence: {
-            bpm: analyzerResult?.bpm_confidence || null,
-            key: analyzerResult?.key_confidence || null,
-          },
-          metadata: {
-            artist: metadata?.common?.artist || null,
-            album: metadata?.common?.album || null,
-            genre: metadata?.common?.genre ? (Array.isArray(metadata.common.genre) ? metadata.common.genre[0] : metadata.common.genre) : null,
-            bitrate: finalBitrate,
-            sampleRate: metadata?.format?.sampleRate || null,
-          },
-          // Voeg waveform toe als beschikbaar
-          ...(analyzerResult?.waveform && { waveform: analyzerResult.waveform }),
+          ...analysisData,
+          ...(savedAnalysisId && { id: savedAnalysisId }), // Voeg ID toe als opgeslagen
         },
+        ...(saveToDatabase && savedAnalysisId && { saved: true, analysisId: savedAnalysisId }),
       });
     } catch (error) {
       // Verwijder het tijdelijke bestand bij fout
-      await fs.unlink(tempFilePath).catch(() => {});
+      if (tempFilePath) {
+        await fs.unlink(tempFilePath).catch(() => {});
+      }
       
       console.error('Fout bij het analyseren van audio:', error);
       return NextResponse.json(
