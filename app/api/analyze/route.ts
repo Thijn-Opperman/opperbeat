@@ -49,6 +49,14 @@ export async function POST(request: NextRequest) {
           // Ga door zonder analyzer, gebruik alleen metadata
           analyzerResult = null;
         } else {
+          // Valideer URL format
+          try {
+            new URL(apiUrl); // Valideer URL format
+          } catch (urlError) {
+            console.error('❌ Ongeldige PYTHON_API_URL format:', apiUrl);
+            throw new Error(`Ongeldige API URL format: ${apiUrl}`);
+          }
+          
           console.log('API URL:', apiUrl);
           console.log('File size:', buffer.length, 'bytes');
           

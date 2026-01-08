@@ -71,7 +71,7 @@ async def health():
 async def analyze(
     file: Optional[UploadFile] = File(None),
     file_path: Optional[str] = Form(None),
-    include_waveform: str = Form("true")
+    include_waveform: Optional[str] = Form(None)
 ):
     """
     Analyseer audio bestand
@@ -79,7 +79,7 @@ async def analyze(
     Accepteert:
     - file: UploadFile (multipart/form-data)
     - file_path: pad naar audio bestand (als al op server) - via form field
-    - include_waveform: boolean via form field
+    - include_waveform: boolean via form field (string: "true" of "false", optioneel)
     """
     should_cleanup = False
     temp_file_path = None
@@ -87,7 +87,10 @@ async def analyze(
     try:
         logger.info("Received analyze request")
         logger.info(f"File provided: {file is not None}")
+        if file:
+            logger.info(f"File name: {file.filename}, content_type: {file.content_type}")
         logger.info(f"File path provided: {file_path is not None}")
+        logger.info(f"Include waveform: {include_waveform} (type: {type(include_waveform)})")
         
         # Check of file of file_path is gegeven
         if not file and not file_path:
@@ -99,11 +102,16 @@ async def analyze(
         
         # Als we een uploaded file hebben
         if file:
-            logger.info(f"Processing uploaded file: {file.filename}, content_type: {file.content_type}")
+            # Sanitize filename voor veiligheid
+            safe_filename = file.filename or "audio_file"
+            # Verwijder speciale karakters die problemen kunnen veroorzaken
+            safe_filename = "".join(c for c in safe_filename if c.isalnum() or c in "._- ")
+            logger.info(f"Processing uploaded file: {safe_filename}, content_type: {file.content_type}")
             
-            # Maak temp file
+            # Maak temp file met veilige naam
             temp_dir = tempfile.gettempdir()
-            temp_file_path = os.path.join(temp_dir, f"audio_{os.urandom(8).hex()}.tmp")
+            file_ext = os.path.splitext(safe_filename)[1] or ".tmp"
+            temp_file_path = os.path.join(temp_dir, f"audio_{os.urandom(8).hex()}{file_ext}")
             logger.info(f"Writing temp file: {temp_file_path}")
             
             # Schrijf uploaded file naar temp file
@@ -134,8 +142,13 @@ async def analyze(
         
         # Analyseer audio
         try:
-            # Converteer include_waveform string naar boolean
-            include_waveform_bool = include_waveform.lower() in ('true', '1', 'yes', 'on')
+            # Converteer include_waveform string naar boolean (veilige conversie)
+            # Default naar False voor grote bestanden (wordt later overschreven)
+            if include_waveform is None or include_waveform == "":
+                include_waveform_bool = False  # Default False voor performance
+            else:
+                include_waveform_str = str(include_waveform).lower().strip()
+                include_waveform_bool = include_waveform_str in ('true', '1', 'yes', 'on')
             
             # Check bestandsgrootte voor optimalisatie
             file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
@@ -170,6 +183,14 @@ async def analyze(
                 detail=f"Fout bij audio analyse: {str(e)}"
             )
             
+    except ValidationError as ve:
+        # Pydantic validation errors
+        logger.error(f"Validation error: {str(ve)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=422,
+            detail=f"Validatiefout: {str(ve)}"
+        )
     except HTTPException:
         # Re-raise HTTP exceptions
         raise
