@@ -225,7 +225,7 @@ def extract_waveform(y, sr, max_samples=5000):
     }
 
 
-def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_samples=5000):
+def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_samples=5000, max_duration=None):
     """
     Analyseer audio bestand en extraheer alle gewenste informatie
     
@@ -234,6 +234,7 @@ def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_s
         sample_rate: Sample rate voor analyse (default: 44100)
         include_waveform: Of waveform data moet worden opgenomen (default: True)
         waveform_samples: Maximum aantal samples voor waveform (default: 5000)
+        max_duration: Maximum duur in seconden om te analyseren (None = volledig bestand)
     
     Returns:
         Dictionary met:
@@ -249,8 +250,11 @@ def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_s
             - waveform: Waveform data (downsampled, alleen als include_waveform=True)
             - filename: Originele bestandsnaam
     """
-    # Laad audio
-    y, sr = librosa.load(filename, sr=sample_rate)
+    # Laad audio (met optionele duration limit voor grote bestanden)
+    if max_duration:
+        y, sr = librosa.load(filename, sr=sample_rate, duration=max_duration)
+    else:
+        y, sr = librosa.load(filename, sr=sample_rate)
     
     # BPM detectie
     bpm, bpm_confidence = detect_bpm_accurate(y, sr)
@@ -299,7 +303,7 @@ def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_s
     return result
 
 
-def analyze_audio_simple(filename, sample_rate=44100, include_waveform=False):
+def analyze_audio_simple(filename, sample_rate=44100, include_waveform=False, max_duration=None):
     """
     Vereenvoudigde versie - retourneert alleen de essentiële velden
     
@@ -307,11 +311,12 @@ def analyze_audio_simple(filename, sample_rate=44100, include_waveform=False):
         filename: Pad naar audio bestand
         sample_rate: Sample rate voor analyse (default: 44100)
         include_waveform: Of waveform data moet worden opgenomen (default: False)
+        max_duration: Maximum duur in seconden om te analyseren (None = volledig bestand)
     
     Returns:
         Dictionary met: bpm, key, song_name, duration, bitrate, (optioneel: waveform)
     """
-    result = analyze_audio(filename, sample_rate, include_waveform=include_waveform)
+    result = analyze_audio(filename, sample_rate, include_waveform=include_waveform, max_duration=max_duration)
     
     simple_result = {
         "bpm": result["bpm"],

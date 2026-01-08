@@ -136,10 +136,28 @@ async def analyze(
         try:
             # Converteer include_waveform string naar boolean
             include_waveform_bool = include_waveform.lower() in ('true', '1', 'yes', 'on')
-            logger.info(f"Starting audio analysis for: {file_path}, include_waveform: {include_waveform_bool}")
+            
+            # Check bestandsgrootte voor optimalisatie
+            file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+            logger.info(f"File size: {file_size_mb:.2f} MB")
+            
+            # Voor grote bestanden (>10MB): gebruik lagere sample rate, geen waveform, en beperk duur
+            if file_size_mb > 10:
+                logger.info("Large file detected, optimizing analysis...")
+                sample_rate = 22050  # Lagere sample rate voor snellere analyse
+                include_waveform_bool = False  # Geen waveform voor grote bestanden
+                max_duration = 120  # Analyseer alleen eerste 2 minuten voor grote bestanden
+                logger.info(f"Using optimized settings: sample_rate={sample_rate}, waveform={include_waveform_bool}, max_duration={max_duration}s")
+            else:
+                sample_rate = 44100  # Standaard sample rate
+                max_duration = None  # Analyseer volledig bestand
+            
+            logger.info(f"Starting audio analysis for: {file_path}, sample_rate: {sample_rate}, include_waveform: {include_waveform_bool}, max_duration: {max_duration}")
             result = analyze_audio_simple(
                 file_path,
-                include_waveform=include_waveform_bool
+                sample_rate=sample_rate,
+                include_waveform=include_waveform_bool,
+                max_duration=max_duration
             )
             logger.info(f"Audio analysis complete, BPM: {result.get('bpm')}, Key: {result.get('key')}")
             return result

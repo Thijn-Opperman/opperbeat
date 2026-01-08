@@ -61,22 +61,38 @@ export async function POST(request: NextRequest) {
           
           console.log('Sending request to Railway...');
           
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            body: uploadFormData,
-          });
+          // Timeout voor grote bestanden (120 seconden)
+          const timeoutMs = 120000; // 2 minuten
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+          
+          try {
+            const response = await fetch(apiUrl, {
+              method: 'POST',
+              body: uploadFormData,
+              signal: controller.signal,
+            });
+            
+            clearTimeout(timeoutId);
 
-          console.log('Response status:', response.status);
-          console.log('Response ok:', response.ok);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
 
-          if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Railway API error response:', errorText);
-            throw new Error(`Python API error: ${response.status} - ${errorText}`);
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.error('Railway API error response:', errorText);
+              throw new Error(`Python API error: ${response.status} - ${errorText}`);
+            }
+
+            analyzerResult = await response.json();
+            console.log('✅ Analyzer resultaat ontvangen:', analyzerResult);
+          } catch (fetchError: any) {
+            clearTimeout(timeoutId);
+            if (fetchError.name === 'AbortError') {
+              throw new Error('Analyse timeout: Het bestand is te groot of de analyse duurt te lang. Probeer een kleiner bestand of korter nummer.');
+            }
+            throw fetchError;
           }
-
-          analyzerResult = await response.json();
-          console.log('✅ Analyzer resultaat ontvangen:', analyzerResult);
         }
         
       } catch (analyzerError: any) {
