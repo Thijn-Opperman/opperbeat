@@ -85,20 +85,102 @@ export default function AnalyzePage() {
     setElapsedTime(0);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const fileSizeMB = file.size / (1024 * 1024);
+      const isLargeFile = fileSizeMB > 4; // Vercel limit is ~4.5MB
+      
+      let result;
+      
+      if (isLargeFile) {
+        // Voor grote bestanden: stuur direct naar Railway om Vercel's body size limit te omzeilen
+        console.log(`Large file detected (${fileSizeMB.toFixed(2)}MB), sending directly to Railway...`);
+        
+        // Haal Railway URL op
+        const configResponse = await fetch('/api/analyze/config');
+        if (!configResponse.ok) {
+          throw new Error('Kon Railway API URL niet ophalen');
+        }
+        const config = await configResponse.json();
+        const railwayUrl = config.apiUrl;
+        
+        if (!railwayUrl) {
+          throw new Error('Railway API URL niet geconfigureerd');
+        }
+        
+        // Stuur direct naar Railway
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('include_waveform', 'true');
+        
+        const timeoutMs = 120000; // 2 minuten
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        
+        try {
+          const railwayResponse = await fetch(railwayUrl, {
+            method: 'POST',
+            body: formData,
+            signal: controller.signal,
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!railwayResponse.ok) {
+            const errorText = await railwayResponse.text();
+            throw new Error(`Railway API error: ${railwayResponse.status} - ${errorText}`);
+          }
+          
+          const railwayResult = await railwayResponse.json();
+          
+          // Format resultaat zoals Vercel API route dat doet
+          result = {
+            success: true,
+            data: {
+              title: railwayResult.song_name || file.name.replace(/\.[^/.]+$/, '') || 'Onbekend',
+              duration: railwayResult.duration_formatted || '0:00',
+              durationSeconds: railwayResult.duration || 0,
+              bpm: railwayResult.bpm || null,
+              key: railwayResult.key || null,
+              confidence: {
+                bpm: railwayResult.bpm_confidence || null,
+                key: railwayResult.key_confidence || null,
+              },
+              metadata: {
+                artist: null,
+                album: null,
+                genre: null,
+                bitrate: railwayResult.bitrate || null,
+                sampleRate: null,
+              },
+              ...(railwayResult.waveform && { waveform: railwayResult.waveform }),
+            },
+          };
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId);
+          if (fetchError.name === 'AbortError') {
+            throw new Error('Analyse timeout: Het bestand is te groot of de analyse duurt te lang.');
+          }
+          throw fetchError;
+        }
+      } else {
+        // Voor kleine bestanden: gebruik Vercel API route (met metadata parsing)
+        console.log(`Small file (${fileSizeMB.toFixed(2)}MB), using Vercel API route...`);
+        
+        const formData = new FormData();
+        formData.append('file', file);
 
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        body: formData,
-      });
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData,
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Fout bij het analyseren van het bestand');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Fout bij het analyseren van het bestand');
+        }
+
+        result = await response.json();
       }
-
-      const result = await response.json();
+      
       console.log('API Response:', result);
       if (result.success && result.data) {
         console.log('Analysis Data:', result.data);
