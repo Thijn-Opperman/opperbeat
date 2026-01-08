@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { I18nProvider } from "@/lib/i18n-context";
-import { ThemeProvider } from "@/lib/theme-context";
+import { Providers } from "./providers";
 import DynamicTitle from "./components/DynamicTitle";
 
 const geistSans = Geist({
@@ -31,12 +30,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          <I18nProvider>
-            <DynamicTitle />
-            {children}
-          </I18nProvider>
-        </ThemeProvider>
+        <Providers>
+          <DynamicTitle />
+          {children}
+        </Providers>
       </body>
     </html>
   );

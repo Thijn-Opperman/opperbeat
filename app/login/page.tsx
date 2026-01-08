@@ -4,11 +4,13 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Headphones, Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
+import { useAuth } from '@/lib/auth-context';
 
 function LoginForm() {
   const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -47,9 +49,9 @@ function LoginForm() {
         throw new Error(data.error || t.errors.loginFailed);
       }
 
-      // Sla gebruikersinformatie op in localStorage
+      // Update auth context met gebruikersinformatie
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        login(data.user);
       }
 
       // Redirect naar dashboard na succesvolle login

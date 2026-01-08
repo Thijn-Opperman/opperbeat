@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, BarChart3, Music, Settings, LogOut, Headphones, TrendingUp, ListMusic, Volume2, FileSearch, Menu, X, Library } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
+import { useAuth } from '@/lib/auth-context';
 import LanguageSwitch from './LanguageSwitch';
 import ThemeToggle from './ThemeToggle';
 
@@ -12,6 +13,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { t } = useI18n();
+  const { logout } = useAuth();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -72,7 +74,15 @@ export default function Sidebar() {
 
       {/* Logout */}
       <div className="p-3 md:p-4 border-t border-[var(--border)]">
-        <NavItem href="#" icon={<LogOut className="w-4 h-4" />} label={t.nav.logout} />
+        <button
+          onClick={logout}
+          className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200 text-[var(--text-secondary)] hover:bg-red-500/10 hover:text-red-500 hover:shadow-md"
+        >
+          <div className="flex items-center gap-3">
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-medium">{t.nav.logout}</span>
+          </div>
+        </button>
       </div>
     </>
   );
