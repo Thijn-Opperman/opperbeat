@@ -43,46 +43,51 @@ export async function POST(request: NextRequest) {
         const apiUrl = process.env.PYTHON_API_URL || process.env.NEXT_PUBLIC_PYTHON_API_URL;
         
         if (!apiUrl) {
-          console.warn('PYTHON_API_URL niet ingesteld, skip analyzer (gebruik alleen metadata)');
-          throw new Error('Python analyzer API URL niet geconfigureerd');
+          console.warn('⚠️ PYTHON_API_URL niet ingesteld in Vercel environment variables');
+          console.warn('⚠️ Gebruik alleen metadata (BPM/key analyse niet beschikbaar)');
+          console.warn('⚠️ Om analyzer te activeren: voeg PYTHON_API_URL toe in Vercel Settings → Environment Variables');
+          // Ga door zonder analyzer, gebruik alleen metadata
+          analyzerResult = null;
+        } else {
+          console.log('API URL:', apiUrl);
+          console.log('File size:', buffer.length, 'bytes');
+          
+          // Gebruik FormData voor efficiënte file upload
+          const uploadFormData = new FormData();
+          const blob = new Blob([buffer], { type: file.type || 'audio/mpeg' });
+          uploadFormData.append('file', blob, file.name);
+          // include_waveform moet als string "true" of "false" worden verzonden
+          uploadFormData.append('include_waveform', String(true));
+          
+          console.log('Sending request to Railway...');
+          
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: uploadFormData,
+          });
+
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Railway API error response:', errorText);
+            throw new Error(`Python API error: ${response.status} - ${errorText}`);
+          }
+
+          analyzerResult = await response.json();
+          console.log('✅ Analyzer resultaat ontvangen:', analyzerResult);
         }
-        
-        console.log('API URL:', apiUrl);
-        console.log('File size:', buffer.length, 'bytes');
-        
-        // Gebruik FormData voor efficiënte file upload
-        const uploadFormData = new FormData();
-        const blob = new Blob([buffer], { type: file.type || 'audio/mpeg' });
-        uploadFormData.append('file', blob, file.name);
-        // include_waveform moet als string "true" of "false" worden verzonden
-        uploadFormData.append('include_waveform', String(true));
-        
-        console.log('Sending request to Railway...');
-        
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          body: uploadFormData,
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Railway API error response:', errorText);
-          throw new Error(`Python API error: ${response.status} - ${errorText}`);
-        }
-
-        analyzerResult = await response.json();
-        console.log('Analyzer resultaat ontvangen:', analyzerResult);
         
       } catch (analyzerError: any) {
-        console.error('Fout bij Python analyzer API:', analyzerError);
+        console.error('❌ Fout bij Python analyzer API:', analyzerError);
         console.error('Error message:', analyzerError.message);
         // Als analyzer faalt, gebruik metadata waarden als fallback
+        // Gooi alleen error als we ook geen metadata hebben
         if (!metadata) {
           throw analyzerError;
         }
+        console.warn('⚠️ Gebruik metadata als fallback (geen BPM/key analyse)');
       }
 
       // Verwijder het tijdelijke bestand
