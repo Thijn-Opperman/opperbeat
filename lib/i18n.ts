@@ -12,6 +12,7 @@ export interface Translations {
     playlistBuilder: string;
     soundSettings: string;
     profileSettings: string;
+    help: string;
     logout: string;
   };
   
@@ -196,6 +197,8 @@ export interface Translations {
     welcomeBack: string;
     login: string;
     loggingIn: string;
+    demoLogin: string;
+    demoLoginDescription: string;
     register: string;
     registering: string;
     email: string;
@@ -221,6 +224,73 @@ export interface Translations {
     description: string;
     unknown: string;
   };
+
+  // Help Page
+  help: {
+    title: string;
+    subtitle: string;
+    aboutTitle: string;
+    aboutDescription: string;
+    feature1Title: string;
+    feature1Description: string;
+    feature2Title: string;
+    feature2Description: string;
+    feature3Title: string;
+    feature3Description: string;
+    feature4Title: string;
+    feature4Description: string;
+    featuresTitle: string;
+    featuresDescription: string;
+    overviewDescription: string;
+    overviewFeature1: string;
+    overviewFeature2: string;
+    overviewFeature3: string;
+    analyzeDescription: string;
+    analyzeFeature1: string;
+    analyzeFeature2: string;
+    analyzeFeature3: string;
+    analyzeFeature4: string;
+    analyzeFeature5: string;
+    libraryDescription: string;
+    libraryFeature1: string;
+    libraryFeature2: string;
+    libraryFeature3: string;
+    mixesDescription: string;
+    mixesFeature1: string;
+    mixesFeature2: string;
+    mixesFeature3: string;
+    analyticsDescription: string;
+    analyticsFeature1: string;
+    analyticsFeature2: string;
+    analyticsFeature3: string;
+    playlistsDescription: string;
+    playlistsFeature1: string;
+    playlistsFeature2: string;
+    playlistsFeature3: string;
+    soundDescription: string;
+    soundFeature1: string;
+    soundFeature2: string;
+    soundFeature3: string;
+    profileDescription: string;
+    profileFeature1: string;
+    profileFeature2: string;
+    profileFeature3: string;
+    technicalTitle: string;
+    technicalDescription: string;
+    tech1Title: string;
+    tech1Item1: string;
+    tech1Item2: string;
+    tech1Item3: string;
+    tech1Item4: string;
+    tech2Title: string;
+    tech2Item1: string;
+    tech2Item2: string;
+    tech2Item3: string;
+    tech3Title: string;
+    tech3Item1: string;
+    tech3Item2: string;
+    tech3Item3: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -235,6 +305,7 @@ export const translations: Record<Language, Translations> = {
       playlistBuilder: 'Playlist Bouwer',
       soundSettings: 'Geluidsinstellingen',
       profileSettings: 'Profiel & Instellingen',
+      help: 'Help & Info',
       logout: 'Uitloggen',
     },
     common: {
@@ -397,6 +468,8 @@ export const translations: Record<Language, Translations> = {
       welcomeBack: 'Welkom terug! Log in om door te gaan',
       login: 'Inloggen',
       loggingIn: 'Inloggen...',
+      demoLogin: 'Demo Login',
+      demoLoginDescription: 'Log direct in met een demo account (voor testen/docenten)',
       register: 'Account Aanmaken',
       registering: 'Account aanmaken...',
       email: 'E-mailadres',
@@ -420,6 +493,71 @@ export const translations: Record<Language, Translations> = {
       description: 'DJ analyses en performance dashboard',
       unknown: 'Onbekend',
     },
+    help: {
+      title: 'Help & Documentatie',
+      subtitle: 'Informatie over alle functionaliteit van Opperbeat voor gebruikers en docenten',
+      aboutTitle: 'Over Opperbeat',
+      aboutDescription: 'Opperbeat is een professioneel DJ-hulpprogramma voor het analyseren, organiseren en beheren van muziekcollecties.',
+      feature1Title: 'Snelle Muziekanalyse',
+      feature1Description: 'Automatische BPM- en key-detectie met hoge nauwkeurigheid voor snelle trackvoorbereiding.',
+      feature2Title: 'DJ Workflow',
+      feature2Description: 'Organiseer je tracks, maak sets en playlists, en houd overzicht tijdens live gebruik.',
+      feature3Title: 'Database Integratie',
+      feature3Description: 'Alle analyses worden opgeslagen in Supabase voor snelle toegang en synchronisatie.',
+      feature4Title: 'Modern Tech Stack',
+      feature4Description: 'Gebouwd met Next.js, TypeScript, Supabase en Python voor betrouwbare performance.',
+      featuresTitle: 'Functionaliteiten per Pagina',
+      featuresDescription: 'Overzicht van alle beschikbare functies en hoe ze werken',
+      overviewDescription: 'Het dashboard geeft een overzicht van je laatste analyses en statistieken.',
+      overviewFeature1: 'Laatste muziekanalyse resultaten',
+      overviewFeature2: 'Totaal aantal analyses',
+      overviewFeature3: 'Snelle toegang tot analyse functionaliteit',
+      analyzeDescription: 'Upload en analyseer muziekbestanden voor gedetailleerde audio-informatie.',
+      analyzeFeature1: 'Drag & drop of klik om bestanden te uploaden (MP3, WAV, FLAC, M4A)',
+      analyzeFeature2: 'Automatische BPM-detectie met confidence score',
+      analyzeFeature3: 'Key-detectie (toonsoort) met Krumhansl-Schmuckler algoritme',
+      analyzeFeature4: 'Metadata extractie (titel, artiest, album, genre)',
+      analyzeFeature5: 'Opslaan van analyses in database voor later gebruik',
+      libraryDescription: 'Bekijk en doorzoek al je geanalyseerde muziek in één centrale bibliotheek.',
+      libraryFeature1: 'Zoeken op titel, artiest of album',
+      libraryFeature2: 'Filteren op BPM, key of genre',
+      libraryFeature3: 'Bekijk gedetailleerde analyse-informatie per track',
+      mixesDescription: 'Maak en beheer DJ-mixes en sets voor live gebruik.',
+      mixesFeature1: 'Creëer nieuwe mixes met meerdere tracks',
+      mixesFeature2: 'Bekijk duur en aantal tracks per mix',
+      mixesFeature3: 'Organiseer sets voor verschillende gelegenheden',
+      analyticsDescription: 'Statistieken en inzichten over je muziekcollectie.',
+      analyticsFeature1: 'Totaal aantal tracks en mixes',
+      analyticsFeature2: 'Gemiddelde trackduur',
+      analyticsFeature3: 'Genreverdeling en activiteitsoverzichten',
+      playlistsDescription: 'Bouw en beheer playlists voor verschillende doeleinden.',
+      playlistsFeature1: 'Creëer aangepaste playlists',
+      playlistsFeature2: 'Voeg tracks toe en verwijder ze',
+      playlistsFeature3: 'Organiseer muziek op basis van stemming of gelegenheid',
+      soundDescription: 'Configureer audio-instellingen voor optimale playback.',
+      soundFeature1: 'Hoofdvolume regeling',
+      soundFeature2: 'Koptelefoon cue-instellingen',
+      soundFeature3: 'Geavanceerde audio-opties (gain control, latency)',
+      profileDescription: 'Beheer je account en persoonlijke instellingen.',
+      profileFeature1: 'Persoonlijke profielinformatie',
+      profileFeature2: 'E-mail notificatie-instellingen',
+      profileFeature3: 'Accountvoorkeuren en privacy-instellingen',
+      technicalTitle: 'Technische Details (voor Docenten)',
+      technicalDescription: 'Technische informatie over de architectuur en implementatie',
+      tech1Title: 'Frontend Technologie',
+      tech1Item1: 'Next.js 16 met App Router voor server-side rendering',
+      tech1Item2: 'TypeScript voor type safety',
+      tech1Item3: 'Tailwind CSS voor styling met custom design system',
+      tech1Item4: 'React 19 met client-side state management',
+      tech2Title: 'Backend & API',
+      tech2Item1: 'Python API op Railway voor audio-analyse (BPM/key detectie)',
+      tech2Item2: 'Next.js API routes voor serverless functies',
+      tech2Item3: 'Supabase voor database, authenticatie en storage',
+      tech3Title: 'Audio Analyse',
+      tech3Item1: 'realtime-bpm-analyzer voor BPM-detectie',
+      tech3Item2: 'Krumhansl-Schmuckler algoritme voor key-detectie',
+      tech3Item3: 'music-metadata voor metadata-extractie uit audiofiles',
+    },
   },
   en: {
     nav: {
@@ -432,6 +570,7 @@ export const translations: Record<Language, Translations> = {
       playlistBuilder: 'Playlist Builder',
       soundSettings: 'Sound Settings',
       profileSettings: 'Profile & Settings',
+      help: 'Help & Info',
       logout: 'Log out',
     },
     common: {
@@ -594,6 +733,8 @@ export const translations: Record<Language, Translations> = {
       welcomeBack: 'Welcome back! Log in to continue',
       login: 'Log In',
       loggingIn: 'Logging in...',
+      demoLogin: 'Demo Login',
+      demoLoginDescription: 'Log in instantly with a demo account (for testing/teachers)',
       register: 'Create Account',
       registering: 'Creating account...',
       email: 'Email Address',
@@ -616,6 +757,71 @@ export const translations: Record<Language, Translations> = {
       dashboard: 'Dashboard',
       description: 'DJ analytics and performance dashboard',
       unknown: 'Unknown',
+    },
+    help: {
+      title: 'Help & Documentation',
+      subtitle: 'Information about all Opperbeat functionality for users and teachers',
+      aboutTitle: 'About Opperbeat',
+      aboutDescription: 'Opperbeat is a professional DJ tool for analyzing, organizing and managing music collections.',
+      feature1Title: 'Fast Music Analysis',
+      feature1Description: 'Automatic BPM and key detection with high accuracy for quick track preparation.',
+      feature2Title: 'DJ Workflow',
+      feature2Description: 'Organize your tracks, create sets and playlists, and maintain overview during live use.',
+      feature3Title: 'Database Integration',
+      feature3Description: 'All analyses are stored in Supabase for quick access and synchronization.',
+      feature4Title: 'Modern Tech Stack',
+      feature4Description: 'Built with Next.js, TypeScript, Supabase and Python for reliable performance.',
+      featuresTitle: 'Features per Page',
+      featuresDescription: 'Overview of all available functions and how they work',
+      overviewDescription: 'The dashboard provides an overview of your latest analyses and statistics.',
+      overviewFeature1: 'Latest music analysis results',
+      overviewFeature2: 'Total number of analyses',
+      overviewFeature3: 'Quick access to analysis functionality',
+      analyzeDescription: 'Upload and analyze music files for detailed audio information.',
+      analyzeFeature1: 'Drag & drop or click to upload files (MP3, WAV, FLAC, M4A)',
+      analyzeFeature2: 'Automatic BPM detection with confidence score',
+      analyzeFeature3: 'Key detection (musical key) using Krumhansl-Schmuckler algorithm',
+      analyzeFeature4: 'Metadata extraction (title, artist, album, genre)',
+      analyzeFeature5: 'Save analyses to database for later use',
+      libraryDescription: 'View and search all your analyzed music in one central library.',
+      libraryFeature1: 'Search by title, artist or album',
+      libraryFeature2: 'Filter by BPM, key or genre',
+      libraryFeature3: 'View detailed analysis information per track',
+      mixesDescription: 'Create and manage DJ mixes and sets for live use.',
+      mixesFeature1: 'Create new mixes with multiple tracks',
+      mixesFeature2: 'View duration and number of tracks per mix',
+      mixesFeature3: 'Organize sets for different occasions',
+      analyticsDescription: 'Statistics and insights about your music collection.',
+      analyticsFeature1: 'Total number of tracks and mixes',
+      analyticsFeature2: 'Average track duration',
+      analyticsFeature3: 'Genre distribution and activity overviews',
+      playlistsDescription: 'Build and manage playlists for different purposes.',
+      playlistsFeature1: 'Create custom playlists',
+      playlistsFeature2: 'Add and remove tracks',
+      playlistsFeature3: 'Organize music based on mood or occasion',
+      soundDescription: 'Configure audio settings for optimal playback.',
+      soundFeature1: 'Master volume control',
+      soundFeature2: 'Headphone cue settings',
+      soundFeature3: 'Advanced audio options (gain control, latency)',
+      profileDescription: 'Manage your account and personal settings.',
+      profileFeature1: 'Personal profile information',
+      profileFeature2: 'Email notification settings',
+      profileFeature3: 'Account preferences and privacy settings',
+      technicalTitle: 'Technical Details (for Teachers)',
+      technicalDescription: 'Technical information about the architecture and implementation',
+      tech1Title: 'Frontend Technology',
+      tech1Item1: 'Next.js 16 with App Router for server-side rendering',
+      tech1Item2: 'TypeScript for type safety',
+      tech1Item3: 'Tailwind CSS for styling with custom design system',
+      tech1Item4: 'React 19 with client-side state management',
+      tech2Title: 'Backend & API',
+      tech2Item1: 'Python API on Railway for audio analysis (BPM/key detection)',
+      tech2Item2: 'Next.js API routes for serverless functions',
+      tech2Item3: 'Supabase for database, authentication and storage',
+      tech3Title: 'Audio Analysis',
+      tech3Item1: 'realtime-bpm-analyzer for BPM detection',
+      tech3Item2: 'Krumhansl-Schmuckler algorithm for key detection',
+      tech3Item3: 'music-metadata for metadata extraction from audio files',
     },
   },
 };

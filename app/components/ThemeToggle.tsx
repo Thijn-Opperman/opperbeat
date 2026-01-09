@@ -13,16 +13,16 @@ export default function ThemeToggle() {
   ];
 
   return (
-    <div className="flex items-center gap-1 bg-surface border border-theme rounded-lg p-1">
+    <div className="flex items-center gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] p-1">
       {themes.map((t) => (
         <button
           key={t.value}
           onClick={() => setTheme(t.value)}
           className={`
-            flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all
+            flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] text-xs font-medium transition-colors
             ${theme === t.value
-              ? 'bg-[var(--primary)] text-white shadow-sm'
-              : 'text-secondary hover:text-primary hover:bg-surface-hover'
+              ? 'bg-[var(--primary)] text-white'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
             }
           `}
           aria-label={`Switch to ${t.label} theme`}

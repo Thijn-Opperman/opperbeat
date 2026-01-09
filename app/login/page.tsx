@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Headphones, Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import { Headphones, Mail, Lock, Eye, EyeOff, LogIn, Zap } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 import { useAuth } from '@/lib/auth-context';
 
@@ -62,29 +62,61 @@ function LoginForm() {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setError('');
+    setIsLoading(true);
+
+    try {
+      // Gebruik demo login endpoint die altijd werkt
+      const response = await fetch('/api/auth/demo-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t.errors.loginFailed);
+      }
+
+      // Update auth context met gebruikersinformatie
+      if (data.user) {
+        login(data.user);
+      }
+
+      // Redirect naar dashboard na succesvolle login
+      router.push('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.errors.somethingWentWrong);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--primary)]/10 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] mb-4">
             <Headphones className="w-8 h-8 text-[var(--primary)]" />
           </div>
-          <h1 className="text-3xl font-semibold text-primary mb-2 tracking-tight">Opperbeat</h1>
-          <p className="text-secondary text-sm">{t.auth.welcomeBack}</p>
+          <h1 className="text-lg font-semibold text-[var(--text-primary)] mb-2 tracking-tight">Opperbeat</h1>
+          <p className="text-[var(--text-secondary)] text-sm">{t.auth.welcomeBack}</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-surface-elevated rounded-2xl p-8 border border-theme shadow-2xl">
+        <div className="bg-[var(--surface)] rounded-[4px] p-8 border border-[var(--border)]">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-primary text-sm font-medium mb-2">
+              <label htmlFor="email" className="block text-[var(--text-primary)] text-sm font-medium mb-2">
                 {t.auth.email}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="w-5 h-5 text-muted" />
+                  <Mail className="w-5 h-5 text-[var(--text-muted)]" />
                 </div>
                 <input
                   id="email"
@@ -93,19 +125,19 @@ function LoginForm() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="naam@voorbeeld.nl"
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-surface border border-theme rounded-lg text-primary placeholder-muted focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-[var(--background)] border border-[var(--border)] rounded-[4px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary)] transition-colors"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-primary text-sm font-medium mb-2">
+              <label htmlFor="password" className="block text-[var(--text-primary)] text-sm font-medium mb-2">
                 {t.auth.password}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="w-5 h-5 text-muted" />
+                  <Lock className="w-5 h-5 text-[var(--text-muted)]" />
                 </div>
                 <input
                   id="password"
@@ -114,12 +146,12 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full pl-12 pr-12 py-3 bg-surface border border-theme rounded-lg text-primary placeholder-muted focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-[var(--background)] border border-[var(--border)] rounded-[4px] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary)] transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-muted hover:text-tertiary transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -142,13 +174,13 @@ function LoginForm() {
                 <div className="relative w-11 h-6 bg-surface rounded-full peer-focus:outline-none peer peer-checked:bg-[var(--primary)] transition-colors">
                   <div className={`absolute top-[2px] left-[2px] w-5 h-5 bg-white rounded-full transition-transform ${rememberMe ? 'translate-x-5' : 'translate-x-0'}`}></div>
                 </div>
-                <span className="ml-3 text-sm text-secondary group-hover:text-primary transition-colors">
+                <span className="ml-3 text-sm text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
                   {t.auth.rememberMe}
                 </span>
               </label>
               <a
                 href="#"
-                className="text-sm text-[var(--primary)] hover:opacity-80 transition-colors font-medium"
+                className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors font-medium"
               >
                 {t.auth.forgotPassword}
               </a>
@@ -156,14 +188,14 @@ function LoginForm() {
 
             {/* Success Message */}
             {success && (
-              <div className="p-4 bg-[var(--success)]/10 border border-[var(--success)]/20 rounded-lg">
+              <div className="p-4 bg-[var(--surface)] border border-[var(--success)] rounded-[4px]">
                 <p className="text-[var(--success)] text-sm text-center">{success}</p>
               </div>
             )}
 
             {/* Error Message */}
             {error && (
-              <div className="p-4 bg-[var(--error)]/10 border border-[var(--error)]/20 rounded-lg">
+              <div className="p-4 bg-[var(--surface)] border border-[var(--error)] rounded-[4px]">
                 <p className="text-[var(--error)] text-sm text-center">{error}</p>
               </div>
             )}
@@ -172,7 +204,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[var(--primary)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium px-6 py-3.5 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium px-6 py-3.5 rounded-[4px] transition-colors flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -188,13 +220,36 @@ function LoginForm() {
             </button>
           </form>
 
+          {/* Demo Login Button */}
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+              className="w-full bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] hover:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--text-primary)] font-medium px-6 py-3.5 rounded-[4px] transition-colors flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-[var(--primary)]/30 border-t-[var(--primary)] rounded-full animate-spin"></div>
+                  <span>{t.auth.loggingIn}</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-5 h-5 text-[var(--accent)]" />
+                  <span>{t.auth.demoLogin}</span>
+                </>
+              )}
+            </button>
+            <p className="text-xs text-[var(--text-muted)] text-center mt-2">{t.auth.demoLoginDescription}</p>
+          </div>
+
           {/* Sign Up Link */}
-          <div className="mt-6 pt-6 border-t border-theme text-center">
-            <p className="text-secondary text-sm">
+          <div className="mt-6 pt-6 border-t border-[var(--border)] text-center">
+            <p className="text-[var(--text-secondary)] text-sm">
               {t.auth.noAccount}{' '}
               <a
                 href="/register"
-                className="text-[var(--primary)] hover:opacity-80 font-medium transition-colors"
+                className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium transition-colors"
               >
                 {t.auth.createAccount}
               </a>
@@ -204,13 +259,13 @@ function LoginForm() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-muted text-xs">
+          <p className="text-[var(--text-muted)] text-xs">
             {t.auth.termsAgreement}{' '}
-            <a href="#" className="text-[var(--primary)] hover:underline">
+            <a href="#" className="text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors">
               {t.auth.termsOfService}
             </a>{' '}
             en{' '}
-            <a href="#" className="text-[var(--primary)] hover:underline">
+            <a href="#" className="text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors">
               {t.auth.privacyPolicy}
             </a>
           </p>

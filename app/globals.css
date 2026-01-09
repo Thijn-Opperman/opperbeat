@@ -1,86 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  /* Primary colors (same for both themes) */
-  --primary: #8B5CF6;
-  --primary-dark: #6D28D9;
-  --primary-light: #A78BFA;
-  --primary-glow: rgba(139, 92, 246, 0.4);
-  --primary-gradient: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
-  --primary-gradient-hover: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%);
+  /* DJ Studio Color Palette */
+  /* Focus / Selection - Electric Blue */
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
   
-  /* Accent colors (same for both themes) */
-  --accent: #00F5FF;
-  --accent-dark: #06B6D4;
-  --accent-glow: rgba(0, 245, 255, 0.3);
-  --accent-gradient: linear-gradient(135deg, #00F5FF 0%, #6366F1 100%);
+  /* Creative / FX - Neon Violet (use sparingly 10-15%) */
+  --accent: #8B5CF6;
+  --accent-hover: #7C3AED;
   
-  /* Secondary accent (same for both themes) */
-  --secondary: #EC4899;
-  --secondary-dark: #DB2777;
-  --secondary-glow: rgba(236, 72, 153, 0.3);
-  
-  /* Status colors (same for both themes) */
-  --success: #10F59E;
-  --success-glow: rgba(16, 245, 158, 0.3);
+  /* Status colors */
+  --success: #22C55E;
   --warning: #F59E0B;
-  --warning-glow: rgba(245, 158, 11, 0.3);
   --error: #EF4444;
-  --error-glow: rgba(239, 68, 68, 0.3);
 }
 
-/* Dark theme (default) */
+/* Dark theme (default) - Studio aesthetic */
 :root,
 :root.dark {
-  --background: #0a0714;
-  --background-gradient: linear-gradient(135deg, #0a0714 0%, #0f0a1f 100%);
-  --foreground: #f5f3ff;
-  --surface: #151020;
-  --surface-elevated: #1d1628;
-  --surface-hover: #241b32;
+  /* Base backgrounds */
+  --background: #0F1115; /* Diep antraciet */
+  --surface: #1A1D23; /* Donker grafiet - Panelen / cards */
+  --surface-elevated: #1A1D23;
+  --surface-hover: #262A33; /* Subtiel grijs - Borders / scheiding */
   
-  --border: rgba(139, 92, 246, 0.15);
-  --border-hover: rgba(139, 92, 246, 0.35);
-  --border-glow: rgba(139, 92, 246, 0.2);
+  /* Borders */
+  --border: #262A33;
+  --border-hover: #374151;
   
-  --text-primary: #f5f3ff;
-  --text-secondary: rgba(245, 243, 255, 0.75);
-  --text-tertiary: rgba(245, 243, 255, 0.55);
-  --text-muted: rgba(245, 243, 255, 0.4);
+  /* Text colors */
+  --foreground: #E6E8EB; /* Primaire tekst */
+  --text-primary: #E6E8EB;
+  --text-secondary: #9CA3AF; /* Secundaire tekst */
+  --text-tertiary: #9CA3AF;
+  --text-muted: #6B7280; /* Disabled / hint */
 }
 
-/* Light theme */
+/* Light theme - minimal support for accessibility */
 :root.light {
-  --background: #ffffff;
-  --background-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  --foreground: #1a1a1a;
-  --surface: #f5f5f7;
-  --surface-elevated: #ffffff;
-  --surface-hover: #e8e8ed;
+  --background: #FFFFFF;
+  --surface: #F9FAFB;
+  --surface-elevated: #FFFFFF;
+  --surface-hover: #F3F4F6;
   
-  --border: rgba(139, 92, 246, 0.2);
-  --border-hover: rgba(139, 92, 246, 0.4);
-  --border-glow: rgba(139, 92, 246, 0.15);
+  --border: #E5E7EB;
+  --border-hover: #D1D5DB;
   
-  --text-primary: #1a1a1a;
-  --text-secondary: rgba(26, 26, 26, 0.75);
-  --text-tertiary: rgba(26, 26, 26, 0.55);
-  --text-muted: rgba(26, 26, 26, 0.4);
-  
-  /* Adjust glow effects for light mode */
-  --primary-glow: rgba(139, 92, 246, 0.25);
-  --accent-glow: rgba(0, 245, 255, 0.2);
-  --secondary-glow: rgba(236, 72, 153, 0.2);
-  --success-glow: rgba(16, 245, 158, 0.2);
-  --warning-glow: rgba(245, 158, 11, 0.2);
-  --error-glow: rgba(239, 68, 68, 0.2);
+  --foreground: #111827;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --text-tertiary: #6B7280;
+  --text-muted: #9CA3AF;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
 }
 
 * {
@@ -90,102 +68,86 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-inter), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-/* Typography improvements */
+/* Typography - Professional DJ Studio */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 h1 {
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-size: 18px; /* 18-20px */
+  font-weight: 600; /* Semibold */
+  letter-spacing: -0.01em;
 }
 
-/* Custom scrollbar with purple accent */
+h2, h3 {
+  font-size: 16px; /* 14-16px */
+  font-weight: 500; /* Medium */
+  letter-spacing: -0.01em;
+}
+
+h4, h5, h6 {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Body text */
+body, p {
+  font-size: 13px; /* 13-14px */
+  font-weight: 400; /* Regular */
+  color: var(--text-secondary);
+}
+
+/* Monospace for BPM, key, time */
+code, .mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-weight: 500;
+}
+
+/* Custom scrollbar - minimal, technical */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--surface);
-  border-radius: 5px;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 5px;
-  border: 2px solid var(--surface);
-  background-clip: padding-box;
-  box-shadow: 0 0 8px var(--primary-glow);
+  background: var(--border);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-light);
-  box-shadow: 0 0 12px var(--primary-glow);
+  background: var(--border-hover);
 }
 
-/* Smooth transitions with bounce */
+/* Smooth, fast transitions - functional only */
 * {
-  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
+  transition-property: color, background-color, border-color, opacity;
+  transition-timing-function: ease-out;
+  transition-duration: 150ms; /* 100-200ms */
 }
 
-/* Glow effects utility */
-.glow-primary {
-  box-shadow: 0 0 20px var(--primary-glow), 0 0 40px var(--primary-glow);
+/* No bounce, no glow - professional feel */
+button, a, .clickable {
+  transition-property: background-color, color, border-color;
+  transition-duration: 150ms;
 }
 
-.glow-accent {
-  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px var(--accent-glow);
-}
-
-.glow-hover:hover {
-  box-shadow: 0 0 25px var(--primary-glow), 0 0 50px var(--primary-glow);
-  transform: translateY(-2px);
-}
-
-/* Primary text utility */
+/* Utility classes - minimal */
 .gradient-text {
   color: var(--primary);
-}
-
-.gradient-accent {
-  color: var(--accent);
-}
-
-/* Card glow effect */
-.card-glow {
-  position: relative;
-}
-
-.card-glow::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: var(--primary);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.card-glow:hover::before {
-  opacity: 0.6;
 }
 
 /* Theme-aware utility classes */

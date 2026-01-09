@@ -157,3 +157,5 @@ Zonder deze 3 variables kan de applicatie niet verbinden met Supabase en worden 
 
 **Klaar!** Na het toevoegen van deze 3 variables en redeployen zou database opslag moeten werken! 🚀
 
+
+

@@ -71,58 +71,56 @@ export default function MusicAnalysisCard() {
   }, []);
 
   return (
-    <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-xl hover:border-[var(--primary)]/40 hover:shadow-2xl hover:shadow-[var(--primary-glow)] transition-all card-glow relative overflow-hidden">
-      <div className="absolute inset-0 bg-[var(--primary)]/5 opacity-0 hover:opacity-100 transition-opacity"></div>
-      <div className="relative z-10">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
-          <div className="flex items-center gap-3">
-            <div className="p-2 sm:p-2.5 bg-[var(--primary)]/20 rounded-lg shadow-lg shadow-[var(--primary-glow)]">
-              <Music className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--primary)] drop-shadow-[0_0_8px_var(--primary-glow)]" />
-            </div>
-            <h3 className="text-primary font-bold text-sm sm:text-base">{t.home.musicAnalysis}</h3>
+    <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-colors hover:border-[var(--border-hover)]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 sm:p-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
+            <Music className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--primary)]" />
           </div>
-          <Link
-            href="/analyze"
-            className="bg-[var(--primary)] hover:opacity-90 text-white font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-[var(--primary-glow)] hover:shadow-xl hover:scale-105 w-full sm:w-auto justify-center"
-          >
-            <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            {t.home.analyze}
-          </Link>
+          <h3 className="text-[var(--text-primary)] font-semibold text-sm sm:text-base">{t.home.musicAnalysis}</h3>
         </div>
+        <Link
+          href="/analyze"
+          className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-[4px] transition-colors text-xs sm:text-sm flex items-center gap-2 w-full sm:w-auto justify-center"
+        >
+          <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          {t.home.analyze}
+        </Link>
+      </div>
 
       {lastAnalysis ? (
         <div className="space-y-4">
           {/* Laatste Analyse Info */}
-          <div className="bg-surface rounded-lg p-4 border border-theme shadow-lg">
+          <div className="bg-[var(--background)] rounded-[4px] p-4 border border-[var(--border)]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex-1 min-w-0">
-                <h4 className="text-primary font-bold text-sm truncate">
+                <h4 className="text-[var(--text-primary)] font-medium text-sm truncate">
                   {lastAnalysis.title}
                 </h4>
                 {lastAnalysis.metadata.artist && (
-                  <p className="text-secondary text-xs mt-1 truncate">
+                  <p className="text-[var(--text-secondary)] text-xs mt-1 truncate">
                     {lastAnalysis.metadata.artist}
                   </p>
                 )}
               </div>
               <div className="text-right ml-3">
-                <p className="text-muted text-xs">{t.home.lastAnalysis}</p>
+                <p className="text-[var(--text-muted)] text-xs">{t.home.lastAnalysis}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-4">
               {/* BPM */}
-              <div className="bg-[var(--primary)]/10 rounded-lg p-3 border border-[var(--primary)]/20 shadow-md">
+              <div className="bg-[var(--surface)] rounded-[4px] p-3 border border-[var(--border)]">
                 <div className="flex items-center gap-2 mb-2">
-                  <Gauge className="w-3.5 h-3.5 text-[var(--primary)] drop-shadow-[0_0_6px_var(--primary-glow)]" />
-                  <span className="text-secondary text-xs font-bold">BPM</span>
+                  <Gauge className="w-3.5 h-3.5 text-[var(--primary)]" />
+                  <span className="text-[var(--text-secondary)] text-xs font-medium">BPM</span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-primary font-bold text-lg">
+                  <span className="text-[var(--text-primary)] font-medium text-base mono">
                     {lastAnalysis.bpm || '-'}
                   </span>
                   {lastAnalysis.confidence?.bpm && (
-                    <span className="text-[var(--success)] text-xs font-bold bg-[var(--success)]/20 px-1.5 py-0.5 rounded border border-[var(--success)]/30 shadow-sm">
+                    <span className="text-[var(--success)] text-xs font-medium bg-[var(--surface)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border)]">
                       {Math.round(lastAnalysis.confidence.bpm * 100)}%
                     </span>
                   )}
@@ -130,17 +128,17 @@ export default function MusicAnalysisCard() {
               </div>
 
               {/* Key */}
-              <div className="bg-[var(--accent)]/10 rounded-lg p-3 border border-[var(--accent)]/20 shadow-md">
+              <div className="bg-[var(--surface)] rounded-[4px] p-3 border border-[var(--border)]">
                 <div className="flex items-center gap-2 mb-2">
-                  <Key className="w-3.5 h-3.5 text-[var(--accent)] drop-shadow-[0_0_6px_var(--accent-glow)]" />
-                  <span className="text-secondary text-xs font-bold">Key</span>
+                  <Key className="w-3.5 h-3.5 text-[var(--accent)]" />
+                  <span className="text-[var(--text-secondary)] text-xs font-medium">Key</span>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-primary font-bold text-lg">
+                  <span className="text-[var(--text-primary)] font-medium text-base mono">
                     {lastAnalysis.key || '-'}
                   </span>
                   {lastAnalysis.confidence?.key && (
-                    <span className="text-[var(--success)] text-xs font-bold bg-[var(--success)]/20 px-1.5 py-0.5 rounded border border-[var(--success)]/30 shadow-sm">
+                    <span className="text-[var(--success)] text-xs font-medium bg-[var(--surface)] px-1.5 py-0.5 rounded-[4px] border border-[var(--border)]">
                       {Math.round(lastAnalysis.confidence.key * 100)}%
                     </span>
                   )}
@@ -149,16 +147,16 @@ export default function MusicAnalysisCard() {
             </div>
 
             {/* Duration */}
-            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-theme">
-              <Clock className="w-3.5 h-3.5 text-muted" />
-              <span className="text-secondary text-xs">{t.analyze.duration}: {lastAnalysis.duration}</span>
+            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[var(--border)]">
+              <Clock className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+              <span className="text-[var(--text-secondary)] text-xs">{t.analyze.duration}: {lastAnalysis.duration}</span>
             </div>
           </div>
 
           {/* Statistics */}
           {analysisCount > 0 && (
             <div className="flex items-center justify-between text-sm pt-2">
-              <div className="flex items-center gap-2 text-secondary">
+              <div className="flex items-center gap-2 text-[var(--text-secondary)]">
                 <BarChart3 className="w-4 h-4 text-[var(--primary)]" />
                 <span className="text-xs font-medium">{t.home.totalAnalyses}: {analysisCount}</span>
               </div>
@@ -167,16 +165,16 @@ export default function MusicAnalysisCard() {
         </div>
       ) : (
         <div className="text-center py-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--primary)]/20 rounded-full mb-4 shadow-lg shadow-[var(--primary-glow)]">
-            <BarChart3 className="w-8 h-8 text-[var(--primary)] drop-shadow-[0_0_12px_var(--primary-glow)]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] mb-4">
+            <BarChart3 className="w-8 h-8 text-[var(--primary)]" />
           </div>
-          <h4 className="text-primary font-bold mb-2 text-sm">{t.home.noAnalyses}</h4>
-          <p className="text-secondary text-sm mb-6 max-w-xs mx-auto">
+          <h4 className="text-[var(--text-primary)] font-medium mb-2 text-sm">{t.home.noAnalyses}</h4>
+          <p className="text-[var(--text-secondary)] text-sm mb-6 max-w-xs mx-auto">
             {t.home.noAnalysesDescription}
           </p>
           <Link
             href="/analyze"
-            className="inline-flex items-center gap-2 bg-[var(--primary)] hover:opacity-90 text-white font-bold px-5 py-2.5 rounded-lg transition-all text-sm shadow-lg shadow-[var(--primary-glow)] hover:shadow-xl hover:scale-105"
+            className="inline-flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-5 py-2.5 rounded-[4px] transition-colors text-sm"
           >
             <Upload className="w-4 h-4" />
             {t.home.startAnalysis}
@@ -185,8 +183,8 @@ export default function MusicAnalysisCard() {
       )}
 
       {/* Quick Actions */}
-      <div className="mt-6 pt-6 border-t border-theme">
-        <div className="flex items-center justify-between text-xs text-tertiary">
+      <div className="mt-6 pt-6 border-t border-[var(--border)]">
+        <div className="flex items-center justify-between text-xs text-[var(--text-tertiary)]">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-[var(--primary)]" />
@@ -198,7 +196,6 @@ export default function MusicAnalysisCard() {
             </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
