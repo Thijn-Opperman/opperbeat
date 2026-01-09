@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Headphones, Mail, Lock, User, Eye, EyeOff, UserPlus } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, Lock, User, Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 
 export default function RegisterPage() {
@@ -76,8 +77,16 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--primary)]/10 rounded-2xl mb-4">
-            <Headphones className="w-8 h-8 text-[var(--primary)]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--primary)]/10 rounded-2xl mb-4 p-2">
+            <div className="relative w-full h-full">
+              <Image
+                src="/opperbeat logo.png"
+                alt="Opperbeat Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </div>
           <h1 className="text-3xl font-semibold text-primary mb-2 tracking-tight">Opperbeat</h1>
           <p className="text-secondary text-sm">{t.auth.createAccount}</p>

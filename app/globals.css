@@ -351,3 +351,26 @@ button, a, .clickable {
 .border-theme-hover {
   border-color: var(--border-hover);
 }
+
+/* Dashboard widget overlapping styles */
+.dashboard-widget {
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.2s;
+}
+
+.dashboard-widget:hover {
+  z-index: 50 !important;
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Responsive adjustments for overlapping widgets */
+@media (max-width: 768px) {
+  .dashboard-widget {
+    position: relative !important;
+    transform: none !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-bottom: 1rem;
+  }
+}

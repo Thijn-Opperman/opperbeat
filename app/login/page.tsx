@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Headphones, Mail, Lock, Eye, EyeOff, LogIn, Zap } from 'lucide-react';
+import Image from 'next/image';
+import { Mail, Lock, Eye, EyeOff, LogIn, Zap } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 import { useAuth } from '@/lib/auth-context';
 
@@ -99,8 +100,16 @@ function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8 animate-fade-in-down">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] mb-4">
-            <Headphones className="w-8 h-8 text-[var(--primary)]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] mb-4 p-2">
+            <div className="relative w-full h-full">
+              <Image
+                src="/opperbeat logo.png"
+                alt="Opperbeat Logo"
+                fill
+                className="object-contain"
+                priority
+              />
+            </div>
           </div>
           <h1 className="text-lg font-semibold text-[var(--text-primary)] mb-2 tracking-tight">Opperbeat</h1>
           <p className="text-[var(--text-secondary)] text-sm">{t.auth.welcomeBack}</p>
