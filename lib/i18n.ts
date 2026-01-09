@@ -71,9 +71,11 @@ export interface Translations {
     uploadMusicFile: string;
     dragDropOrClick: string;
     selectFile: string;
+    selectFiles: string;
     saveToDatabase: string;
     supportedFormats: string;
     analyzing: string;
+    analyzingBatch: string;
     analyzingDescription: string;
     elapsedTime: string;
     analysisTimeout: string;
@@ -95,6 +97,13 @@ export interface Translations {
     veryAccurate: string;
     accurate: string;
     moderatelyAccurate: string;
+    batchMode: string;
+    batchModeDescription: string;
+    filesSelected: string;
+    analyzingProgress: string;
+    completed: string;
+    failed: string;
+    viewResults: string;
   };
 
   // Mixes Page
@@ -353,12 +362,14 @@ export const translations: Record<Language, Translations> = {
     analyze: {
       title: 'Muziek Analyse',
       subtitle: 'Upload en analyseer je muziekstukken voor gedetailleerde inzichten',
-      uploadMusicFile: 'Upload Muziekbestand',
-      dragDropOrClick: 'Sleep een bestand hierheen of klik om te selecteren',
+      uploadMusicFile: 'Upload Muziekbestand(en)',
+      dragDropOrClick: 'Sleep bestanden hierheen of klik om te selecteren',
       selectFile: 'Bestand Selecteren',
+      selectFiles: 'Bestanden Selecteren',
       saveToDatabase: 'Opslaan in database na analyse',
       supportedFormats: 'Ondersteunde formaten: MP3, WAV, FLAC, M4A',
       analyzing: 'Bestand wordt geanalyseerd...',
+      analyzingBatch: 'Playlist wordt geanalyseerd...',
       analyzingDescription: 'Dit kan even duren, vooral voor BPM en key detectie',
       elapsedTime: 'Verstreken tijd',
       analysisTimeout: '⚠️ Analyse duurt langer dan verwacht. Voor grote bestanden wordt alleen het begin geanalyseerd.',
@@ -380,6 +391,13 @@ export const translations: Record<Language, Translations> = {
       veryAccurate: 'Zeer accuraat',
       accurate: 'Accuraat',
       moderatelyAccurate: 'Matig accuraat',
+      batchMode: 'Playlist Analyse',
+      batchModeDescription: 'Selecteer meerdere bestanden om een hele playlist te analyseren',
+      filesSelected: 'bestanden geselecteerd',
+      analyzingProgress: 'Analyseer {current} van {total}',
+      completed: 'Voltooid',
+      failed: 'Gefaald',
+      viewResults: 'Bekijk Resultaten',
     },
     mixes: {
       title: 'Mixes & Sets',
@@ -618,12 +636,14 @@ export const translations: Record<Language, Translations> = {
     analyze: {
       title: 'Music Analysis',
       subtitle: 'Upload and analyze your music tracks for detailed insights',
-      uploadMusicFile: 'Upload Music File',
-      dragDropOrClick: 'Drag a file here or click to select',
+      uploadMusicFile: 'Upload Music File(s)',
+      dragDropOrClick: 'Drag files here or click to select',
       selectFile: 'Select File',
+      selectFiles: 'Select Files',
       saveToDatabase: 'Save to database after analysis',
       supportedFormats: 'Supported formats: MP3, WAV, FLAC, M4A',
       analyzing: 'File is being analyzed...',
+      analyzingBatch: 'Playlist is being analyzed...',
       analyzingDescription: 'This may take a while, especially for BPM and key detection',
       elapsedTime: 'Elapsed time',
       analysisTimeout: '⚠️ Analysis is taking longer than expected. For large files, only the beginning is analyzed.',
@@ -645,6 +665,13 @@ export const translations: Record<Language, Translations> = {
       veryAccurate: 'Very accurate',
       accurate: 'Accurate',
       moderatelyAccurate: 'Moderately accurate',
+      batchMode: 'Playlist Analysis',
+      batchModeDescription: 'Select multiple files to analyze an entire playlist',
+      filesSelected: 'files selected',
+      analyzingProgress: 'Analyzing {current} of {total}',
+      completed: 'Completed',
+      failed: 'Failed',
+      viewResults: 'View Results',
     },
     mixes: {
       title: 'Mixes & Sets',

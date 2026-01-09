@@ -19,10 +19,10 @@ export default function ThemeToggle() {
           key={t.value}
           onClick={() => setTheme(t.value)}
           className={`
-            flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] text-xs font-medium transition-colors
+            flex items-center gap-1.5 px-2.5 py-1.5 rounded-[4px] text-xs font-medium transition-all duration-200 button-press
             ${theme === t.value
-              ? 'bg-[var(--primary)] text-white'
-              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
+              ? 'bg-[var(--primary)] text-white scale-105'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] hover-scale'
             }
           `}
           aria-label={`Switch to ${t.label} theme`}

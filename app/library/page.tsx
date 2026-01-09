@@ -191,7 +191,7 @@ export default function LibraryPage() {
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden pt-16 lg:pt-0">
         {/* Header */}
-        <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-3 border-b border-theme">
+        <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-3 border-b border-theme animate-fade-in-down">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-primary mb-1">{t.library.title}</h1>
@@ -209,7 +209,7 @@ export default function LibraryPage() {
                 placeholder={t.library.searchMusic}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-surface border border-theme rounded text-primary text-sm placeholder-muted focus:outline-none focus:border-[var(--primary)] transition-all"
+                className="w-full pl-9 pr-3 py-1.5 bg-surface border border-theme rounded text-primary text-sm placeholder-muted focus:outline-none focus:border-[var(--primary)] transition-all duration-200"
               />
             </div>
 
@@ -250,7 +250,7 @@ export default function LibraryPage() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-theme rounded text-primary text-sm hover:bg-surface-hover transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-theme rounded text-primary text-sm hover:bg-surface-hover transition-all duration-200 button-press hover-scale animate-fade-in"
               >
                 <X className="w-3.5 h-3.5" />
                 Clear
@@ -273,7 +273,7 @@ export default function LibraryPage() {
               <p className="text-secondary text-sm mb-6">{error}</p>
               <button
                 onClick={() => fetchAnalyses(true)}
-                className="px-5 py-2.5 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded transition-all"
+                className="px-5 py-2.5 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded transition-all duration-200 button-press hover-scale"
               >
                 {t.library.retry}
               </button>
@@ -285,7 +285,7 @@ export default function LibraryPage() {
               <p className="text-secondary text-sm mb-6">{t.library.noMusicDescription}</p>
               <Link
                 href="/analyze"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--primary)] hover:opacity-90 text-white font-medium rounded transition-all duration-200 button-press hover-scale"
               >
                 <Music className="w-4 h-4" />
                 Start Analyse
@@ -315,7 +315,8 @@ export default function LibraryPage() {
                     <tr
                       key={analysis.id}
                       onClick={() => window.location.href = `/analyze?id=${analysis.id}`}
-                      className="group cursor-pointer hover:bg-surface transition-colors border-b border-theme"
+                      className="group cursor-pointer hover:bg-surface transition-all duration-200 border-b border-theme animate-fade-in-up hover-lift"
+                      style={{ animationDelay: `${index * 0.03}s` }}
                     >
                       <td className="px-3 py-2">
                         <button
@@ -413,7 +414,7 @@ export default function LibraryPage() {
                 <div className="py-4 text-center border-t border-theme">
                   <button
                     onClick={() => fetchAnalyses(false)}
-                    className="px-6 py-2 bg-surface hover:bg-surface-hover border border-theme text-primary text-sm font-medium rounded transition-all"
+                    className="px-6 py-2 bg-surface hover:bg-surface-hover border border-theme text-primary text-sm font-medium rounded transition-all duration-200 button-press hover-scale"
                   >
                     Load More
                   </button>
@@ -425,8 +426,8 @@ export default function LibraryPage() {
 
         {/* Delete Confirmation Modal */}
         {deleteConfirm && (
-          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-surface-elevated border border-theme rounded-lg p-6 max-w-md w-full">
+          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-surface-elevated border border-theme rounded-lg p-6 max-w-md w-full animate-scale-in">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--error)]/20 rounded-lg">
                   <AlertCircle className="w-6 h-6 text-[var(--error)]" />
@@ -442,14 +443,14 @@ export default function LibraryPage() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={() => setDeleteConfirm(null)}
-                  className="px-4 py-2 bg-surface hover:bg-surface-hover border border-theme text-primary text-sm font-medium rounded transition-all"
+                  className="px-4 py-2 bg-surface hover:bg-surface-hover border border-theme text-primary text-sm font-medium rounded transition-all duration-200 button-press hover-scale"
                 >
                   Annuleren
                 </button>
                 <button
                   onClick={() => handleDelete(deleteConfirm.id)}
                   disabled={deletingId === deleteConfirm.id}
-                  className="px-4 py-2 bg-[var(--error)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-[var(--error)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded transition-all duration-200 button-press hover-scale flex items-center gap-2"
                 >
                   {deletingId === deleteConfirm.id ? (
                     <>

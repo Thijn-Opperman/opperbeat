@@ -1,10 +1,25 @@
 import { NextRequest } from 'next/server'
 import { supabaseAdmin } from './supabase'
+import { promises as fs } from 'fs'
+import path from 'path'
+
+const USERS_FILE = path.join(process.cwd(), 'data', 'users.json')
+
+async function loadUsers(): Promise<any[]> {
+  try {
+    const data = await fs.readFile(USERS_FILE, 'utf-8')
+    return JSON.parse(data)
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      return []
+    }
+    throw error
+  }
+}
 
 /**
  * Haal user ID op uit request
- * Voorlopig gebruiken we een simpele header-based auth
- * Later migreren naar Supabase Auth
+ * Gebruikt session token cookie om user ID te bepalen
  */
 export async function getUserIdFromRequest(request: NextRequest): Promise<string | null> {
   // Option 1: Check Authorization header (voor Supabase Auth later)
@@ -24,10 +39,17 @@ export async function getUserIdFromRequest(request: NextRequest): Promise<string
   // Option 2: Check session cookie (huidige implementatie)
   const sessionToken = request.cookies.get('session_token')?.value
   if (sessionToken) {
-    // Voor nu: gebruik een placeholder - later migreren naar Supabase Auth
-    // Je kunt hier je bestaande session validation logica plaatsen
-    // Voor testen kunnen we een hardcoded user ID gebruiken
-    return null // Return null als geen auth gevonden
+    try {
+      // Laad gebruikers om user ID te bepalen
+      const users = await loadUsers()
+      // Voor nu: gebruik de eerste gebruiker als er een session token is
+      // In productie zou je de session token gebruiken om de juiste gebruiker op te halen
+      if (users.length > 0) {
+        return users[0].id
+      }
+    } catch (error) {
+      console.warn('Error loading users:', error)
+    }
   }
 
   // Option 3: Check user-id header (voor development/testing)

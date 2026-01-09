@@ -13,7 +13,7 @@ export default function HelpPage() {
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 animate-fade-in-down">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
                 <HelpCircle className="w-6 h-6 text-[var(--primary)]" />
@@ -184,7 +184,7 @@ export default function HelpPage() {
 
 function Section({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <div className="mb-8">
+    <div className="mb-8 animate-fade-in-up">
       <h2 className="text-base font-medium text-[var(--text-primary)] mb-2">{title}</h2>
       <p className="text-[var(--text-secondary)] text-sm mb-4">{description}</p>
       <div className="space-y-3">
@@ -196,7 +196,7 @@ function Section({ title, description, children }: { title: string; description:
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)]">
+    <div className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up">
       <div className="flex items-start gap-3">
         <div className="text-[var(--primary)] flex-shrink-0 mt-0.5">{icon}</div>
         <div className="flex-1">
@@ -216,7 +216,7 @@ function FeaturePageCard({ icon, title, route, description, features }: {
   features: string[];
 }) {
   return (
-    <div className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)]">
+    <div className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up">
       <div className="flex items-start gap-3 mb-3">
         <div className="text-[var(--primary)] flex-shrink-0 mt-0.5">{icon}</div>
         <div className="flex-1">
@@ -241,7 +241,7 @@ function FeaturePageCard({ icon, title, route, description, features }: {
 
 function TechCard({ title, items }: { title: string; items: string[] }) {
   return (
-    <div className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)]">
+    <div className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up">
       <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">{title}</h3>
       <ul className="space-y-1.5">
         {items.map((item, index) => (

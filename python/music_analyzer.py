@@ -158,6 +158,30 @@ def get_bitrate(filename):
     return None
 
 
+def get_file_duration(filename):
+    """
+    Haal originele duur van audio bestand op uit metadata
+    
+    Args:
+        filename: Pad naar audio bestand
+    
+    Returns:
+        duration_seconds: Duur in seconden (float), of None als niet beschikbaar
+    """
+    if MUTAGEN_AVAILABLE:
+        try:
+            audio_file = MutagenFile(filename)
+            if audio_file is not None and hasattr(audio_file, 'info'):
+                # Duur is meestal beschikbaar in info.length
+                if hasattr(audio_file.info, 'length') and audio_file.info.length:
+                    return float(audio_file.info.length)
+        except Exception as e:
+            print(f"Waarschuwing: Kon duur niet ophalen uit metadata: {e}")
+            pass
+    
+    return None
+
+
 def get_song_name(filename):
     """
     Haal song naam op uit metadata of filename
@@ -235,6 +259,7 @@ def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_s
         include_waveform: Of waveform data moet worden opgenomen (default: True)
         waveform_samples: Maximum aantal samples voor waveform (default: 5000)
         max_duration: Maximum duur in seconden om te analyseren (None = volledig bestand)
+                     NOTE: Dit limiteert alleen de analyse, niet de opgeslagen duur
     
     Returns:
         Dictionary met:
@@ -244,17 +269,53 @@ def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_s
             - mode: 'major' of 'minor'
             - key_confidence: Betrouwbaarheid key (0-1)
             - song_name: Naam van het nummer
-            - duration: Duur in seconden (float)
-            - duration_formatted: Duur geformatteerd (bijv. "3:45")
+            - duration: Originele duur in seconden (float) - NIET de geanalyseerde duur
+            - duration_formatted: Originele duur geformatteerd (bijv. "3:45")
             - bitrate: Bitrate in kbps (None als niet beschikbaar)
             - waveform: Waveform data (downsampled, alleen als include_waveform=True)
             - filename: Originele bestandsnaam
     """
+    # Haal originele duur op uit metadata VOORDAT we audio laden
+    # Dit is belangrijk omdat we misschien alleen een deel analyseren (max_duration)
+    # maar we willen wel de volledige originele duur opslaan
+    
+    # Probeer eerst mutagen (kan snel zijn)
+    original_duration = get_file_duration(filename)
+    
+    # Als mutagen geen duur geeft OF als we max_duration gebruiken,
+    # gebruik librosa.get_duration() die de volledige duur uit bestandsmetadata haalt
+    # Dit is belangrijk omdat mutagen soms de verkeerde duur geeft of None
+    if original_duration is None or (max_duration and original_duration <= max_duration + 1):
+        # Als we max_duration gebruiken en de mutagen duur is ongeveer gelijk aan max_duration,
+        # is het waarschijnlijk dat mutagen de verkeerde duur heeft (bijvoorbeeld van een partiaal geladen bestand)
+        # Gebruik librosa.get_duration() die altijd de volledige duur uit metadata haalt
+        try:
+            original_duration = librosa.get_duration(path=filename)
+            print(f"Gebruik librosa.get_duration(): {original_duration}s")
+        except Exception as e:
+            print(f"Waarschuwing: librosa.get_duration() gefaald: {e}")
+            # Als fallback, gebruik mutagen waarde als die bestaat
+            if original_duration is None:
+                # Probeer volledige bestand te laden (trag maar accuraat)
+                try:
+                    y_full, sr_full = librosa.load(filename, sr=None, duration=None)
+                    original_duration = len(y_full) / sr_full
+                except Exception as e2:
+                    print(f"Waarschuwing: Volledige load ook gefaald: {e2}")
+    
     # Laad audio (met optionele duration limit voor grote bestanden)
+    # Dit limiteert alleen wat we analyseren, niet wat we opslaan
     if max_duration:
         y, sr = librosa.load(filename, sr=sample_rate, duration=max_duration)
+        # Als we nog steeds geen originele duur hebben na alle pogingen, gebruik max_duration als laatste fallback
+        if original_duration is None:
+            print(f"Waarschuwing: Gebruik max_duration als fallback voor duur")
+            original_duration = max_duration
     else:
         y, sr = librosa.load(filename, sr=sample_rate)
+        # Als we geen max_duration hebben en ook geen metadata duur, gebruik geladen audio duur
+        if original_duration is None:
+            original_duration = len(y) / sr
     
     # BPM detectie
     bpm, bpm_confidence = detect_bpm_accurate(y, sr)
@@ -262,8 +323,13 @@ def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_s
     # Key detectie
     key, mode, key_confidence = detect_key_accurate(y, sr)
     
-    # Duur berekenen
-    duration_seconds = len(y) / sr
+    # Gebruik originele duur als beschikbaar, anders fallback naar geladen audio duur
+    if original_duration is not None:
+        duration_seconds = original_duration
+    else:
+        # Fallback: gebruik duur van geladen audio
+        duration_seconds = len(y) / sr
+    
     minutes = int(duration_seconds // 60)
     seconds = int(duration_seconds % 60)
     duration_formatted = f"{minutes}:{seconds:02d}"

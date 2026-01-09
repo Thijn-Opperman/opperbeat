@@ -71,7 +71,7 @@ export default function MusicAnalysisCard() {
   }, []);
 
   return (
-    <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-colors hover:border-[var(--border-hover)]">
+    <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 sm:p-2.5 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
@@ -81,7 +81,7 @@ export default function MusicAnalysisCard() {
         </div>
         <Link
           href="/analyze"
-          className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-[4px] transition-colors text-xs sm:text-sm flex items-center gap-2 w-full sm:w-auto justify-center"
+          className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-3 sm:px-4 py-1.5 sm:py-2 rounded-[4px] transition-all duration-200 text-xs sm:text-sm flex items-center gap-2 w-full sm:w-auto justify-center button-press hover-scale"
         >
           <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           {t.home.analyze}
@@ -90,8 +90,8 @@ export default function MusicAnalysisCard() {
 
       {lastAnalysis ? (
         <div className="space-y-4">
-          {/* Laatste Analyse Info */}
-          <div className="bg-[var(--background)] rounded-[4px] p-4 border border-[var(--border)]">
+            {/* Laatste Analyse Info */}
+          <div className="bg-[var(--background)] rounded-[4px] p-4 border border-[var(--border)] animate-fade-in">
             <div className="flex items-center justify-between mb-3">
               <div className="flex-1 min-w-0">
                 <h4 className="text-[var(--text-primary)] font-medium text-sm truncate">
@@ -110,7 +110,7 @@ export default function MusicAnalysisCard() {
 
             <div className="grid grid-cols-2 gap-3 mt-4">
               {/* BPM */}
-              <div className="bg-[var(--surface)] rounded-[4px] p-3 border border-[var(--border)]">
+              <div className="bg-[var(--surface)] rounded-[4px] p-3 border border-[var(--border)] hover-scale transition-all duration-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Gauge className="w-3.5 h-3.5 text-[var(--primary)]" />
                   <span className="text-[var(--text-secondary)] text-xs font-medium">BPM</span>
@@ -128,7 +128,7 @@ export default function MusicAnalysisCard() {
               </div>
 
               {/* Key */}
-              <div className="bg-[var(--surface)] rounded-[4px] p-3 border border-[var(--border)]">
+              <div className="bg-[var(--surface)] rounded-[4px] p-3 border border-[var(--border)] hover-scale transition-all duration-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Key className="w-3.5 h-3.5 text-[var(--accent)]" />
                   <span className="text-[var(--text-secondary)] text-xs font-medium">Key</span>
@@ -174,7 +174,7 @@ export default function MusicAnalysisCard() {
           </p>
           <Link
             href="/analyze"
-            className="inline-flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-5 py-2.5 rounded-[4px] transition-colors text-sm"
+            className="inline-flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-5 py-2.5 rounded-[4px] transition-all duration-200 text-sm button-press hover-scale"
           >
             <Upload className="w-4 h-4" />
             {t.home.startAnalysis}

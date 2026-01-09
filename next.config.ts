@@ -1,7 +1,23 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Output configuratie
+  output: 'standalone',
+  
+  // Exclude node_modules dependencies die niet nodig zijn
+  experimental: {
+    serverComponentsExternalPackages: ['ffmpeg-static', 'fluent-ffmpeg'],
+  },
+  
+  // Image optimization
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

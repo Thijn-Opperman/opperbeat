@@ -39,12 +39,17 @@ export async function GET(request: NextRequest) {
       .from('music_analyses')
       .select('*');
     
-    // Filter op user_id (of null voor anonymous)
+    // Filter op user_id: toon nummers van de ingelogde gebruiker OF nummers zonder user_id (oude/anonymous)
     if (userId) {
-      query = query.eq('user_id', userId);
+      // Toon nummers van deze gebruiker OF nummers zonder user_id (oude nummers)
+      // Gebruik .or() met een array van conditions
+      query = query.or(`user_id.eq.${userId},user_id.is.null`);
     } else {
+      // Als niet ingelogd: toon alleen nummers zonder user_id
       query = query.is('user_id', null);
     }
+    
+    console.log('Fetching analyses for userId:', userId);
     
     query = query.order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -83,7 +88,8 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true });
     
     if (userId) {
-      countQuery = countQuery.eq('user_id', userId);
+      // Tel nummers van deze gebruiker OF nummers zonder user_id
+      countQuery = countQuery.or(`user_id.eq.${userId},user_id.is.null`);
     } else {
       countQuery = countQuery.is('user_id', null);
     }

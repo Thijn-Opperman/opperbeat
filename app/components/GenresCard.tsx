@@ -11,7 +11,7 @@ const genresData = [
 
 export default function GenresCard() {
   return (
-    <div className="bg-surface-elevated rounded-lg p-4 sm:p-6 border border-theme">
+    <div className="bg-surface-elevated rounded-lg p-4 sm:p-6 border border-theme transition-all duration-200 hover:border-theme-hover hover-lift">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-4">
         <h3 className="text-primary font-semibold text-sm sm:text-base">Genres Breakdown</h3>
         <select className="bg-surface border border-theme rounded px-2 sm:px-3 py-1 text-primary text-xs sm:text-sm w-full sm:w-auto">

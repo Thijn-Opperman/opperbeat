@@ -123,7 +123,7 @@ export default function AnalyticsPage() {
       <Sidebar />
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-          <div className="mb-6 lg:mb-8">
+          <div className="mb-6 lg:mb-8 animate-fade-in-down">
             <h1 className="text-2xl sm:text-3xl font-semibold text-primary mb-2 tracking-tight">{t.analytics.title}</h1>
             <p className="text-secondary text-sm">{t.analytics.subtitle}</p>
           </div>
@@ -137,7 +137,8 @@ export default function AnalyticsPage() {
                   return (
                     <div
                       key={index}
-                      className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg"
+                      className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg transition-all duration-200 hover:border-theme-hover hover-lift animate-fade-in-up"
+                      style={{ animationDelay: `${index * 0.1}s` }}
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div className="p-2.5 bg-[var(--primary)]/10 rounded-lg">
@@ -168,7 +169,7 @@ export default function AnalyticsPage() {
               {/* Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
                 {/* Genre Distribution */}
-                <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg">
+                <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg transition-all duration-200 hover:border-theme-hover hover-lift animate-fade-in-up stagger-1">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-[var(--primary)]/10 rounded-lg">
                       <TrendingUp className="w-5 h-5 text-[var(--primary)]" />
@@ -187,7 +188,7 @@ export default function AnalyticsPage() {
                           </div>
                           <div className="w-full bg-surface rounded-full h-2">
                             <div
-                              className="h-2 rounded-full transition-all duration-500"
+                              className="h-2 rounded-full transition-all duration-700 ease-out"
                               style={{ 
                                 width: `${item.percentage}%`, 
                                 backgroundColor: genreColors[index % genreColors.length] 
@@ -205,7 +206,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Activity Timeline */}
-                <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg">
+                <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg transition-all duration-200 hover:border-theme-hover hover-lift animate-fade-in-up stagger-2">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-[var(--primary)]/10 rounded-lg">
                       <BarChart3 className="w-5 h-5 text-[var(--primary)]" />
@@ -258,7 +259,7 @@ export default function AnalyticsPage() {
 
               {/* BPM Distribution */}
               {analyticsData.bpmDistribution && analyticsData.bpmDistribution.some(b => b.count > 0) && (
-                <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg mb-6">
+                <div className="bg-surface-elevated rounded-xl p-4 sm:p-6 border border-theme shadow-lg mb-6 transition-all duration-200 hover:border-theme-hover hover-lift animate-fade-in-up stagger-3">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-[var(--primary)]/10 rounded-lg">
                       <Music className="w-5 h-5 text-[var(--primary)]" />

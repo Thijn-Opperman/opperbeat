@@ -30,15 +30,15 @@ export async function GET(
       userId = null;
     }
 
-    // Haal analyse op (RLS zorgt ervoor dat alleen eigen analyses worden opgehaald)
+    // Haal analyse op - toon nummers van de gebruiker OF nummers zonder user_id (oude nummers)
     let query = supabaseAdmin
       .from('music_analyses')
       .select('*')
       .eq('id', id);
     
-    // Als userId null is, gebruik een query die null user_id toestaat
+    // Als userId bestaat: toon nummers van deze gebruiker OF nummers zonder user_id
     if (userId) {
-      query = query.eq('user_id', userId);
+      query = query.or(`user_id.eq.${userId},user_id.is.null`);
     } else {
       query = query.is('user_id', null);
     }

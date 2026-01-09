@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Upload, FileAudio, BarChart3, Music, Waves, Loader2 } from 'lucide-react';
+import { Upload, FileAudio, BarChart3, Music, Waves, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 
 interface AnalysisData {
@@ -24,6 +24,14 @@ interface AnalysisData {
   };
 }
 
+interface BatchResult {
+  filename: string;
+  success: boolean;
+  data?: AnalysisData;
+  error?: string;
+  analysisId?: string | null;
+}
+
 export default function AnalyzePage() {
   const { t } = useI18n();
   const [isUploading, setIsUploading] = useState(false);
@@ -32,6 +40,9 @@ export default function AnalyzePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [saveToDatabase, setSaveToDatabase] = useState(true); // Standaard opslaan
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [batchResults, setBatchResults] = useState<BatchResult[]>([]);
+  const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -263,19 +274,205 @@ export default function AnalyzePage() {
     }
   };
 
+  const handleBatchAnalyze = async (files: File[]) => {
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    setError(null);
+    setElapsedTime(0);
+    setBatchResults([]);
+    setBatchProgress({ current: 0, total: files.length });
+
+    try {
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+      formData.append('save', saveToDatabase ? 'true' : 'false');
+
+      const response = await fetch('/api/analyze/batch', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || t.errors.somethingWentWrong };
+        }
+        throw new Error(errorData.error || t.errors.somethingWentWrong);
+      }
+
+      // Lees de streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      
+      if (!reader) {
+        throw new Error('Kon response stream niet lezen');
+      }
+
+      let buffer = '';
+      let successfulCount = 0;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) {
+          break;
+        }
+
+        // Decode de chunk en voeg toe aan buffer
+        buffer += decoder.decode(value, { stream: true });
+        
+        // Verwerk complete messages (gescheiden door \n\n)
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || ''; // Bewaar incomplete line in buffer
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6)); // Remove 'data: ' prefix
+              
+              if (data.type === 'start') {
+                console.log('🚀 Batch analyse gestart:', data.totalFiles, 'bestanden');
+                setBatchProgress({ current: 0, total: data.totalFiles });
+              } else if (data.type === 'progress') {
+                console.log(`📊 Progress: ${data.current}/${data.total} - ${data.filename}`);
+                setBatchProgress({ current: data.current, total: data.total });
+              } else if (data.type === 'result') {
+                console.log(`✅ Resultaat ontvangen: ${data.filename}`, data.success ? 'succesvol' : 'gefaald');
+                
+                // Update batch results met nieuw resultaat
+                setBatchResults((prev) => {
+                  const existingIndex = prev.findIndex((r) => r.filename === data.filename);
+                  const newResult: BatchResult = {
+                    filename: data.filename,
+                    success: data.success,
+                    ...(data.success && data.data ? { data: data.data } : {}),
+                    ...(data.success && data.analysisId ? { analysisId: data.analysisId } : {}),
+                    ...(!data.success && data.error ? { error: data.error } : {}),
+                  };
+                  
+                  if (existingIndex >= 0) {
+                    // Update bestaand resultaat
+                    const updated = [...prev];
+                    updated[existingIndex] = newResult;
+                    return updated;
+                  } else {
+                    // Voeg nieuw resultaat toe
+                    const newResults = [...prev, newResult];
+                    
+                    // Update localStorage voor eerste succesvolle analyse
+                    if (data.success && data.data && prev.length === 0) {
+                      try {
+                        localStorage.setItem('lastAnalysis', JSON.stringify(data.data));
+                      } catch (e) {
+                        console.warn('Kon analyse niet opslaan in localStorage:', e);
+                      }
+                    }
+                    
+                    return newResults;
+                  }
+                });
+                
+                if (data.success) {
+                  successfulCount++;
+                  
+                  // Update localStorage voor succesvolle analyse
+                  try {
+                    const currentCount = localStorage.getItem('analysisCount');
+                    const newCount = currentCount ? parseInt(currentCount, 10) + 1 : 1;
+                    localStorage.setItem('analysisCount', newCount.toString());
+                  } catch (e) {
+                    console.warn('Kon analyse niet opslaan in localStorage:', e);
+                  }
+                }
+              } else if (data.type === 'complete') {
+                console.log('🏁 Batch analyse voltooid:', data);
+                setIsUploading(false);
+                setBatchProgress({ current: data.totalFiles, total: data.totalFiles });
+                
+                // Dispatch event voor alle succesvolle analyses
+                window.dispatchEvent(new Event('analysisUpdated'));
+              }
+            } catch (parseError) {
+              console.warn('Fout bij parsen van SSE data:', parseError, line);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.errors.somethingWentWrong);
+      setIsUploading(false);
+      setBatchProgress({ current: 0, total: 0 });
+    } finally {
+      setSelectedFiles([]);
+    }
+  };
+
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Valideer bestandstypen
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/flac', 'audio/m4a', 'audio/x-m4a'];
+    const validatedFiles = files.filter((file) => {
+      const fileType = file.type || '';
+      const fileName = file.name.toLowerCase();
+      return validTypes.includes(fileType) || 
+        fileName.endsWith('.mp3') || 
+        fileName.endsWith('.wav') || 
+        fileName.endsWith('.flac') || 
+        fileName.endsWith('.m4a');
+    });
+
+    if (validatedFiles.length === 0) {
+      setError(t.errors.invalidFileType);
+      return;
+    }
+
+    if (validatedFiles.length === 1) {
+      // Enkel bestand: gebruik normale analyse
+      handleFileSelect(validatedFiles[0]);
+    } else {
+      // Meerdere bestanden: batch analyse
+      setSelectedFiles(validatedFiles);
+      handleBatchAnalyze(validatedFiles);
     }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileSelect(file);
+    const files = Array.from(e.dataTransfer.files);
+    
+    if (files.length === 0) return;
+
+    // Valideer bestandstypen
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/flac', 'audio/m4a', 'audio/x-m4a'];
+    const validatedFiles = files.filter((file) => {
+      const fileType = file.type || '';
+      const fileName = file.name.toLowerCase();
+      return validTypes.includes(fileType) || 
+        fileName.endsWith('.mp3') || 
+        fileName.endsWith('.wav') || 
+        fileName.endsWith('.flac') || 
+        fileName.endsWith('.m4a');
+    });
+
+    if (validatedFiles.length === 0) {
+      setError(t.errors.invalidFileType);
+      return;
+    }
+
+    if (validatedFiles.length === 1) {
+      handleFileSelect(validatedFiles[0]);
+    } else {
+      setSelectedFiles(validatedFiles);
+      handleBatchAnalyze(validatedFiles);
     }
   };
 
@@ -295,20 +492,20 @@ export default function AnalyzePage() {
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-6 lg:mb-8">
+          <div className="mb-6 lg:mb-8 animate-fade-in-down">
             <h1 className="text-lg sm:text-xl font-semibold mb-2 tracking-tight text-[var(--text-primary)]">{t.analyze.title}</h1>
             <p className="text-[var(--text-secondary)] text-sm">{t.analyze.subtitle}</p>
           </div>
 
           {/* Upload Section */}
-          <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 lg:p-8 border border-[var(--border)] mb-4 sm:mb-6 transition-colors hover:border-[var(--border-hover)]">
+          <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 lg:p-8 border border-[var(--border)] mb-4 sm:mb-6 transition-all duration-200 hover:border-[var(--border-hover)] animate-fade-in-up stagger-1">
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              className={`flex flex-col items-center justify-center py-8 sm:py-12 lg:py-16 border-2 border-dashed rounded-[4px] transition-colors ${
+              className={`flex flex-col items-center justify-center py-8 sm:py-12 lg:py-16 border-2 border-dashed rounded-[4px] transition-all duration-200 ${
                 isDragging
-                  ? 'border-[var(--primary)] bg-[var(--surface-hover)]'
+                  ? 'border-[var(--primary)] bg-[var(--surface-hover)] scale-[1.02]'
                   : 'border-[var(--border)] hover:border-[var(--border-hover)] hover:bg-[var(--background)]'
               }`}
             >
@@ -316,13 +513,33 @@ export default function AnalyzePage() {
                 ref={fileInputRef}
                 type="file"
                 accept="audio/*,.mp3,.wav,.flac,.m4a"
+                multiple
                 onChange={handleFileInputChange}
                 className="hidden"
               />
               {isUploading ? (
                 <>
                   <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-[var(--primary)] mb-4 animate-spin" />
-                  <h3 className="text-base sm:text-lg font-medium text-[var(--text-primary)] mb-2 text-center px-4">{t.analyze.analyzing}</h3>
+                  <h3 className="text-base sm:text-lg font-medium text-[var(--text-primary)] mb-2 text-center px-4">
+                    {batchProgress.total > 1 ? t.analyze.analyzingBatch : t.analyze.analyzing}
+                  </h3>
+                  {batchProgress.total > 1 && (
+                    <>
+                      <p className="text-[var(--text-secondary)] text-xs sm:text-sm mb-2 text-center px-4">
+                        {t.analyze.analyzingProgress.replace('{current}', batchProgress.current.toString()).replace('{total}', batchProgress.total.toString())}
+                      </p>
+                      {batchResults.length > 0 && (
+                        <p className="text-[var(--text-muted)] text-xs text-center px-4">
+                          {batchResults.filter(r => r.success).length} {t.analyze.completed}
+                          {batchResults.filter(r => !r.success).length > 0 && (
+                            <span className="ml-2 text-[var(--error)]">
+                              • {batchResults.filter(r => !r.success).length} {t.analyze.failed}
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </>
+                  )}
                   <p className="text-[var(--text-secondary)] text-xs sm:text-sm mb-2 text-center px-4">{t.analyze.analyzingDescription}</p>
                   {elapsedTime > 25 && (
                     <div className="mt-2 px-4 py-2 bg-[var(--surface)] border border-[var(--warning)] rounded-[4px]">
@@ -341,12 +558,13 @@ export default function AnalyzePage() {
                 <>
                   <Upload className="w-12 h-12 sm:w-16 sm:h-16 text-[var(--text-muted)] mb-4" />
                   <h3 className="text-base sm:text-lg font-medium text-[var(--text-primary)] mb-2 text-center px-4">{t.analyze.uploadMusicFile}</h3>
-                  <p className="text-[var(--text-secondary)] text-xs sm:text-sm mb-6 text-center px-4">{t.analyze.dragDropOrClick}</p>
+                  <p className="text-[var(--text-secondary)] text-xs sm:text-sm mb-2 text-center px-4">{t.analyze.dragDropOrClick}</p>
+                  <p className="text-[var(--text-muted)] text-xs mb-6 text-center px-4">{t.analyze.batchModeDescription}</p>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-5 sm:px-6 py-2.5 sm:py-3 rounded-[4px] transition-colors text-sm sm:text-base"
+                    className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-medium px-5 sm:px-6 py-2.5 sm:py-3 rounded-[4px] transition-all duration-200 text-sm sm:text-base button-press hover-scale"
                   >
-                    {t.analyze.selectFile}
+                    {t.analyze.selectFiles}
                   </button>
                   <div className="mt-4 flex items-center gap-2">
                     <input
@@ -371,10 +589,72 @@ export default function AnalyzePage() {
             )}
           </div>
 
+          {/* Batch Results */}
+          {batchResults.length > 0 && (
+            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] mb-4 sm:mb-6 transition-all duration-200 hover:border-[var(--border-hover)] animate-scale-in">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
+                  <Music className="w-5 h-5 text-[var(--primary)]" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-[var(--text-primary)] font-medium">{t.analyze.batchMode}</h3>
+                  <p className="text-[var(--text-secondary)] text-sm">
+                    {batchResults.filter(r => r.success).length} {t.analyze.completed}, {batchResults.filter(r => !r.success).length} {t.analyze.failed}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {batchResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className={`p-3 rounded-[4px] border transition-all duration-200 hover-scale animate-fade-in-up ${
+                      result.success
+                        ? 'bg-[var(--surface)] border-[var(--success)]/30'
+                        : 'bg-[var(--surface)] border-[var(--error)]/30'
+                    }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {result.success ? (
+                          <CheckCircle2 className="w-5 h-5 text-[var(--success)]" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-[var(--error)]" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[var(--text-primary)] font-medium text-sm truncate mb-1">
+                          {result.filename}
+                        </p>
+                        {result.success && result.data && (
+                          <div className="text-xs text-[var(--text-secondary)] space-y-1">
+                            <div className="flex gap-4">
+                              {result.data.bpm && (
+                                <span>BPM: <span className="font-medium">{result.data.bpm}</span></span>
+                              )}
+                              {result.data.key && (
+                                <span>Key: <span className="font-medium">{result.data.key}</span></span>
+                              )}
+                              <span>Duur: <span className="font-medium">{result.data.duration}</span></span>
+                            </div>
+                          </div>
+                        )}
+                        {!result.success && result.error && (
+                          <p className="text-xs text-[var(--error)]">{result.error}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Analysis Results Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Audio Waveform */}
-            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-colors hover:border-[var(--border-hover)]">
+            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up stagger-2">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
                   <Waves className="w-5 h-5 text-[var(--primary)]" />
@@ -387,7 +667,7 @@ export default function AnalyzePage() {
             </div>
 
             {/* Track Information */}
-            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-colors hover:border-[var(--border-hover)]">
+            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up stagger-3">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
                   <FileAudio className="w-5 h-5 text-[var(--accent)]" />
@@ -412,7 +692,7 @@ export default function AnalyzePage() {
             </div>
 
             {/* Audio Analysis */}
-            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-colors hover:border-[var(--border-hover)]">
+            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up stagger-4">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
                   <BarChart3 className="w-5 h-5 text-[var(--primary)]" />
@@ -444,7 +724,7 @@ export default function AnalyzePage() {
             </div>
 
             {/* Spectral Analysis */}
-            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-colors hover:border-[var(--border-hover)]">
+            <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up stagger-5">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
                   <Music className="w-5 h-5 text-[var(--accent)]" />
@@ -498,10 +778,10 @@ function AnalysisMetric({ label, value, confidence }: { label: string; value: st
         </div>
       </div>
       <div className="w-full bg-[var(--background)] rounded-[4px] h-1.5 border border-[var(--border)]">
-        <div 
-          className={`${confidenceColor} h-1.5 rounded-[4px] transition-all duration-150`} 
-          style={{ width: confidencePercent ? `${confidencePercent}%` : '0%' }}
-        ></div>
+      <div 
+        className={`${confidenceColor} h-1.5 rounded-[4px] transition-all duration-500 ease-out`} 
+        style={{ width: confidencePercent ? `${confidencePercent}%` : '0%' }}
+      ></div>
       </div>
       {confidence != null && (
         <div className="mt-1.5 text-xs text-[var(--text-tertiary)] font-medium">

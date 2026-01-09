@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const totalTracks = analyses.length;
     
     // Totale duur en gemiddelde
-    const totalDurationSeconds = analyses.reduce((sum, a) => sum + (a.duration_seconds || 0), 0);
+    const totalDurationSeconds = analyses.reduce((sum: number, a: any) => sum + (a.duration_seconds || 0), 0);
     const avgDurationSeconds = totalDurationSeconds / totalTracks;
     const avgMinutes = Math.floor(avgDurationSeconds / 60);
     const avgSeconds = Math.floor(avgDurationSeconds % 60);

@@ -148,11 +148,27 @@ export async function POST(request: NextRequest) {
                    file.name.replace(/\.[^/.]+$/, '') || 
                    'Onbekend';
       
-      const duration = analyzerResult?.duration || 
-                      (metadata?.format?.duration ? Math.round(metadata.format.duration) : 0);
+      // Prioriteit: gebruik metadata duur (originele duur), anders analyzer resultaat
+      // Dit is belangrijk omdat bij grote bestanden alleen 2 minuten worden geanalyseerd,
+      // maar we willen wel de volledige originele duur opslaan
+      const metadataDuration = metadata?.format?.duration ? Math.round(metadata.format.duration) : null;
+      const analyzerDuration = analyzerResult?.duration ? Math.round(analyzerResult.duration) : null;
       
-      const durationFormatted = analyzerResult?.duration_formatted || 
-                               (duration ? `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}` : '0:00');
+      // Debug logging om te zien welke duur wordt gebruikt
+      console.log(`📊 Duur voor ${file.name}:`);
+      console.log(`   - Metadata duur: ${metadataDuration ? `${Math.floor(metadataDuration / 60)}:${(metadataDuration % 60).toString().padStart(2, '0')}` : 'niet beschikbaar'}`);
+      console.log(`   - Analyzer duur: ${analyzerDuration ? `${Math.floor(analyzerDuration / 60)}:${(analyzerDuration % 60).toString().padStart(2, '0')}` : 'niet beschikbaar'}`);
+      
+      // Gebruik metadata duur als beschikbaar (meest betrouwbaar voor originele duur)
+      // Alleen als metadata geen duur heeft, gebruik analyzer resultaat
+      const duration = metadataDuration || analyzerDuration || 0;
+      
+      console.log(`   - Gebruikte duur: ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`);
+      
+      const durationFormatted = metadataDuration 
+        ? `${Math.floor(metadataDuration / 60)}:${(metadataDuration % 60).toString().padStart(2, '0')}`
+        : (analyzerResult?.duration_formatted || 
+           (duration ? `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}` : '0:00'));
       
       const bpm = analyzerResult?.bpm || 
                  (metadata?.common?.bpm ? (Array.isArray(metadata.common.bpm) ? metadata.common.bpm[0] : metadata.common.bpm) : null);

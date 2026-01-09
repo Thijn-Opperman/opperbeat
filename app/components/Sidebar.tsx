@@ -35,7 +35,7 @@ export default function Sidebar() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <Link href="/" className="p-4 md:p-6 flex items-center gap-3 border-b border-[var(--border)] hover:bg-[var(--surface-hover)] transition-colors">
+      <Link href="/" className="p-4 md:p-6 flex items-center gap-3 border-b border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all duration-200 hover-scale">
         <div className="p-2 bg-[var(--surface)] rounded-[4px] border border-[var(--border)]">
           <Headphones className="w-5 h-5 text-[var(--primary)]" />
         </div>
@@ -44,7 +44,7 @@ export default function Sidebar() {
 
       {/* Dashboard/Home */}
       <div className="p-3 md:p-4 border-b border-[var(--border)]">
-        <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-[4px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors text-sm font-medium">
+        <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-[4px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-all duration-200 text-sm font-medium">
           <Home className="w-4 h-4" />
           <span>{t.nav.dashboard}</span>
         </Link>
@@ -77,7 +77,7 @@ export default function Sidebar() {
       <div className="p-3 md:p-4 border-t border-[var(--border)]">
         <button
           onClick={logout}
-          className="w-full flex items-center justify-between px-3 py-2.5 rounded-[4px] cursor-pointer transition-colors text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--error)]"
+          className="w-full flex items-center justify-between px-3 py-2.5 rounded-[4px] cursor-pointer transition-all duration-200 text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--error)] button-press"
         >
           <div className="flex items-center gap-3">
             <LogOut className="w-4 h-4" />
@@ -93,7 +93,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-all duration-200 button-press hover-scale animate-fade-in"
         aria-label="Toggle menu"
       >
         {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -102,7 +102,7 @@ export default function Sidebar() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-40 backdrop-blur-md"
+          className="lg:hidden fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-40 backdrop-blur-md animate-fade-in"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -114,7 +114,7 @@ export default function Sidebar() {
 
       {/* Sidebar - Mobile */}
       <div
-        className={`lg:hidden fixed top-0 left-0 h-screen w-64 bg-[var(--surface)] border-r border-[var(--border)] flex flex-col z-50 transform transition-transform duration-200 ease-out ${
+        className={`lg:hidden fixed top-0 left-0 h-screen w-64 bg-[var(--surface)] border-r border-[var(--border)] flex flex-col z-50 transform transition-transform duration-300 ease-out ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -126,10 +126,10 @@ export default function Sidebar() {
 
 function NavItem({ href, icon, label, badge, active }: { href: string; icon: React.ReactNode; label: string; badge?: string; active?: boolean }) {
   const content = (
-    <div className={`flex items-center justify-between px-3 py-2.5 rounded-[4px] cursor-pointer transition-colors relative ${
+    <div className={`flex items-center justify-between px-3 py-2.5 rounded-[4px] cursor-pointer transition-all duration-200 relative ${
       active 
         ? 'bg-[var(--surface-hover)] text-[var(--text-primary)] border-l-2 border-[var(--primary)]' 
-        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
+        : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] hover-scale'
     }`}>
       <div className="flex items-center gap-3">
         <span className={active ? 'text-[var(--primary)]' : 'text-[var(--text-muted)]'}>{icon}</span>
