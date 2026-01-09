@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Music, Settings, LogOut, TrendingUp, ListMusic, Volume2, FileSearch, Menu, X, Library, HelpCircle } from 'lucide-react';
+import { Home, Music, Settings, LogOut, TrendingUp, ListMusic, Volume2, FileSearch, Menu, X, Library, HelpCircle, Download } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 import { useAuth } from '@/lib/auth-context';
 import LanguageSwitch from './LanguageSwitch';
@@ -60,6 +60,7 @@ export default function Sidebar() {
       <div className="flex-1 p-3 md:p-4 space-y-1 overflow-y-auto">
         <NavItem href="/analyze" icon={<FileSearch className="w-4 h-4" />} label={t.nav.musicAnalysis} active={pathname === '/analyze'} />
         <NavItem href="/library" icon={<Library className="w-4 h-4" />} label={t.nav.library} active={pathname === '/library'} />
+        <NavItem href="/download" icon={<Download className="w-4 h-4" />} label="Download" active={pathname === '/download'} />
         <NavItem href="/mixes" icon={<Music className="w-4 h-4" />} label={t.nav.mixesSets} active={pathname === '/mixes'} />
         <NavItem href="/analytics" icon={<TrendingUp className="w-4 h-4" />} label={t.nav.analytics} badge="1" active={pathname === '/analytics'} />
         <NavItem href="/playlists" icon={<ListMusic className="w-4 h-4" />} label={t.nav.playlistBuilder} active={pathname === '/playlists'} />

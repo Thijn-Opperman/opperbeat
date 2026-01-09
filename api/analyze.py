@@ -8,8 +8,11 @@ import tempfile
 import base64
 import traceback
 import logging
+import subprocess
+import re
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ValidationError
 from typing import Optional
 from python.music_analyzer import analyze_audio_simple
@@ -54,6 +57,12 @@ class AnalyzeRequest(BaseModel):
         str_strip_whitespace = False
         # Geen pattern validatie voor base64 strings
         extra = "allow"
+
+
+class DownloadRequest(BaseModel):
+    """Request model voor muziek download"""
+    source: str  # 'youtube', 'soundcloud', 'search'
+    input: str   # URL of zoekterm
 
 
 @app.get("/")
@@ -217,4 +226,200 @@ async def analyze(
                 os.unlink(temp_file_path)
             except:
                 pass
+
+
+def is_youtube_url(url: str) -> bool:
+    """Check of URL een YouTube URL is"""
+    youtube_patterns = [
+        r'(?:https?://)?(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]+)',
+        r'(?:https?://)?(?:www\.)?youtube\.com/embed/([a-zA-Z0-9_-]+)',
+    ]
+    for pattern in youtube_patterns:
+        if re.search(pattern, url):
+            return True
+    return False
+
+
+def is_soundcloud_url(url: str) -> bool:
+    """Check of URL een SoundCloud URL is"""
+    return 'soundcloud.com' in url.lower()
+
+
+def search_youtube(query: str) -> Optional[str]:
+    """Zoek YouTube video op basis van query"""
+    try:
+        import yt_dlp
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': True,
+            'default_search': 'ytsearch1',
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(query, download=False)
+            if info and 'entries' in info and len(info['entries']) > 0:
+                return info['entries'][0]['url']
+    except Exception as e:
+        logger.error(f"Error searching YouTube: {str(e)}")
+    return None
+
+
+def search_soundcloud(query: str) -> Optional[str]:
+    """Zoek SoundCloud track op basis van query"""
+    try:
+        import yt_dlp
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'extract_flat': True,
+            'default_search': 'scsearch1',
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(query, download=False)
+            if info and 'entries' in info and len(info['entries']) > 0:
+                return info['entries'][0]['url']
+    except Exception as e:
+        logger.error(f"Error searching SoundCloud: {str(e)}")
+    return None
+
+
+@app.post("/download")
+async def download_music(request: DownloadRequest):
+    """
+    Download muziek van YouTube, SoundCloud of zoek op naam
+    Converteert naar 320 kbps MP3
+    """
+    temp_dir = tempfile.gettempdir()
+    output_file = None
+    actual_output = None
+    
+    try:
+        source = request.source.lower()
+        input_text = request.input.strip()
+        
+        if not input_text:
+            raise HTTPException(status_code=400, detail="Input is verplicht")
+        
+        logger.info(f"Download request: source={source}, input={input_text[:50]}")
+        
+        # Bepaal URL
+        url = None
+        
+        if source == 'youtube':
+            if is_youtube_url(input_text):
+                url = input_text
+            else:
+                # Zoek op YouTube
+                logger.info(f"Searching YouTube for: {input_text}")
+                url = search_youtube(input_text)
+                if not url:
+                    raise HTTPException(status_code=404, detail="Geen YouTube video gevonden")
+        
+        elif source == 'soundcloud':
+            if is_soundcloud_url(input_text):
+                url = input_text
+            else:
+                # Zoek op SoundCloud
+                logger.info(f"Searching SoundCloud for: {input_text}")
+                url = search_soundcloud(input_text)
+                if not url:
+                    raise HTTPException(status_code=404, detail="Geen SoundCloud track gevonden")
+        
+        elif source == 'search':
+            # Probeer eerst YouTube, dan SoundCloud
+            logger.info(f"Searching for: {input_text}")
+            url = search_youtube(input_text)
+            if not url:
+                url = search_soundcloud(input_text)
+            if not url:
+                raise HTTPException(status_code=404, detail="Geen resultaat gevonden")
+        
+        else:
+            raise HTTPException(status_code=400, detail="Ongeldige source. Gebruik 'youtube', 'soundcloud' of 'search'")
+        
+        if not url:
+            raise HTTPException(status_code=404, detail="Geen URL gevonden")
+        
+        logger.info(f"Downloading from URL: {url}")
+        
+        # Download en converteer naar 320 kbps MP3
+        try:
+            import yt_dlp
+        except ImportError:
+            raise HTTPException(status_code=500, detail="yt-dlp niet geïnstalleerd. Installeer via: pip install yt-dlp")
+        
+        # Genereer output filename
+        output_base = os.path.join(temp_dir, f"download_{os.urandom(8).hex()}")
+        
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'outtmpl': output_base + '.%(ext)s',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '320',
+            }],
+            'quiet': True,
+            'no_warnings': True,
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            title = info.get('title', 'download')
+            # Sanitize filename
+            title = re.sub(r'[^\w\s-]', '', title)[:100]
+            
+            # Find the actual output file
+            actual_output = output_base + '.mp3'
+            if not os.path.exists(actual_output):
+                # Try to find the file with different extensions
+                for ext in ['.m4a', '.webm', '.opus', '.ogg']:
+                    test_file = output_base + ext
+                    if os.path.exists(test_file):
+                        # Convert to MP3
+                        logger.info(f"Converting {ext} to MP3...")
+                        actual_output = output_base + '.mp3'
+                        result = subprocess.run(
+                            ['ffmpeg', '-i', test_file, '-codec:a', 'libmp3lame', '-b:a', '320k', actual_output, '-y'],
+                            capture_output=True,
+                            text=True
+                        )
+                        if result.returncode != 0:
+                            logger.error(f"FFmpeg error: {result.stderr}")
+                            raise HTTPException(status_code=500, detail="Conversie naar MP3 mislukt")
+                        # Remove original
+                        try:
+                            os.unlink(test_file)
+                        except:
+                            pass
+                        break
+            
+            if not os.path.exists(actual_output):
+                raise HTTPException(status_code=500, detail="Download mislukt - bestand niet gevonden")
+            
+            logger.info(f"Download complete: {actual_output}")
+            
+            # Return file as download
+            return FileResponse(
+                actual_output,
+                media_type='audio/mpeg',
+                filename=f"{title}.mp3",
+                headers={
+                    'Content-Disposition': f'attachment; filename="{title}.mp3"'
+                }
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Download error: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=500,
+            detail=f"Fout bij downloaden: {str(e)}"
+        )
+    finally:
+        # Cleanup temp files (na een delay zodat download kan voltooien)
+        # In productie zou je dit via een background task kunnen doen
+        pass
 
