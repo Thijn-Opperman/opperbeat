@@ -284,126 +284,207 @@ export default function AnalyzePage() {
     setBatchProgress({ current: 0, total: files.length });
 
     try {
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-      formData.append('save', saveToDatabase ? 'true' : 'false');
-
-      const response = await fetch('/api/analyze/batch', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: errorText || t.errors.somethingWentWrong };
-        }
-        throw new Error(errorData.error || t.errors.somethingWentWrong);
-      }
-
-      // Lees de streaming response
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      // Stuur start event
+      console.log('🚀 Batch analyse gestart:', files.length, 'bestanden');
       
-      if (!reader) {
-        throw new Error('Kon response stream niet lezen');
-      }
+      let successful = 0;
+      let failed = 0;
 
-      let buffer = '';
-      let successfulCount = 0;
-
-      while (true) {
-        const { done, value } = await reader.read();
+      // Verwerk elk bestand individueel om Vercel payload limiet te voorkomen
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        console.log(`\n🔄 Analyseren bestand ${i + 1}/${files.length}: ${file.name}`);
         
-        if (done) {
-          break;
-        }
+        // Update progress
+        setBatchProgress({ current: i + 1, total: files.length });
 
-        // Decode de chunk en voeg toe aan buffer
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Verwerk complete messages (gescheiden door \n\n)
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || ''; // Bewaar incomplete line in buffer
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6)); // Remove 'data: ' prefix
-              
-              if (data.type === 'start') {
-                console.log('🚀 Batch analyse gestart:', data.totalFiles, 'bestanden');
-                setBatchProgress({ current: 0, total: data.totalFiles });
-              } else if (data.type === 'progress') {
-                console.log(`📊 Progress: ${data.current}/${data.total} - ${data.filename}`);
-                setBatchProgress({ current: data.current, total: data.total });
-              } else if (data.type === 'result') {
-                console.log(`✅ Resultaat ontvangen: ${data.filename}`, data.success ? 'succesvol' : 'gefaald');
-                
-                // Update batch results met nieuw resultaat
-                setBatchResults((prev) => {
-                  const existingIndex = prev.findIndex((r) => r.filename === data.filename);
-                  const newResult: BatchResult = {
-                    filename: data.filename,
-                    success: data.success,
-                    ...(data.success && data.data ? { data: data.data } : {}),
-                    ...(data.success && data.analysisId ? { analysisId: data.analysisId } : {}),
-                    ...(!data.success && data.error ? { error: data.error } : {}),
-                  };
-                  
-                  if (existingIndex >= 0) {
-                    // Update bestaand resultaat
-                    const updated = [...prev];
-                    updated[existingIndex] = newResult;
-                    return updated;
-                  } else {
-                    // Voeg nieuw resultaat toe
-                    const newResults = [...prev, newResult];
-                    
-                    // Update localStorage voor eerste succesvolle analyse
-                    if (data.success && data.data && prev.length === 0) {
-                      try {
-                        localStorage.setItem('lastAnalysis', JSON.stringify(data.data));
-                      } catch (e) {
-                        console.warn('Kon analyse niet opslaan in localStorage:', e);
-                      }
-                    }
-                    
-                    return newResults;
-                  }
-                });
-                
-                if (data.success) {
-                  successfulCount++;
-                  
-                  // Update localStorage voor succesvolle analyse
-                  try {
-                    const currentCount = localStorage.getItem('analysisCount');
-                    const newCount = currentCount ? parseInt(currentCount, 10) + 1 : 1;
-                    localStorage.setItem('analysisCount', newCount.toString());
-                  } catch (e) {
-                    console.warn('Kon analyse niet opslaan in localStorage:', e);
-                  }
-                }
-              } else if (data.type === 'complete') {
-                console.log('🏁 Batch analyse voltooid:', data);
-                setIsUploading(false);
-                setBatchProgress({ current: data.totalFiles, total: data.totalFiles });
-                
-                // Dispatch event voor alle succesvolle analyses
-                window.dispatchEvent(new Event('analysisUpdated'));
-              }
-            } catch (parseError) {
-              console.warn('Fout bij parsen van SSE data:', parseError, line);
+        try {
+          // Check file size - gebruik grote file route als nodig
+          const fileSizeMB = file.size / (1024 * 1024);
+          const isLargeFile = fileSizeMB > 4; // Vercel limit is ~4.5MB
+          
+          let result: any;
+          
+          if (isLargeFile) {
+            // Voor grote bestanden: stuur direct naar Railway
+            console.log(`Large file detected (${fileSizeMB.toFixed(2)}MB), sending directly to Railway...`);
+            
+            const configResponse = await fetch('/api/analyze/config');
+            if (!configResponse.ok) {
+              throw new Error(t.errors.couldNotFetchRailwayUrl);
             }
+            const config = await configResponse.json();
+            const railwayUrl = config.apiUrl;
+            
+            if (!railwayUrl) {
+              throw new Error(t.errors.railwayUrlNotConfigured);
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('include_waveform', fileSizeMB > 5 ? 'false' : 'true');
+            
+            const timeoutMs = 300000; // 5 minuten
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+            
+            try {
+              const railwayResponse = await fetch(railwayUrl, {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal,
+                keepalive: false,
+              });
+              
+              clearTimeout(timeoutId);
+              
+              if (!railwayResponse.ok) {
+                const errorText = await railwayResponse.text();
+                throw new Error(`Railway API error: ${railwayResponse.status} - ${errorText}`);
+              }
+              
+              const railwayResult = await railwayResponse.json();
+              
+              result = {
+                success: true,
+                data: {
+                  title: railwayResult.song_name || file.name.replace(/\.[^/.]+$/, '') || t.metadata.unknown,
+                  duration: railwayResult.duration_formatted || '0:00',
+                  durationSeconds: railwayResult.duration || 0,
+                  bpm: railwayResult.bpm || null,
+                  key: railwayResult.key || null,
+                  confidence: {
+                    bpm: railwayResult.bpm_confidence || null,
+                    key: railwayResult.key_confidence || null,
+                  },
+                  metadata: {
+                    artist: null,
+                    album: null,
+                    genre: null,
+                    bitrate: railwayResult.bitrate || null,
+                    sampleRate: null,
+                  },
+                  ...(railwayResult.waveform && { waveform: railwayResult.waveform }),
+                },
+              };
+
+              // Als saveToDatabase = true, sla op in Supabase
+              if (saveToDatabase) {
+                try {
+                  const saveFormData = new FormData();
+                  saveFormData.append('file', file);
+                  saveFormData.append('analysisData', JSON.stringify(result.data));
+
+                  const saveResponse = await fetch('/api/analyze/save', {
+                    method: 'POST',
+                    body: saveFormData,
+                  });
+
+                  if (saveResponse.ok) {
+                    const saveResult = await saveResponse.json();
+                    result.saved = true;
+                    result.analysisId = saveResult.analysisId;
+                    if (result.data) {
+                      result.data.id = saveResult.analysisId;
+                    }
+                  } else {
+                    const saveError = await saveResponse.json();
+                    result.saveWarning = saveError.error || 'Kon niet opslaan in database';
+                  }
+                } catch (saveError: any) {
+                  result.saveWarning = 'Kon niet opslaan in database: ' + saveError.message;
+                }
+              }
+            } catch (fetchError: any) {
+              clearTimeout(timeoutId);
+              if (fetchError.name === 'AbortError') {
+                throw new Error(t.errors.analysisTimeout);
+              }
+              throw fetchError;
+            }
+          } else {
+            // Voor kleine bestanden: gebruik Vercel API route
+            console.log(`Small file (${fileSizeMB.toFixed(2)}MB), using Vercel API route...`);
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('save', saveToDatabase ? 'true' : 'false');
+
+            const response = await fetch('/api/analyze', {
+              method: 'POST',
+              body: formData,
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.error || t.errors.somethingWentWrong);
+            }
+
+            result = await response.json();
           }
+          
+          // Succesvol resultaat
+          if (result.success && result.data) {
+            successful++;
+            
+            const newResult: BatchResult = {
+              filename: file.name,
+              success: true,
+              data: result.data,
+              analysisId: result.analysisId || null,
+            };
+            
+            setBatchResults((prev) => {
+              // Update localStorage voor eerste succesvolle analyse
+              if (prev.length === 0) {
+                try {
+                  localStorage.setItem('lastAnalysis', JSON.stringify(result.data));
+                } catch (e) {
+                  console.warn('Kon analyse niet opslaan in localStorage:', e);
+                }
+              }
+              
+              return [...prev, newResult];
+            });
+            
+            // Update localStorage voor succesvolle analyse
+            try {
+              const currentCount = localStorage.getItem('analysisCount');
+              const newCount = currentCount ? parseInt(currentCount, 10) + 1 : 1;
+              localStorage.setItem('analysisCount', newCount.toString());
+            } catch (e) {
+              console.warn('Kon analyse niet opslaan in localStorage:', e);
+            }
+            
+            console.log(`✅ Bestand ${i + 1} succesvol geanalyseerd: ${file.name}`);
+          } else {
+            throw new Error('Onbekende fout');
+          }
+        } catch (error: any) {
+          failed++;
+          console.error(`❌ Fout bij analyseren ${file.name}:`, error);
+          
+          const errorResult: BatchResult = {
+            filename: file.name,
+            success: false,
+            error: error.message || 'Onbekende fout',
+          };
+          
+          setBatchResults((prev) => [...prev, errorResult]);
         }
       }
+
+      // Batch voltooid
+      console.log(`\n📊 Batch analyse voltooid:`);
+      console.log(`   - Succesvol: ${successful}`);
+      console.log(`   - Gefaald: ${failed}`);
+      
+      setIsUploading(false);
+      setBatchProgress({ current: files.length, total: files.length });
+      
+      // Dispatch event voor alle succesvolle analyses
+      window.dispatchEvent(new Event('analysisUpdated'));
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : t.errors.somethingWentWrong);
       setIsUploading(false);
