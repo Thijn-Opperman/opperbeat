@@ -39,6 +39,18 @@ export default function DownloadPage() {
         }),
       });
 
+      // Check if response is OK first
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || `Server error: ${response.status} ${response.statusText}` };
+        }
+        throw new Error(errorData.error || errorData.detail || `Fout bij downloaden: ${response.status}`);
+      }
+
       // Check if response is a file (audio/mpeg)
       const contentType = response.headers.get('content-type');
       
@@ -60,8 +72,8 @@ export default function DownloadPage() {
         // JSON response
         const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || 'Fout bij downloaden');
+        if (data.error) {
+          throw new Error(data.error);
         }
 
         if (data.downloadUrl) {

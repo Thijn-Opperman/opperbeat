@@ -84,8 +84,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data);
     } catch (fetchError) {
       console.error('Error calling Python API:', fetchError);
+      const errorMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
       return NextResponse.json(
-        { error: 'Kon niet verbinden met download service. Zorg dat de Python API draait.' },
+        { error: `Kon niet verbinden met download service: ${errorMessage}. Zorg dat de Python API draait op ${downloadUrl}` },
         { status: 503 }
       );
     }
