@@ -348,90 +348,20 @@ async def download_music(request: DownloadRequest):
         except ImportError:
             raise HTTPException(status_code=500, detail="yt-dlp niet geïnstalleerd. Installeer via: pip install yt-dlp")
         
-        # Find FFmpeg path
-        ffmpeg_path = None
-        ffprobe_path = None
-        
-        # Try to find ffmpeg in common locations
-        possible_paths = [
-            '/usr/bin/ffmpeg',
-            '/usr/local/bin/ffmpeg',
-            '/bin/ffmpeg',
-            'ffmpeg',  # In PATH
-        ]
-        
-        for path in possible_paths:
-            try:
-                result = subprocess.run(
-                    [path, '-version'],
-                    capture_output=True,
-                    timeout=2
-                )
-                if result.returncode == 0:
-                    ffmpeg_path = path
-                    logger.info(f"Found ffmpeg at: {ffmpeg_path}")
-                    break
-            except (FileNotFoundError, subprocess.TimeoutExpired):
-                continue
-        
-        # Try to find ffprobe
-        if ffmpeg_path:
-            # Replace 'ffmpeg' with 'ffprobe' in path
-            ffprobe_candidates = [
-                ffmpeg_path.replace('ffmpeg', 'ffprobe'),
-                '/usr/bin/ffprobe',
-                '/usr/local/bin/ffprobe',
-                '/bin/ffprobe',
-                'ffprobe',
-            ]
-            for path in ffprobe_candidates:
-                try:
-                    result = subprocess.run(
-                        [path, '-version'],
-                        capture_output=True,
-                        timeout=2
-                    )
-                    if result.returncode == 0:
-                        ffprobe_path = path
-                        logger.info(f"Found ffprobe at: {ffprobe_path}")
-                        break
-                except (FileNotFoundError, subprocess.TimeoutExpired):
-                    continue
-        
-        if not ffmpeg_path:
-            logger.error("FFmpeg not found. Check Railway logs and ensure nixpacks.toml or Dockerfile includes FFmpeg installation.")
-            raise HTTPException(
-                status_code=500,
-                detail="FFmpeg niet gevonden. Zorg dat FFmpeg is geïnstalleerd op Railway. Check nixpacks.toml of gebruik Dockerfile met FFmpeg."
-            )
-        
         # Genereer output filename
         output_base = os.path.join(temp_dir, f"download_{os.urandom(8).hex()}")
         
-        # Configure yt-dlp options
         ydl_opts = {
             'format': 'bestaudio/best',
             'outtmpl': output_base + '.%(ext)s',
-            'quiet': True,
-            'no_warnings': True,
-        }
-        
-        # Add FFmpeg path if found
-        if ffmpeg_path:
-            ffmpeg_dir = os.path.dirname(ffmpeg_path) if os.path.dirname(ffmpeg_path) else '.'
-            ydl_opts['ffmpeg_location'] = ffmpeg_dir
-            logger.info(f"Using FFmpeg from: {ffmpeg_dir}")
-            
-            # Add postprocessor for MP3 conversion if FFmpeg is available
-            ydl_opts['postprocessors'] = [{
+            'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '320',
-            }]
-        else:
-            # If FFmpeg not found, download best audio and convert manually
-            logger.warning("FFmpeg not found, will download and convert manually")
-            ydl_opts['postprocessors'] = []
+            }],
+            'quiet': True,
+            'no_warnings': True,
+        }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
@@ -449,10 +379,8 @@ async def download_music(request: DownloadRequest):
                         # Convert to MP3
                         logger.info(f"Converting {ext} to MP3...")
                         actual_output = output_base + '.mp3'
-                        # Use detected ffmpeg path
-                        ffmpeg_cmd = ffmpeg_path if ffmpeg_path else 'ffmpeg'
                         result = subprocess.run(
-                            [ffmpeg_cmd, '-i', test_file, '-codec:a', 'libmp3lame', '-b:a', '320k', actual_output, '-y'],
+                            ['ffmpeg', '-i', test_file, '-codec:a', 'libmp3lame', '-b:a', '320k', actual_output, '-y'],
                             capture_output=True,
                             text=True
                         )

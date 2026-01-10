@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check of Python API beschikbaar is
-    let pythonApiUrl = process.env.PYTHON_API_URL || process.env.NEXT_PUBLIC_PYTHON_API_URL;
+    const pythonApiUrl = process.env.PYTHON_API_URL || process.env.NEXT_PUBLIC_PYTHON_API_URL;
     
     if (!pythonApiUrl) {
       return NextResponse.json(
@@ -30,17 +30,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Remove /api/analyze from URL if present (for download endpoint)
-    // PYTHON_API_URL might be: https://xxx.up.railway.app/api/analyze
-    // But download endpoint is at: https://xxx.up.railway.app/download
-    const baseUrl = pythonApiUrl.replace(/\/api\/analyze\/?$/, '');
-    const downloadUrl = `${baseUrl}/download`;
-
-    console.log('Download request:', { source, input, pythonApiUrl, baseUrl, downloadUrl });
-
     // Forward request naar Python API
     try {
-      const response = await fetch(downloadUrl, {
+      const response = await fetch(`${pythonApiUrl}/download`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,9 +76,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(data);
     } catch (fetchError) {
       console.error('Error calling Python API:', fetchError);
-      const errorMessage = fetchError instanceof Error ? fetchError.message : String(fetchError);
       return NextResponse.json(
-        { error: `Kon niet verbinden met download service: ${errorMessage}. Zorg dat de Python API draait op ${downloadUrl}` },
+        { error: 'Kon niet verbinden met download service. Zorg dat de Python API draait.' },
         { status: 503 }
       );
     }
