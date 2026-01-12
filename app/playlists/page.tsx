@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { ListMusic, Plus, Play, Clock, Music, MoreVertical, Search, X, Edit2, Trash2, Loader2, AlertCircle } from 'lucide-react';
+import { ListMusic, Plus, Play, Clock, Music, MoreVertical, Search, X, Edit2, Trash2, Loader2, AlertCircle, Wrench } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
+import { useRouter } from 'next/navigation';
 
 interface Playlist {
   id: string;
@@ -18,6 +19,7 @@ interface Playlist {
 
 export default function PlaylistsPage() {
   const { t } = useI18n();
+  const router = useRouter();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -233,6 +235,7 @@ export default function PlaylistsPage() {
               {filteredPlaylists.map((playlist, index) => (
               <div
                 key={playlist.id}
+                onClick={() => router.push(`/playlists/${playlist.id}/builder`)}
                 className="bg-[var(--surface)] rounded-[4px] p-3 sm:p-4 border border-[var(--border)] hover:border-[var(--border-hover)] transition-all duration-200 cursor-pointer group hover-lift animate-fade-in-up"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
@@ -276,7 +279,17 @@ export default function PlaylistsPage() {
                       >
                         <MoreVertical className="w-5 h-5 text-[var(--text-tertiary)]" />
                       </button>
-                      <div className="absolute right-0 top-full mt-1 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 min-w-[120px]">
+                      <div className="absolute right-0 top-full mt-1 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 min-w-[160px]">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/playlists/${playlist.id}/builder`);
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] flex items-center gap-2 transition-all duration-200"
+                        >
+                          <Wrench className="w-4 h-4" />
+                          Builder
+                        </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
