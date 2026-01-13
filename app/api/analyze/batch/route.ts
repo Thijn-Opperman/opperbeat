@@ -8,8 +8,34 @@ import { randomUUID } from 'crypto';
 import { extractArtwork } from '@/lib/extract-artwork';
 import { uploadAudioFile, uploadArtwork } from '@/lib/storage-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
+import { MusicMetadata, AnalyzerResult, WaveformData } from '@/lib/types';
 
-async function analyzeSingleFile(file: File, saveToDatabase: boolean, userId: string | null): Promise<any> {
+interface BatchAnalysisResult {
+  success: boolean;
+  data?: {
+    title: string;
+    duration: string;
+    durationSeconds: number;
+    bpm: number | null;
+    key: string | null;
+    confidence: {
+      bpm: number | null;
+      key: number | null;
+    };
+    metadata: {
+      artist: string | null;
+      album: string | null;
+      genre: string | null;
+      bitrate: number | null;
+      sampleRate: number | null;
+    };
+    waveform: WaveformData | null;
+  };
+  analysisId?: string | null;
+  error?: string;
+}
+
+async function analyzeSingleFile(file: File, saveToDatabase: boolean, userId: string | null): Promise<BatchAnalysisResult> {
   // Maak een tijdelijk bestand aan voor metadata parsing
   const tempDir = os.tmpdir();
   const tempFilePath = path.join(tempDir, `audio-${Date.now()}-${randomUUID()}-${file.name}`);
@@ -21,7 +47,7 @@ async function analyzeSingleFile(file: File, saveToDatabase: boolean, userId: st
 
   try {
     // Parse metadata met music-metadata
-    let metadata: any = null;
+    let metadata: MusicMetadata | null = null;
     try {
       metadata = await parseFile(tempFilePath);
     } catch (metaError) {
@@ -29,7 +55,7 @@ async function analyzeSingleFile(file: File, saveToDatabase: boolean, userId: st
     }
 
     // Roep externe Python analyzer API aan (Railway)
-    let analyzerResult: any = null;
+    let analyzerResult: AnalyzerResult | null = null;
     try {
       const apiUrl = process.env.PYTHON_API_URL || process.env.NEXT_PUBLIC_PYTHON_API_URL;
       
@@ -184,7 +210,7 @@ async function analyzeSingleFile(file: File, saveToDatabase: boolean, userId: st
         }
 
         savedAnalysisId = dbData.id;
-      } catch (saveError: any) {
+      } catch (saveError: unknown) {
         console.error('❌ Fout bij opslaan van analyse:', saveError);
         throw saveError;
       }
@@ -310,14 +336,15 @@ export async function POST(request: NextRequest) {
             } else {
               throw new Error('Onbekende fout');
             }
-          } catch (error: any) {
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Onbekende fout';
             failed++;
             console.error(`❌ Fout bij analyseren ${file.name}:`, error);
             const errorData = {
               type: 'result',
               filename: file.name,
               success: false,
-              error: error.message || 'Onbekende fout',
+              error: errorMessage,
               current: i + 1,
               total: validatedFiles.length,
               timestamp: new Date().toISOString(),

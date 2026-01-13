@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getUserId } from '@/lib/auth-helpers';
+import { PAGINATION } from '@/lib/constants';
+import { handleUnknownError } from '@/lib/error-handler';
 
 /**
  * GET /api/analyses
@@ -20,7 +22,7 @@ export async function GET(request: NextRequest) {
     let userId: string | null = null;
     try {
       userId = await getUserId(request, true); // allowAnonymous voor development
-    } catch (authError) {
+    } catch {
       // Voor development: gebruik null
       userId = null;
     }
@@ -31,7 +33,7 @@ export async function GET(request: NextRequest) {
     const key = searchParams.get('key');
     const genre = searchParams.get('genre');
     const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit') || '50', 10);
+    const limit = parseInt(searchParams.get('limit') || PAGINATION.DEFAULT_LIMIT.toString(), 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
 
     // Start query builder
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Voer query uit
-    const { data, error, count } = await query;
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching analyses:', error);
@@ -107,11 +109,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in GET /api/analyses:', error);
-    return NextResponse.json(
-      { error: 'Interne serverfout', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    return handleUnknownError(error);
   }
 }
 
@@ -126,7 +124,7 @@ export async function DELETE(request: NextRequest) {
     let userId: string | null = null;
     try {
       userId = await getUserId(request, true);
-    } catch (authError) {
+    } catch {
       // Voor development: gebruik null
       userId = null;
     }
@@ -169,11 +167,7 @@ export async function DELETE(request: NextRequest) {
       deleted: data?.length || 0,
     });
   } catch (error) {
-    console.error('Error in DELETE /api/analyses:', error);
-    return NextResponse.json(
-      { error: 'Interne serverfout', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    return handleUnknownError(error);
   }
 }
 

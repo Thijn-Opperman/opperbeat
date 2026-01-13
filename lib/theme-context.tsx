@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: Theme;
@@ -13,23 +13,9 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
+  const [theme, setThemeState] = useState<Theme>('dark');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
-
-  // Get system preference
-  const getSystemTheme = (): 'light' | 'dark' => {
-    if (typeof window === 'undefined') return 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  };
-
-  // Resolve theme based on preference
-  const resolveTheme = (themePreference: Theme): 'light' | 'dark' => {
-    if (themePreference === 'system') {
-      return getSystemTheme();
-    }
-    return themePreference;
-  };
 
   // Apply theme to document
   const applyTheme = (themeToApply: 'light' | 'dark') => {
@@ -39,46 +25,28 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.setAttribute('data-theme', themeToApply);
   };
 
-  // Initialize theme from localStorage or system preference
+  // Initialize theme from localStorage or default to dark
   useEffect(() => {
     const stored = localStorage.getItem('theme') as Theme | null;
-    const initialTheme = stored || 'system';
+    const initialTheme = stored || 'dark';
     setThemeState(initialTheme);
-    const resolved = resolveTheme(initialTheme);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
+    setResolvedTheme(initialTheme);
+    applyTheme(initialTheme);
     setMounted(true);
   }, []);
 
   // Update resolved theme when theme preference changes
   useEffect(() => {
     if (!mounted) return;
-    const resolved = resolveTheme(theme);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
-  }, [theme, mounted]);
-
-  // Listen for system theme changes
-  useEffect(() => {
-    if (!mounted || theme !== 'system') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      const resolved = resolveTheme('system');
-      setResolvedTheme(resolved);
-      applyTheme(resolved);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    setResolvedTheme(theme);
+    applyTheme(theme);
   }, [theme, mounted]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem('theme', newTheme);
-    const resolved = resolveTheme(newTheme);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
+    setResolvedTheme(newTheme);
+    applyTheme(newTheme);
   };
 
   // Prevent flash of wrong theme

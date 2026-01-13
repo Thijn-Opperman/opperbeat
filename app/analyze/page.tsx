@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Upload, FileAudio, BarChart3, Music, Waves, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
+import { WaveformData, isWaveformObject } from '@/lib/types';
 
 interface AnalysisData {
   title: string;
@@ -22,13 +23,16 @@ interface AnalysisData {
     bitrate: number | null;
     sampleRate: number | null;
   };
-  waveform?: {
-    waveform: number[];
-    waveform_samples?: number;
-    original_samples?: number;
-    sample_rate?: number;
-    downsampled?: boolean;
-  } | null;
+  waveform?: WaveformData | null;
+  id?: string;
+}
+
+interface AnalysisApiResponse {
+  success: boolean;
+  data?: AnalysisData;
+  saved?: boolean;
+  analysisId?: string | null;
+  saveWarning?: string;
 }
 
 interface BatchResult {
@@ -47,7 +51,6 @@ export default function AnalyzePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [saveToDatabase, setSaveToDatabase] = useState(true); // Standaard opslaan
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [batchResults, setBatchResults] = useState<BatchResult[]>([]);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,7 +112,7 @@ export default function AnalyzePage() {
       const fileSizeMB = file.size / (1024 * 1024);
       const isLargeFile = fileSizeMB > 4; // Vercel limit is ~4.5MB
       
-      let result: any;
+      let result: AnalysisApiResponse;
       
       if (isLargeFile) {
         // Voor grote bestanden: stuur direct naar Railway om Vercel's body size limit te omzeilen
@@ -192,7 +195,7 @@ export default function AnalyzePage() {
             },
           };
           
-          console.log('Formatted result with waveform:', result.data.waveform ? 'Present' : 'Missing');
+          console.log('Formatted result with waveform:', result.data?.waveform ? 'Present' : 'Missing');
 
           // Als saveToDatabase = true, sla op in Supabase
           if (saveToDatabase) {
@@ -201,7 +204,9 @@ export default function AnalyzePage() {
               
               const saveFormData = new FormData();
               saveFormData.append('file', file);
-              saveFormData.append('analysisData', JSON.stringify(result.data));
+              if (result.data) {
+                saveFormData.append('analysisData', JSON.stringify(result.data));
+              }
 
               const saveResponse = await fetch('/api/analyze/save', {
                 method: 'POST',
@@ -223,19 +228,22 @@ export default function AnalyzePage() {
                 console.warn('⚠️ Opslaan mislukt:', saveError.error);
                 result.saveWarning = saveError.error || 'Kon niet opslaan in database';
               }
-            } catch (saveError: any) {
-              console.warn('⚠️ Fout bij opslaan:', saveError.message);
-              result.saveWarning = 'Kon niet opslaan in database: ' + saveError.message;
+            } catch (saveError: unknown) {
+              const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
+              console.warn('⚠️ Fout bij opslaan:', errorMessage);
+              result.saveWarning = 'Kon niet opslaan in database: ' + errorMessage;
             }
           }
-        } catch (fetchError: any) {
+        } catch (fetchError: unknown) {
           clearTimeout(timeoutId);
-          if (fetchError.name === 'AbortError') {
-            throw new Error(t.errors.analysisTimeout);
-          }
-          // Check voor network errors
-          if (fetchError.message && fetchError.message.includes('Load failed')) {
-            throw new Error(t.errors.connectionLost);
+          if (fetchError instanceof Error) {
+            if (fetchError.name === 'AbortError') {
+              throw new Error(t.errors.analysisTimeout);
+            }
+            // Check voor network errors
+            if (fetchError.message && fetchError.message.includes('Load failed')) {
+              throw new Error(t.errors.connectionLost);
+            }
           }
           throw fetchError;
         }
@@ -260,11 +268,13 @@ export default function AnalyzePage() {
         result = await response.json();
         console.log('Vercel API Response:', result);
         if (result.data?.waveform) {
+          const waveform = result.data.waveform;
+          const waveformArray = isWaveformObject(waveform) ? waveform.waveform : (Array.isArray(waveform) ? waveform : []);
           console.log('Vercel waveform structure:', {
-            hasWaveform: !!result.data.waveform.waveform,
-            isArray: Array.isArray(result.data.waveform.waveform),
-            length: result.data.waveform.waveform?.length || 0,
-            keys: Object.keys(result.data.waveform)
+            hasWaveform: waveformArray.length > 0,
+            isArray: Array.isArray(waveform),
+            length: waveformArray.length,
+            keys: isWaveformObject(waveform) ? Object.keys(waveform) : []
           });
         }
       }
@@ -274,11 +284,13 @@ export default function AnalyzePage() {
         console.log('Analysis Data:', result.data);
         console.log('Waveform data:', result.data.waveform ? 'Present' : 'Missing');
         if (result.data.waveform) {
+          const waveform = result.data.waveform;
+          const waveformArray = isWaveformObject(waveform) ? waveform.waveform : (Array.isArray(waveform) ? waveform : []);
           console.log('Waveform structure:', {
-            hasWaveform: !!result.data.waveform.waveform,
-            isArray: Array.isArray(result.data.waveform.waveform),
-            length: result.data.waveform.waveform?.length || 0,
-            keys: Object.keys(result.data.waveform)
+            hasWaveform: waveformArray.length > 0,
+            isArray: Array.isArray(waveform),
+            length: waveformArray.length,
+            keys: isWaveformObject(waveform) ? Object.keys(waveform) : []
           });
         }
         setAnalysisData(result.data);
@@ -340,7 +352,7 @@ export default function AnalyzePage() {
           const fileSizeMB = file.size / (1024 * 1024);
           const isLargeFile = fileSizeMB > 4; // Vercel limit is ~4.5MB
           
-          let result: any;
+          let result: AnalysisApiResponse;
           
           if (isLargeFile) {
             // Voor grote bestanden: stuur direct naar Railway
@@ -429,13 +441,14 @@ export default function AnalyzePage() {
                     const saveError = await saveResponse.json();
                     result.saveWarning = saveError.error || 'Kon niet opslaan in database';
                   }
-                } catch (saveError: any) {
-                  result.saveWarning = 'Kon niet opslaan in database: ' + saveError.message;
+                } catch (saveError: unknown) {
+                  const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
+                  result.saveWarning = 'Kon niet opslaan in database: ' + errorMessage;
                 }
               }
-            } catch (fetchError: any) {
+            } catch (fetchError: unknown) {
               clearTimeout(timeoutId);
-              if (fetchError.name === 'AbortError') {
+              if (fetchError instanceof Error && fetchError.name === 'AbortError') {
                 throw new Error(t.errors.analysisTimeout);
               }
               throw fetchError;
@@ -498,14 +511,15 @@ export default function AnalyzePage() {
           } else {
             throw new Error('Onbekende fout');
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           failed++;
+          const errorMessage = error instanceof Error ? error.message : 'Onbekende fout';
           console.error(`❌ Fout bij analyseren ${file.name}:`, error);
           
           const errorResult: BatchResult = {
             filename: file.name,
             success: false,
-            error: error.message || 'Onbekende fout',
+            error: errorMessage,
           };
           
           setBatchResults((prev) => [...prev, errorResult]);
@@ -527,8 +541,6 @@ export default function AnalyzePage() {
       setError(err instanceof Error ? err.message : t.errors.somethingWentWrong);
       setIsUploading(false);
       setBatchProgress({ current: 0, total: 0 });
-    } finally {
-      setSelectedFiles([]);
     }
   };
 
@@ -558,7 +570,6 @@ export default function AnalyzePage() {
       handleFileSelect(validatedFiles[0]);
     } else {
       // Meerdere bestanden: batch analyse
-      setSelectedFiles(validatedFiles);
       handleBatchAnalyze(validatedFiles);
     }
   };
@@ -590,7 +601,6 @@ export default function AnalyzePage() {
     if (validatedFiles.length === 1) {
       handleFileSelect(validatedFiles[0]);
     } else {
-      setSelectedFiles(validatedFiles);
       handleBatchAnalyze(validatedFiles);
     }
   };
@@ -860,7 +870,7 @@ export default function AnalyzePage() {
 }
 
 // Waveform visualization component
-function WaveformVisualization({ waveform }: { waveform: any | null }) {
+function WaveformVisualization({ waveform }: { waveform: WaveformData | null }) {
   const { t } = useI18n();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -883,7 +893,7 @@ function WaveformVisualization({ waveform }: { waveform: any | null }) {
     
     // Handle different waveform formats
     let waveformData: number[] = [];
-    if (waveform.waveform && Array.isArray(waveform.waveform)) {
+    if (isWaveformObject(waveform)) {
       waveformData = waveform.waveform;
       console.log('WaveformVisualization - Using waveform.waveform array, length:', waveformData.length);
     } else if (Array.isArray(waveform)) {
@@ -944,7 +954,7 @@ function WaveformVisualization({ waveform }: { waveform: any | null }) {
 
   // Check if waveform data exists and is valid
   const hasValidWaveform = waveform && (
-    (waveform.waveform && Array.isArray(waveform.waveform) && waveform.waveform.length > 0) ||
+    (isWaveformObject(waveform) && waveform.waveform.length > 0) ||
     (Array.isArray(waveform) && waveform.length > 0)
   );
 

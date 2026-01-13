@@ -8,6 +8,8 @@ import { extractArtwork } from '@/lib/extract-artwork';
 import { uploadAudioFile, uploadArtwork } from '@/lib/storage-helpers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getUserId } from '@/lib/auth-helpers';
+import { MusicMetadata, AnalyzerResult } from '@/lib/types';
+import { handleUnknownError } from '@/lib/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Parse metadata met music-metadata (voor snelle metadata)
-      let metadata: any = null;
+      let metadata: MusicMetadata | null = null;
       try {
         metadata = await parseFile(tempFilePath);
       } catch (metaError) {
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Roep externe Python analyzer API aan (Railway)
-      let analyzerResult: any = null;
+      let analyzerResult: AnalyzerResult | null = null;
       try {
         console.log('Roep Python analyzer API aan...');
         
@@ -118,18 +120,19 @@ export async function POST(request: NextRequest) {
 
             analyzerResult = await response.json();
             console.log('✅ Analyzer resultaat ontvangen:', analyzerResult);
-          } catch (fetchError: any) {
+          } catch (fetchError: unknown) {
             clearTimeout(timeoutId);
-            if (fetchError.name === 'AbortError') {
+            if (fetchError instanceof Error && fetchError.name === 'AbortError') {
               throw new Error('Analyse timeout: Het bestand is te groot of de analyse duurt te lang. Probeer een kleiner bestand of korter nummer.');
             }
             throw fetchError;
           }
         }
         
-      } catch (analyzerError: any) {
+      } catch (analyzerError: unknown) {
+        const errorMessage = analyzerError instanceof Error ? analyzerError.message : String(analyzerError);
         console.error('❌ Fout bij Python analyzer API:', analyzerError);
-        console.error('Error message:', analyzerError.message);
+        console.error('Error message:', errorMessage);
         // Als analyzer faalt, gebruik metadata waarden als fallback
         // Gooi alleen error als we ook geen metadata hebben
         if (!metadata) {
@@ -171,11 +174,19 @@ export async function POST(request: NextRequest) {
            (duration ? `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}` : '0:00'));
       
       const bpm = analyzerResult?.bpm || 
-                 (metadata?.common?.bpm ? (Array.isArray(metadata.common.bpm) ? metadata.common.bpm[0] : metadata.common.bpm) : null);
+                 (metadata?.common?.bpm 
+                   ? (Array.isArray(metadata.common.bpm) 
+                       ? metadata.common.bpm[0] 
+                       : (typeof metadata.common.bpm === 'number' ? metadata.common.bpm : null))
+                   : null);
       
       // Railway retourneert 'key' als key_full (bijv. "C major")
       const key = analyzerResult?.key || 
-                 (metadata?.common?.key ? (Array.isArray(metadata.common.key) ? metadata.common.key[0] : metadata.common.key) : null);
+                 (metadata?.common?.key 
+                   ? (Array.isArray(metadata.common.key) 
+                       ? metadata.common.key[0] 
+                       : (typeof metadata.common.key === 'string' ? metadata.common.key : null))
+                   : null);
       
       const finalBitrate = analyzerResult?.bitrate || 
                           (metadata?.format?.bitrate ? Math.round(metadata.format.bitrate / 1000) : null);
@@ -287,14 +298,15 @@ export async function POST(request: NextRequest) {
           savedAnalysisId = dbData.id;
           console.log('✅ Analyse opgeslagen in database met ID:', savedAnalysisId);
 
-        } catch (saveError: any) {
+        } catch (saveError: unknown) {
+          const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);
           console.error('❌ Fout bij opslaan van analyse:', saveError);
           // Return analysis data maar zonder database ID
           return NextResponse.json({
             success: true,
             data: analysisData,
             warning: 'Analyse voltooid, maar opslaan in database is mislukt',
-            error: saveError.message,
+            error: errorMessage,
           }, { status: 200 });
         } finally {
           // Verwijder temp file na opslag (ook bij errors)

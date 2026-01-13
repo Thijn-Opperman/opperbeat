@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getUserId } from '@/lib/auth-helpers';
+import { MusicAnalysis } from '@/lib/types';
+import { handleUnknownError } from '@/lib/error-handler';
 
 /**
  * GET /api/analytics
@@ -12,7 +14,7 @@ export async function GET(request: NextRequest) {
     let userId: string | null = null;
     try {
       userId = await getUserId(request, true); // allowAnonymous voor development
-    } catch (authError) {
+    } catch {
       // Voor development: gebruik null
       userId = null;
     }
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest) {
     const totalTracks = analyses.length;
     
     // Totale duur en gemiddelde
-    const totalDurationSeconds = analyses.reduce((sum: number, a: any) => sum + (a.duration_seconds || 0), 0);
+    const totalDurationSeconds = analyses.reduce((sum: number, a: MusicAnalysis) => sum + (a.duration || 0), 0);
     const avgDurationSeconds = totalDurationSeconds / totalTracks;
     const avgMinutes = Math.floor(avgDurationSeconds / 60);
     const avgSeconds = Math.floor(avgDurationSeconds % 60);
@@ -163,11 +165,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error in GET /api/analytics:', error);
-    return NextResponse.json(
-      { error: 'Interne serverfout', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    return handleUnknownError(error);
   }
 }
 

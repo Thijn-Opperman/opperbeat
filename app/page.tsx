@@ -10,9 +10,12 @@ import SetLengthCard from './components/SetLengthCard';
 import TagSuggestionsWidget from './components/TagSuggestionsWidget';
 import SetSuggestionsWidget from './components/SetSuggestionsWidget';
 import CuePointsWidget from './components/CuePointsWidget';
+import SmartCratesWidget from './components/SmartCratesWidget';
 import { useI18n } from '@/lib/i18n-context';
 import { useAuth } from '@/lib/auth-context';
 import { TrendingUp, Clock, User, Download, Music, Key, Gauge, ListMusic, ExternalLink, Play, Search } from 'lucide-react';
+import { PAGINATION, BPM_TOLERANCE, TIME } from '@/lib/constants';
+import { MusicAnalysis } from '@/lib/types';
 
 function QuickStatsWidget() {
   const [stats, setStats] = useState<{ totalTracks: number; avgBPM: number | null }>({ totalTracks: 0, avgBPM: null });
@@ -23,7 +26,7 @@ function QuickStatsWidget() {
       try {
         const [analyticsRes, analysesRes] = await Promise.all([
           fetch('/api/analytics'),
-          fetch('/api/analyses?limit=100'),
+          fetch(`/api/analyses?limit=${PAGINATION.WIDGET_LIMIT}`),
         ]);
 
         if (analyticsRes.ok) {
@@ -36,7 +39,7 @@ function QuickStatsWidget() {
         if (analysesRes.ok) {
           const analyses = await analysesRes.json();
           if (analyses.data && analyses.data.length > 0) {
-            const bpms = analyses.data.filter((a: any) => a.bpm).map((a: any) => a.bpm);
+            const bpms = analyses.data.filter((a: MusicAnalysis) => a.bpm).map((a: MusicAnalysis) => a.bpm);
             const avgBPM = bpms.length > 0 
               ? Math.round(bpms.reduce((sum: number, bpm: number) => sum + bpm, 0) / bpms.length)
               : null;
@@ -94,14 +97,14 @@ function RecentActivityWidget() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/analyses?limit=10');
+        const response = await fetch(`/api/analyses?limit=${PAGINATION.SMALL_WIDGET_LIMIT}`);
         if (response.ok) {
           const result = await response.json();
           if (result.data && result.data.length > 0) {
             const latest = result.data[0];
             const lastDate = new Date(latest.created_at);
             const now = new Date();
-            const diffHours = Math.floor((now.getTime() - lastDate.getTime()) / (1000 * 60 * 60));
+            const diffHours = Math.floor((now.getTime() - lastDate.getTime()) / TIME.ONE_HOUR_MS);
             
             let timeAgo = '';
             if (diffHours < 1) {
@@ -116,7 +119,7 @@ function RecentActivityWidget() {
             // Count tracks added today
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const todayTracks = result.data.filter((a: any) => {
+            const todayTracks = result.data.filter((a: MusicAnalysis) => {
               const created = new Date(a.created_at);
               return created >= today;
             }).length;
@@ -260,6 +263,11 @@ export default function Home() {
 
             {/* Cue Points Widget */}
             <CuePointsWidget />
+
+            {/* Smart Crates Widget - 2 kolommen */}
+            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2 animate-fade-in-up stagger-14">
+              <SmartCratesWidget />
+            </div>
           </div>
         </div>
       </div>
@@ -331,7 +339,7 @@ function DownloadWidget() {
   useEffect(() => {
     const fetchRecent = async () => {
       try {
-        const response = await fetch('/api/analyses?limit=1');
+        const response = await fetch(`/api/analyses?limit=${PAGINATION.MINIMAL_LIMIT}`);
         if (response.ok) {
           const result = await response.json();
           if (result.data && result.data.length > 0) {
@@ -395,7 +403,7 @@ function BPMMatcherWidget() {
   useEffect(() => {
     const fetchBPMData = async () => {
       try {
-        const response = await fetch('/api/analyses?limit=1');
+        const response = await fetch(`/api/analyses?limit=${PAGINATION.MINIMAL_LIMIT}`);
         if (response.ok) {
           const result = await response.json();
           if (result.data && result.data.length > 0 && result.data[0].bpm) {
@@ -403,11 +411,11 @@ function BPMMatcherWidget() {
             setLastBPM(bpm);
             
             // Find tracks with similar BPM (±5 BPM)
-            const matchesResponse = await fetch(`/api/analyses?limit=100`);
+            const matchesResponse = await fetch(`/api/analyses?limit=${PAGINATION.WIDGET_LIMIT}`);
             if (matchesResponse.ok) {
               const matchesResult = await matchesResponse.json();
-              const similarTracks = matchesResult.data?.filter((a: any) => 
-                a.bpm && Math.abs(a.bpm - bpm) <= 5
+              const similarTracks = matchesResult.data?.filter((a: MusicAnalysis) => 
+                a.bpm && Math.abs(a.bpm - bpm) <= BPM_TOLERANCE
               ) || [];
               setMatches(similarTracks.length);
             }
@@ -460,7 +468,7 @@ function KeyMatcherWidget() {
   useEffect(() => {
     const fetchKeyData = async () => {
       try {
-        const response = await fetch('/api/analyses?limit=1');
+        const response = await fetch(`/api/analyses?limit=${PAGINATION.MINIMAL_LIMIT}`);
         if (response.ok) {
           const result = await response.json();
           if (result.data && result.data.length > 0 && result.data[0].key) {
@@ -468,10 +476,10 @@ function KeyMatcherWidget() {
             setLastKey(key);
             
             // Find tracks with same key
-            const matchesResponse = await fetch(`/api/analyses?limit=100`);
+            const matchesResponse = await fetch(`/api/analyses?limit=${PAGINATION.WIDGET_LIMIT}`);
             if (matchesResponse.ok) {
               const matchesResult = await matchesResponse.json();
-              const sameKeyTracks = matchesResult.data?.filter((a: any) => 
+              const sameKeyTracks = matchesResult.data?.filter((a: MusicAnalysis) => 
                 a.key && a.key === key
               ) || [];
               setMatches(sameKeyTracks.length);

@@ -5,23 +5,11 @@ import Sidebar from '../components/Sidebar';
 import { Music, Search, Filter, X, Loader2, AlertCircle, Play, Trash2 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 import Link from 'next/link';
-
-interface MusicAnalysis {
-  id: string;
-  title: string;
-  artist: string | null;
-  album: string | null;
-  genre: string | null;
-  bpm: number | null;
-  key: string | null;
-  duration_formatted: string;
-  artwork_public_url: string | null;
-  waveform: any | null;
-  created_at: string;
-}
+import { MusicAnalysis, WaveformData, isWaveformObject } from '@/lib/types';
+import { PAGINATION } from '@/lib/constants';
 
 // Simple waveform visualization component
-function WaveformPreview({ waveform }: { waveform: any | null }) {
+function WaveformPreview({ waveform }: { waveform: WaveformData | null }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -36,7 +24,7 @@ function WaveformPreview({ waveform }: { waveform: any | null }) {
     
     // Handle different waveform formats
     let waveformData: number[] = [];
-    if (waveform.waveform && Array.isArray(waveform.waveform)) {
+    if (isWaveformObject(waveform)) {
       waveformData = waveform.waveform;
     } else if (Array.isArray(waveform)) {
       waveformData = waveform;
@@ -100,7 +88,7 @@ export default function LibraryPage() {
   const [total, setTotal] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; title: string } | null>(null);
-  const limit = 20;
+  const limit = PAGINATION.LIBRARY_PAGE_LIMIT;
 
   const fetchAnalyses = async (resetOffset = false) => {
     try {
@@ -135,7 +123,7 @@ export default function LibraryPage() {
 
       // Debug: check waveform data
       if (data.data && data.data.length > 0) {
-        const withWaveform = data.data.filter((a: any) => a.waveform).length;
+        const withWaveform = data.data.filter((a: MusicAnalysis) => a.waveform).length;
         console.log(`📊 Library: ${data.data.length} analyses, ${withWaveform} met waveform`);
       }
 
