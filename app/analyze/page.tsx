@@ -22,6 +22,13 @@ interface AnalysisData {
     bitrate: number | null;
     sampleRate: number | null;
   };
+  waveform?: {
+    waveform: number[];
+    waveform_samples?: number;
+    original_samples?: number;
+    sample_rate?: number;
+    downsampled?: boolean;
+  } | null;
 }
 
 interface BatchResult {
@@ -121,11 +128,10 @@ export default function AnalyzePage() {
         }
         
         // Stuur direct naar Railway
-        // Voor bestanden >5MB: gebruik geen waveform om Railway timeout te voorkomen
         const formData = new FormData();
         formData.append('file', file);
-        // Geen waveform voor bestanden >5MB (sneller, voorkomt timeout)
-        formData.append('include_waveform', fileSizeMB > 5 ? 'false' : 'true');
+        // Altijd waveform ophalen voor visualisatie
+        formData.append('include_waveform', 'true');
         
         // Verhoog timeout naar 5 minuten voor grote bestanden
         const timeoutMs = 300000; // 5 minuten
@@ -151,6 +157,17 @@ export default function AnalyzePage() {
           
           const railwayResult = await railwayResponse.json();
           
+          console.log('Railway API Response:', railwayResult);
+          console.log('Railway waveform data:', railwayResult.waveform ? 'Present' : 'Missing');
+          if (railwayResult.waveform) {
+            console.log('Railway waveform structure:', {
+              hasWaveform: !!railwayResult.waveform.waveform,
+              isArray: Array.isArray(railwayResult.waveform.waveform),
+              length: railwayResult.waveform.waveform?.length || 0,
+              keys: Object.keys(railwayResult.waveform)
+            });
+          }
+          
           // Format resultaat zoals Vercel API route dat doet
           result = {
             success: true,
@@ -174,6 +191,8 @@ export default function AnalyzePage() {
               ...(railwayResult.waveform && { waveform: railwayResult.waveform }),
             },
           };
+          
+          console.log('Formatted result with waveform:', result.data.waveform ? 'Present' : 'Missing');
 
           // Als saveToDatabase = true, sla op in Supabase
           if (saveToDatabase) {
@@ -239,11 +258,29 @@ export default function AnalyzePage() {
         }
 
         result = await response.json();
+        console.log('Vercel API Response:', result);
+        if (result.data?.waveform) {
+          console.log('Vercel waveform structure:', {
+            hasWaveform: !!result.data.waveform.waveform,
+            isArray: Array.isArray(result.data.waveform.waveform),
+            length: result.data.waveform.waveform?.length || 0,
+            keys: Object.keys(result.data.waveform)
+          });
+        }
       }
       
       console.log('API Response:', result);
       if (result.success && result.data) {
         console.log('Analysis Data:', result.data);
+        console.log('Waveform data:', result.data.waveform ? 'Present' : 'Missing');
+        if (result.data.waveform) {
+          console.log('Waveform structure:', {
+            hasWaveform: !!result.data.waveform.waveform,
+            isArray: Array.isArray(result.data.waveform.waveform),
+            length: result.data.waveform.waveform?.length || 0,
+            keys: Object.keys(result.data.waveform)
+          });
+        }
         setAnalysisData(result.data);
         
         // Toon succesmelding als opgeslagen
@@ -322,7 +359,8 @@ export default function AnalyzePage() {
             
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('include_waveform', fileSizeMB > 5 ? 'false' : 'true');
+            // Altijd waveform ophalen voor visualisatie
+            formData.append('include_waveform', 'true');
             
             const timeoutMs = 300000; // 5 minuten
             const controller = new AbortController();
@@ -742,9 +780,7 @@ export default function AnalyzePage() {
                 </div>
                 <h3 className="text-[var(--text-primary)] font-medium">{t.analyze.audioWaveform}</h3>
               </div>
-              <div className="h-48 bg-[var(--background)] rounded-[4px] border border-[var(--border)] flex items-center justify-center">
-                <p className="text-[var(--text-muted)] text-sm">{t.analyze.waveformPlaceholder}</p>
-              </div>
+              <WaveformVisualization waveform={analysisData?.waveform || null} />
             </div>
 
             {/* Track Information */}
@@ -819,6 +855,115 @@ export default function AnalyzePage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Waveform visualization component
+function WaveformVisualization({ waveform }: { waveform: any | null }) {
+  const { t } = useI18n();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    console.log('WaveformVisualization - waveform prop:', waveform);
+    if (!waveform || !canvasRef.current) {
+      console.log('WaveformVisualization - No waveform or canvas, returning');
+      return;
+    }
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.log('WaveformVisualization - Could not get canvas context');
+      return;
+    }
+
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Handle different waveform formats
+    let waveformData: number[] = [];
+    if (waveform.waveform && Array.isArray(waveform.waveform)) {
+      waveformData = waveform.waveform;
+      console.log('WaveformVisualization - Using waveform.waveform array, length:', waveformData.length);
+    } else if (Array.isArray(waveform)) {
+      waveformData = waveform;
+      console.log('WaveformVisualization - Using waveform as array, length:', waveformData.length);
+    } else {
+      console.log('WaveformVisualization - Waveform format not recognized:', waveform);
+      return;
+    }
+
+    if (waveformData.length === 0) {
+      console.log('WaveformVisualization - Waveform data is empty');
+      return;
+    }
+    
+    console.log('WaveformVisualization - Drawing waveform with', waveformData.length, 'samples');
+
+    ctx.clearRect(0, 0, width, height);
+    
+    // Background - use CSS variable for background color
+    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--background').trim() || '#1a1a1a';
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, width, height);
+
+    // Waveform color - use primary color from CSS variables
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#3b82f6';
+    ctx.fillStyle = primaryColor;
+    ctx.strokeStyle = primaryColor;
+    ctx.lineWidth = 1;
+
+    const centerY = height / 2;
+    const step = width / waveformData.length;
+    const maxValue = Math.max(...waveformData.map(Math.abs));
+    const minBarHeight = 1; // Minimum bar height in pixels
+
+    console.log('WaveformVisualization - Drawing params:', {
+      width,
+      height,
+      dataLength: waveformData.length,
+      step,
+      maxValue,
+      centerY
+    });
+
+    // Draw waveform bars
+    for (let i = 0; i < waveformData.length; i++) {
+      const value = Math.abs(waveformData[i]);
+      const normalizedValue = maxValue > 0 ? value / maxValue : 0;
+      const barHeight = Math.max(minBarHeight, (normalizedValue * height) / 2);
+      const x = i * step;
+      
+      // Always draw bars, even if small
+      ctx.fillRect(x, centerY - barHeight, Math.max(1, step - 0.5), barHeight * 2);
+    }
+    
+    console.log('WaveformVisualization - Drawing complete');
+  }, [waveform]);
+
+  // Check if waveform data exists and is valid
+  const hasValidWaveform = waveform && (
+    (waveform.waveform && Array.isArray(waveform.waveform) && waveform.waveform.length > 0) ||
+    (Array.isArray(waveform) && waveform.length > 0)
+  );
+
+  if (!hasValidWaveform) {
+    return (
+      <div className="h-48 bg-[var(--background)] rounded-[4px] border border-[var(--border)] flex items-center justify-center">
+        <p className="text-[var(--text-muted)] text-sm">{t.analyze.waveformPlaceholder}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-48 bg-[var(--background)] rounded-[4px] border border-[var(--border)] p-2">
+      <canvas
+        ref={canvasRef}
+        width={800}
+        height={180}
+        className="w-full h-full"
+      />
     </div>
   );
 }

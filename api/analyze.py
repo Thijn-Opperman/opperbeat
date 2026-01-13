@@ -162,14 +162,18 @@ async def analyze(
                 include_waveform_str = str(include_waveform).lower().strip()
                 include_waveform_bool = include_waveform_str in ('true', '1', 'yes', 'on')
             
+            logger.info(f"Waveform setting after conversion: {include_waveform_bool} (original: {include_waveform})")
+            
             # Voor bestanden >5MB: gebruik optimalisaties om Railway timeout te voorkomen
             # Railway heeft een timeout van ~30 seconden, dus we moeten sneller zijn
+            waveform_samples = 5000  # Standaard aantal samples
             if file_size_mb > 5:
                 logger.info("Large file detected (>5MB), optimizing analysis for Railway timeout...")
                 sample_rate = 22050  # Lagere sample rate voor snellere analyse
-                include_waveform_bool = False  # FORCEER geen waveform voor grote bestanden (sneller)
+                # Behoud waveform setting van request, maar gebruik minder samples voor snellere verwerking
+                waveform_samples = 2000 if include_waveform_bool else 5000  # Minder samples voor grote bestanden
                 max_duration = 120  # Analyseer alleen eerste 2 minuten voor grote bestanden
-                logger.info(f"Using optimized settings: sample_rate={sample_rate}, waveform={include_waveform_bool}, max_duration={max_duration}s")
+                logger.info(f"Using optimized settings: sample_rate={sample_rate}, waveform={include_waveform_bool}, waveform_samples={waveform_samples}, max_duration={max_duration}s")
             elif file_size_mb > 3:
                 # Voor middelgrote bestanden (3-5MB): gebruik lagere sample rate maar wel waveform
                 logger.info("Medium file detected (3-5MB), using medium optimization...")
@@ -183,11 +187,12 @@ async def analyze(
                 max_duration = None  # Analyseer volledig bestand
                 logger.info(f"Small file, using full analysis: sample_rate={sample_rate}, waveform={include_waveform_bool}")
             
-            logger.info(f"Starting audio analysis for: {file_path}, sample_rate: {sample_rate}, include_waveform: {include_waveform_bool}, max_duration: {max_duration}")
+            logger.info(f"Starting audio analysis for: {file_path}, sample_rate: {sample_rate}, include_waveform: {include_waveform_bool}, waveform_samples: {waveform_samples}, max_duration: {max_duration}")
             result = analyze_audio_simple(
                 file_path,
                 sample_rate=sample_rate,
                 include_waveform=include_waveform_bool,
+                waveform_samples=waveform_samples,
                 max_duration=max_duration
             )
             logger.info(f"Audio analysis complete, BPM: {result.get('bpm')}, Key: {result.get('key')}")

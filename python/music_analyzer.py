@@ -369,7 +369,7 @@ def analyze_audio(filename, sample_rate=44100, include_waveform=True, waveform_s
     return result
 
 
-def analyze_audio_simple(filename, sample_rate=44100, include_waveform=False, max_duration=None):
+def analyze_audio_simple(filename, sample_rate=44100, include_waveform=False, waveform_samples=5000, max_duration=None):
     """
     Vereenvoudigde versie - retourneert alleen de essentiële velden
     
@@ -377,12 +377,13 @@ def analyze_audio_simple(filename, sample_rate=44100, include_waveform=False, ma
         filename: Pad naar audio bestand
         sample_rate: Sample rate voor analyse (default: 44100)
         include_waveform: Of waveform data moet worden opgenomen (default: False)
+        waveform_samples: Maximum aantal samples voor waveform (default: 5000)
         max_duration: Maximum duur in seconden om te analyseren (None = volledig bestand)
     
     Returns:
         Dictionary met: bpm, key, song_name, duration, bitrate, (optioneel: waveform)
     """
-    result = analyze_audio(filename, sample_rate, include_waveform=include_waveform, max_duration=max_duration)
+    result = analyze_audio(filename, sample_rate, include_waveform=include_waveform, waveform_samples=waveform_samples, max_duration=max_duration)
     
     simple_result = {
         "bpm": result["bpm"],
