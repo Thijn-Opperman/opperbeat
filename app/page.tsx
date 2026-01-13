@@ -7,6 +7,9 @@ import MusicAnalysisCard from './components/MusicAnalysisCard';
 import LibraryCard from './components/LibraryCard';
 import GenresCard from './components/GenresCard';
 import SetLengthCard from './components/SetLengthCard';
+import TagSuggestionsWidget from './components/TagSuggestionsWidget';
+import SetSuggestionsWidget from './components/SetSuggestionsWidget';
+import CuePointsWidget from './components/CuePointsWidget';
 import { useI18n } from '@/lib/i18n-context';
 import { useAuth } from '@/lib/auth-context';
 import { TrendingUp, Clock, User, Download, Music, Key, Gauge, ListMusic, ExternalLink, Play, Search } from 'lucide-react';
@@ -248,6 +251,15 @@ export default function Home() {
             <div className="md:col-span-2 lg:col-span-2 xl:col-span-2 animate-fade-in-up stagger-13">
               <SoundCloudWidget />
             </div>
+
+            {/* Tag Suggestions Widget */}
+            <TagSuggestionsWidget />
+
+            {/* Set Suggestions Widget - 2 kolommen */}
+            <SetSuggestionsWidget />
+
+            {/* Cue Points Widget */}
+            <CuePointsWidget />
           </div>
         </div>
       </div>
