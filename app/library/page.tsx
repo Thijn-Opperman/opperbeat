@@ -48,38 +48,40 @@ function WaveformPreview({ waveform }: { waveform: any | null }) {
 
     ctx.clearRect(0, 0, width, height);
     
-    // Background
-    ctx.fillStyle = '#1a1a1a';
+    // Background - use CSS variable for background color
+    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--background').trim() || '#1a1a1a';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
 
-    // Waveform color - blue like Rekordbox
-    ctx.fillStyle = '#3b82f6';
-    ctx.strokeStyle = '#3b82f6';
+    // Waveform color - use primary color from CSS variables
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#3b82f6';
+    ctx.fillStyle = primaryColor;
+    ctx.strokeStyle = primaryColor;
     ctx.lineWidth = 1;
 
     const centerY = height / 2;
     const step = width / waveformData.length;
     const maxValue = Math.max(...waveformData.map(Math.abs));
+    const minBarHeight = 0.5; // Minimum bar height in pixels
 
-    // Draw waveform bars
+    // Draw waveform bars - always draw bars, even if small
     for (let i = 0; i < waveformData.length; i++) {
       const value = Math.abs(waveformData[i]);
       const normalizedValue = maxValue > 0 ? value / maxValue : 0;
-      const barHeight = (normalizedValue * height) / 2;
+      const barHeight = Math.max(minBarHeight, (normalizedValue * height) / 2);
       const x = i * step;
       
-      if (barHeight > 0.5) {
-        ctx.fillRect(x, centerY - barHeight, Math.max(1, step), barHeight * 2);
-      }
+      // Always draw bars for better visibility
+      ctx.fillRect(x, centerY - barHeight, Math.max(1, step - 0.5), barHeight * 2);
     }
   }, [waveform]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={128}
+      width={256}
       height={24}
-      className="w-full h-6"
+      className="w-full h-full"
     />
   );
 }
@@ -129,6 +131,12 @@ export default function LibraryPage() {
 
       if (!response.ok) {
         throw new Error(data.error || 'Fout bij ophalen van analyses');
+      }
+
+      // Debug: check waveform data
+      if (data.data && data.data.length > 0) {
+        const withWaveform = data.data.filter((a: any) => a.waveform).length;
+        console.log(`📊 Library: ${data.data.length} analyses, ${withWaveform} met waveform`);
       }
 
       if (resetOffset) {
@@ -343,12 +351,12 @@ export default function LibraryPage() {
                         </div>
                       </td>
                       <td className="px-3 py-2">
-                        <div className="w-32 h-6 bg-surface border border-theme rounded overflow-hidden">
+                        <div className="w-32 h-6 bg-[var(--background)] border border-[var(--border)] rounded overflow-hidden">
                           {analysis.waveform ? (
                             <WaveformPreview waveform={analysis.waveform} />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <span className="text-xs text-muted">—</span>
+                              <span className="text-xs text-[var(--text-muted)]">—</span>
                             </div>
                           )}
                         </div>
