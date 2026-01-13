@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { Mail, Lock, Eye, EyeOff, LogIn, Zap } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, LogIn, Play } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 import { useAuth } from '@/lib/auth-context';
 
@@ -100,7 +100,7 @@ function LoginForm() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8 animate-fade-in-down">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] mb-4 p-2">
+          <div className="inline-flex items-center justify-center w-48 h-48 mb-4">
             <div className="relative w-full h-full">
               <Image
                 src="/opperbeat logo.png"
@@ -235,7 +235,7 @@ function LoginForm() {
               type="button"
               onClick={handleDemoLogin}
               disabled={isLoading}
-              className="w-full bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] hover:border-[var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--text-primary)] font-medium px-6 py-3.5 rounded-[4px] transition-all duration-200 flex items-center justify-center gap-2 button-press hover-scale"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] hover:border-[var(--primary)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--text-primary)] font-medium px-6 py-3.5 rounded-[4px] transition-all duration-200 flex items-center justify-center gap-2 button-press hover-scale"
             >
               {isLoading ? (
                 <>
@@ -244,7 +244,7 @@ function LoginForm() {
                 </>
               ) : (
                 <>
-                  <Zap className="w-5 h-5 text-[var(--accent)]" />
+                  <Play className="w-5 h-5 text-[var(--primary)]" />
                   <span>{t.auth.demoLogin}</span>
                 </>
               )}

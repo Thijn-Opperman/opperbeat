@@ -36,13 +36,13 @@ export default function Sidebar() {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <Link href="/" className="h-[80px] flex items-center justify-center border-b border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all duration-200 hover-scale px-2">
-        <div className="relative w-full h-full max-w-[calc(100%-16px)] flex-shrink-0">
+      <Link href="/" className="h-[72px] flex items-center justify-center border-b border-[var(--border)] hover:bg-[var(--surface-hover)] transition-all duration-200 hover-scale px-4">
+        <div className="relative w-full h-[48px] flex-shrink-0">
           <Image
             src="/opperbeat logo.png"
             alt="Opperbeat Logo"
             fill
-            className="object-contain"
+            className="object-contain object-center"
             priority
           />
         </div>
