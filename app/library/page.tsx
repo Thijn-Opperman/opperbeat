@@ -155,7 +155,8 @@ export default function LibraryPage() {
   const [setTracks, setSetTracks] = useState<Array<{ id?: string; title?: string; artist?: string; album?: string; genre?: string; duration?: string; durationSeconds?: number; bpm?: number; key?: string; artwork?: string; waveform?: any }>>([]);
   const [loadingSetTracks, setLoadingSetTracks] = useState(false);
   const [deletingSetTrackId, setDeletingSetTrackId] = useState<string | null>(null);
-  const [sets, setSets] = useState<Array<{ id: string; name: string; tracks: number; duration: string }>>([]);
+  const [selectedSetData, setSelectedSetData] = useState<SetData | null>(null);
+  const [sets, setSets] = useState<Array<{ id: string; name: string; tracks: number; duration: string; created_at?: string }>>([]);
   const limit = PAGINATION.LIBRARY_PAGE_LIMIT;
 
   const fetchAnalyses = async (resetOffset = false) => {
@@ -251,6 +252,7 @@ export default function LibraryPage() {
           name: set.name,
           tracks: set.tracks.length,
           duration: durationFormatted,
+          created_at: set.created_at,
         };
       });
       setSets(setsWithStats);
@@ -319,6 +321,7 @@ export default function LibraryPage() {
         }));
         setSetTracks(tracks);
         setSelectedSetId(setId);
+        setSelectedSetData(foundSet);
       } else {
         setError('Set niet gevonden');
       }
@@ -926,6 +929,11 @@ export default function LibraryPage() {
                       <span>{set.duration}</span>
                     </div>
                   </div>
+                  {set.created_at && (
+                    <div className="text-xs text-[var(--text-muted)] mt-1.5">
+                      {new Date(set.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                  )}
                 </div>
               ))}
             </>
@@ -944,6 +952,7 @@ export default function LibraryPage() {
                     setPlaylistTracks([]);
                     setSelectedSetId(null);
                     setSetTracks([]);
+                    setSelectedSetData(null);
                   }}
                   className="p-2 hover:bg-surface-hover rounded transition-all duration-200"
                 >
@@ -963,7 +972,7 @@ export default function LibraryPage() {
                   {selectedPlaylistId
                     ? `${playlistTracks.length} ${playlistTracks.length === 1 ? 'Track' : 'Tracks'}`
                     : selectedSetId
-                    ? `${setTracks.length} ${setTracks.length === 1 ? 'Track' : 'Tracks'}`
+                    ? `${setTracks.length} ${setTracks.length === 1 ? 'Track' : 'Tracks'}${selectedSetData?.created_at ? ` • ${new Date(selectedSetData.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}`
                     : total > 0 ? `Collection (${total} ${total === 1 ? 'Track' : 'Tracks'})` : 'Collection'
                   }
                 </p>

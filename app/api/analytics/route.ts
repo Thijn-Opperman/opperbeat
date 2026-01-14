@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
           bpmDistribution: [],
           keyDistribution: [],
           activityTimeline: [],
-          totalMixes: 0, // Placeholder - kan later worden toegevoegd
+          totalPlaylists: 0,
         },
       });
     }
@@ -149,6 +149,24 @@ export async function GET(request: NextRequest) {
       ? `${totalHours}u ${totalMinutes}m`
       : `${totalMinutes}m`;
 
+    // Haal playlists count op
+    let totalPlaylists = 0;
+    try {
+      if (userId) {
+        const { count, error: playlistsError } = await supabaseAdmin
+          .from('playlists')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId);
+        
+        if (!playlistsError && count !== null) {
+          totalPlaylists = count;
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching playlists count:', err);
+      // Continue zonder playlists count
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -161,7 +179,7 @@ export async function GET(request: NextRequest) {
         bpmDistribution,
         keyDistribution,
         activityTimeline: months,
-        totalMixes: 0, // Placeholder
+        totalPlaylists,
       },
     });
   } catch (error) {

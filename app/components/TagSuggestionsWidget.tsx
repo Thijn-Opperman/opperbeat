@@ -40,8 +40,7 @@ export default function TagSuggestionsWidget() {
   }, []);
 
   return (
-    <div className="animate-fade-in-up stagger-14">
-      <Link href="/library" className="block h-full">
+    <Link href="/library" className="block h-full">
         <div className="bg-[var(--surface)] rounded-[4px] p-3 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex items-center gap-3">
           <div className="p-1.5 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] flex-shrink-0">
             <Tag className="w-3.5 h-3.5 text-[var(--primary)]" />
@@ -58,6 +57,5 @@ export default function TagSuggestionsWidget() {
           </div>
         </div>
       </Link>
-    </div>
   );
 }

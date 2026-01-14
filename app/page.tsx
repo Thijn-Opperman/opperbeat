@@ -57,7 +57,7 @@ function QuickStatsWidget() {
   }, []);
 
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-5">
+    <div className="animate-fade-in-up">
       <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-2 mb-4">
@@ -116,7 +116,6 @@ function RecentActivityWidget() {
               timeAgo = `${diffDays}d ago`;
             }
 
-            // Count tracks added today
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const todayTracks = result.data.filter((a: MusicAnalysis) => {
@@ -141,7 +140,7 @@ function RecentActivityWidget() {
   }, []);
 
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-6">
+    <div className="animate-fade-in-up">
       <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
@@ -204,69 +203,83 @@ export default function Home() {
         </div>
 
         <div className="max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8">
-          {/* Widget Grid - Grid layout met verschillende groottes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-6 auto-rows-min">
-            {/* Grote Widget: Music Analysis - 2 kolommen op md, 3 op lg, 4 op xl */}
-            <div className="md:col-span-2 lg:col-span-3 xl:col-span-4 animate-fade-in-up stagger-1">
-              <MusicAnalysisCard />
-            </div>
-
-            {/* Medium Widget: Library Insights - 2 kolommen op md, 1 op lg, 2 op xl */}
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-2 animate-fade-in-up stagger-2">
+          {/* Unified Dashboard Grid - All widgets in one flowing grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 sm:gap-6 auto-rows-auto">
+            {/* Library Card - Groot (4 kolommen, 2 rijen) */}
+            <div className="md:col-span-2 lg:col-span-2 xl:col-span-4 xl:row-span-2 animate-fade-in-up">
               <LibraryCard />
             </div>
 
-            {/* Medium Widget: Genres Breakdown - 2 kolommen op md, 1 op lg, 2 op xl */}
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-2 animate-fade-in-up stagger-3">
+            {/* Quick Stats - Medium (2 kolommen, 1 rij) */}
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+              <QuickStatsWidget />
+            </div>
+
+            {/* Recent Activity - Medium (2 kolommen, 1 rij) */}
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+              <RecentActivityWidget />
+            </div>
+
+            {/* Music Analysis Card - Extra Groot (5 kolommen, 3 rijen) */}
+            <div className="md:col-span-2 lg:col-span-3 xl:col-span-5 xl:row-span-3 animate-fade-in-up">
+              <MusicAnalysisCard />
+            </div>
+
+            {/* Set Suggestions - Groot (3 kolommen, 3 rijen) */}
+            <div className="md:col-span-2 lg:col-span-1 xl:col-span-3 xl:row-span-3 animate-fade-in-up">
+              <SetSuggestionsWidget />
+            </div>
+
+            {/* Genres Card - Medium (3 kolommen, 2 rijen) */}
+            <div className="md:col-span-1 lg:col-span-2 xl:col-span-3 xl:row-span-2 animate-fade-in-up">
               <GenresCard />
             </div>
 
-            {/* Kleine Widget: Set Length - 1 kolom op md, 1 op lg, 1 op xl */}
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-4">
+            {/* Smart Crates - Groot (5 kolommen, 3 rijen) */}
+            <div className="md:col-span-1 lg:col-span-2 xl:col-span-5 xl:row-span-3 animate-fade-in-up">
+              <SmartCratesWidget />
+            </div>
+
+            {/* Compact Widgets - Kleine widgets (1 kolom, 1 rij) */}
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <SetLengthCard />
             </div>
 
-            {/* Kleine Widget: Quick Stats */}
-            <QuickStatsWidget />
-
-            {/* Kleine Widget: Recent Activity */}
-            <RecentActivityWidget />
-
-            {/* Profile Widget */}
-            <ProfileWidget />
-
-            {/* Download Widget */}
-            <DownloadWidget />
-
-            {/* BPM Matcher Widget */}
-            <BPMMatcherWidget />
-
-            {/* Key Matcher Widget */}
-            <KeyMatcherWidget />
-
-            {/* Quick Playlist Widget */}
-            <QuickPlaylistWidget />
-
-            {/* Spotify Widget */}
-            <SpotifyWidget />
-
-            {/* SoundCloud Widget - 2 kolommen op md, 2 op lg, 2 op xl */}
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2 animate-fade-in-up stagger-13">
-              <SoundCloudWidget />
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+              <TagSuggestionsWidget />
             </div>
 
-            {/* Tag Suggestions Widget */}
-            <TagSuggestionsWidget />
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+              <CuePointsWidget />
+            </div>
 
-            {/* Set Suggestions Widget - 2 kolommen */}
-            <SetSuggestionsWidget />
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+              <BPMMatcherWidget />
+            </div>
 
-            {/* Cue Points Widget */}
-            <CuePointsWidget />
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+              <KeyMatcherWidget />
+            </div>
 
-            {/* Smart Crates Widget - 2 kolommen */}
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-2 animate-fade-in-up stagger-14">
-              <SmartCratesWidget />
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+              <QuickPlaylistWidget />
+            </div>
+
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+              <ProfileWidget />
+            </div>
+
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+              <DownloadWidget />
+            </div>
+
+            {/* External Services - Medium (2 kolommen, 1 rij) */}
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+              <SpotifyWidget />
+            </div>
+
+            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+              <SoundCloudWidget />
             </div>
           </div>
         </div>
@@ -303,7 +316,7 @@ function ProfileWidget() {
   }, [user]);
 
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-7">
+    <div className="animate-fade-in-up">
       <Link href="/profile" className="block h-full">
         <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
           <div className="flex items-center gap-2 mb-4">
@@ -363,7 +376,7 @@ function DownloadWidget() {
   };
 
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-8">
+    <div className="animate-fade-in-up">
       <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
@@ -410,7 +423,6 @@ function BPMMatcherWidget() {
             const bpm = result.data[0].bpm;
             setLastBPM(bpm);
             
-            // Find tracks with similar BPM (±5 BPM)
             const matchesResponse = await fetch(`/api/analyses?limit=${PAGINATION.WIDGET_LIMIT}`);
             if (matchesResponse.ok) {
               const matchesResult = await matchesResponse.json();
@@ -432,7 +444,7 @@ function BPMMatcherWidget() {
   }, []);
 
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-9">
+    <div className="animate-fade-in-up">
       <Link href="/library" className="block h-full">
         <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
           <div className="flex items-center gap-2 mb-4">
@@ -475,7 +487,6 @@ function KeyMatcherWidget() {
             const key = result.data[0].key;
             setLastKey(key);
             
-            // Find tracks with same key
             const matchesResponse = await fetch(`/api/analyses?limit=${PAGINATION.WIDGET_LIMIT}`);
             if (matchesResponse.ok) {
               const matchesResult = await matchesResponse.json();
@@ -497,7 +508,7 @@ function KeyMatcherWidget() {
   }, []);
 
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-10">
+    <div className="animate-fade-in-up">
       <Link href="/library" className="block h-full">
         <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
           <div className="flex items-center gap-2 mb-4">
@@ -547,7 +558,7 @@ function QuickPlaylistWidget() {
   }, []);
 
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-11">
+    <div className="animate-fade-in-up">
       <Link href="/library" className="block h-full">
         <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
           <div className="flex items-center gap-2 mb-4">
@@ -580,7 +591,7 @@ function QuickPlaylistWidget() {
 
 function SpotifyWidget() {
   return (
-    <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-12">
+    <div className="animate-fade-in-up">
       <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-2 bg-[#1DB954] border border-[var(--border)] rounded-[4px]">
@@ -602,7 +613,7 @@ function SpotifyWidget() {
 
 function SoundCloudWidget() {
   return (
-    <div className="animate-fade-in-up stagger-13">
+    <div className="animate-fade-in-up">
       <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-2 bg-[#FF5500] border border-[var(--border)] rounded-[4px]">

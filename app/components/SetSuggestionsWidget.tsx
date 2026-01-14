@@ -133,8 +133,7 @@ export default function SetSuggestionsWidget() {
   };
 
   return (
-    <div className="md:col-span-2 lg:col-span-2 xl:col-span-2 animate-fade-in-up stagger-15">
-      <Link href="/set-suggestions" className="block h-full">
+    <Link href="/set-suggestions" className="block h-full">
         <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
           <div className="flex items-center gap-2 mb-4">
             <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">
@@ -212,6 +211,5 @@ export default function SetSuggestionsWidget() {
           )}
         </div>
       </Link>
-    </div>
   );
 }
