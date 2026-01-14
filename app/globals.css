@@ -14,6 +14,12 @@
   --success: #22C55E;
   --warning: #F59E0B;
   --error: #EF4444;
+
+  /* Fonts (offline-safe: no Google Fonts fetch during build) */
+  --font-inter: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 /* Dark theme (default) - Studio aesthetic */

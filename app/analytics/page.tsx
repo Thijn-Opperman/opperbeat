@@ -222,10 +222,24 @@ export default function AnalyticsPage() {
                             borderRadius: '4px',
                             color: 'var(--text-primary)'
                           }}
-                          formatter={(value: number, name: string, props: any) => [
-                            `${value.toFixed(1)}% (${props.payload.count})`,
-                            props.payload.name,
-                          ]}
+                          formatter={(value: number | string | undefined, _name: string | undefined, props: any) => {
+                            const numericValue =
+                              typeof value === 'number'
+                                ? value
+                                : typeof value === 'string'
+                                  ? Number(value)
+                                  : undefined;
+
+                            const formatted =
+                              typeof numericValue === 'number' && Number.isFinite(numericValue)
+                                ? `${numericValue.toFixed(1)}%`
+                                : '—';
+
+                            return [
+                              `${formatted} (${props?.payload?.count ?? 0})`,
+                              props?.payload?.name ?? props?.name ?? '',
+                            ];
+                          }}
                         />
                       </PieChart>
                     </ResponsiveContainer>
