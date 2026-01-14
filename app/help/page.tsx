@@ -1,7 +1,7 @@
 'use client';
 
 import Sidebar from '../components/Sidebar';
-import { HelpCircle, Music, FileSearch, Library, Layers, TrendingUp, ListMusic, Volume2, Settings, Info, Database, Code, Zap, BarChart3 } from 'lucide-react';
+import { HelpCircle, Music, FileSearch, Library, Layers, TrendingUp, ListMusic, Volume2, Settings, Info, Database, Code, Zap, BarChart3, Download, Sparkles, Play, Tag } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 
 export default function HelpPage() {
@@ -133,6 +133,51 @@ export default function HelpPage() {
                 t.help.profileFeature2,
                 t.help.profileFeature3
               ]}
+            />
+
+            <FeaturePageCard
+              icon={<Download className="w-5 h-5" />}
+              title="Download"
+              route="/download"
+              description={t.help.downloadDescription}
+              features={[
+                t.help.downloadFeature1,
+                t.help.downloadFeature2,
+                t.help.downloadFeature3,
+                t.help.downloadFeature4
+              ]}
+            />
+
+            <FeaturePageCard
+              icon={<Sparkles className="w-5 h-5" />}
+              title="Set Suggestions"
+              route="/set-suggestions"
+              description={t.help.setSuggestionsDescription}
+              features={[
+                t.help.setSuggestionsFeature1,
+                t.help.setSuggestionsFeature2,
+                t.help.setSuggestionsFeature3,
+                t.help.setSuggestionsFeature4
+              ]}
+            />
+          </Section>
+
+          {/* Dashboard Widgets */}
+          <Section title={t.help.widgetsTitle} description={t.help.widgetsDescription}>
+            <FeatureCard
+              icon={<Play className="w-5 h-5" />}
+              title={t.help.cuePointsWidgetTitle}
+              description={t.help.cuePointsWidgetDescription}
+            />
+            <FeatureCard
+              icon={<Tag className="w-5 h-5" />}
+              title={t.help.tagSuggestionsWidgetTitle}
+              description={t.help.tagSuggestionsWidgetDescription}
+            />
+            <FeatureCard
+              icon={<Sparkles className="w-5 h-5" />}
+              title={t.help.smartCratesWidgetTitle}
+              description={t.help.smartCratesWidgetDescription}
             />
           </Section>
 

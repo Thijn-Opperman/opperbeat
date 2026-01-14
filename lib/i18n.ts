@@ -284,6 +284,24 @@ export interface Translations {
     profileFeature1: string;
     profileFeature2: string;
     profileFeature3: string;
+    downloadDescription: string;
+    downloadFeature1: string;
+    downloadFeature2: string;
+    downloadFeature3: string;
+    downloadFeature4: string;
+    setSuggestionsDescription: string;
+    setSuggestionsFeature1: string;
+    setSuggestionsFeature2: string;
+    setSuggestionsFeature3: string;
+    setSuggestionsFeature4: string;
+    widgetsTitle: string;
+    widgetsDescription: string;
+    cuePointsWidgetTitle: string;
+    cuePointsWidgetDescription: string;
+    tagSuggestionsWidgetTitle: string;
+    tagSuggestionsWidgetDescription: string;
+    smartCratesWidgetTitle: string;
+    smartCratesWidgetDescription: string;
     technicalTitle: string;
     technicalDescription: string;
     tech1Title: string;
@@ -560,6 +578,24 @@ export const translations: Record<Language, Translations> = {
       profileFeature1: 'Persoonlijke profielinformatie',
       profileFeature2: 'E-mail notificatie-instellingen',
       profileFeature3: 'Accountvoorkeuren en privacy-instellingen',
+      downloadDescription: 'Download muziek van YouTube, SoundCloud of zoek op naam in hoge kwaliteit.',
+      downloadFeature1: 'Download van YouTube via URL of zoek op nummer naam',
+      downloadFeature2: 'Download van SoundCloud via URL of zoek op nummer naam',
+      downloadFeature3: 'Zoek en download via artiest en titel (bijv: "Daft Punk - One More Time")',
+      downloadFeature4: 'Automatische conversie naar 320 kbps MP3 kwaliteit',
+      setSuggestionsDescription: 'AI-powered track recommendations voor je DJ set op basis van BPM, key en energy.',
+      setSuggestionsFeature1: 'Selecteer een huidige track om suggesties te genereren',
+      setSuggestionsFeature2: 'Automatische suggesties op basis van BPM compatibiliteit en key matching',
+      setSuggestionsFeature3: 'Energy level detectie (hoog, medium, laag) voor vloeiende overgangen',
+      setSuggestionsFeature4: 'Track history tracking voor variatie in je set',
+      widgetsTitle: 'Dashboard Widgets',
+      widgetsDescription: 'Handige widgets op het dashboard voor snelle toegang en inzichten',
+      cuePointsWidgetTitle: 'Cue Points Widget',
+      cuePointsWidgetDescription: 'Toont het aantal tracks zonder cue points. Klik om naar de bibliotheek te gaan en cue points toe te voegen.',
+      tagSuggestionsWidgetTitle: 'Tag Suggestions Widget',
+      tagSuggestionsWidgetDescription: 'Toont het aantal tracks zonder tags. Klik om naar de bibliotheek te gaan en tags toe te voegen voor betere organisatie.',
+      smartCratesWidgetTitle: 'Smart Crates Widget',
+      smartCratesWidgetDescription: 'Maak intelligente playlists op basis van regels (BPM, key, energy, datum). Exporteer naar Rekordbox M3U formaat.',
       technicalTitle: 'Technische Details (voor Docenten)',
       technicalDescription: 'Technische informatie over de architectuur en implementatie',
       tech1Title: 'Frontend Technologie',
@@ -834,6 +870,24 @@ export const translations: Record<Language, Translations> = {
       profileFeature1: 'Personal profile information',
       profileFeature2: 'Email notification settings',
       profileFeature3: 'Account preferences and privacy settings',
+      downloadDescription: 'Download music from YouTube, SoundCloud or search by name in high quality.',
+      downloadFeature1: 'Download from YouTube via URL or search by track name',
+      downloadFeature2: 'Download from SoundCloud via URL or search by track name',
+      downloadFeature3: 'Search and download via artist and title (e.g., "Daft Punk - One More Time")',
+      downloadFeature4: 'Automatic conversion to 320 kbps MP3 quality',
+      setSuggestionsDescription: 'AI-powered track recommendations for your DJ set based on BPM, key and energy.',
+      setSuggestionsFeature1: 'Select a current track to generate suggestions',
+      setSuggestionsFeature2: 'Automatic suggestions based on BPM compatibility and key matching',
+      setSuggestionsFeature3: 'Energy level detection (high, medium, low) for smooth transitions',
+      setSuggestionsFeature4: 'Track history tracking for variety in your set',
+      widgetsTitle: 'Dashboard Widgets',
+      widgetsDescription: 'Handy widgets on the dashboard for quick access and insights',
+      cuePointsWidgetTitle: 'Cue Points Widget',
+      cuePointsWidgetDescription: 'Shows the number of tracks without cue points. Click to go to the library and add cue points.',
+      tagSuggestionsWidgetTitle: 'Tag Suggestions Widget',
+      tagSuggestionsWidgetDescription: 'Shows the number of tracks without tags. Click to go to the library and add tags for better organization.',
+      smartCratesWidgetTitle: 'Smart Crates Widget',
+      smartCratesWidgetDescription: 'Create intelligent playlists based on rules (BPM, key, energy, date). Export to Rekordbox M3U format.',
       technicalTitle: 'Technical Details (for Teachers)',
       technicalDescription: 'Technical information about the architecture and implementation',
       tech1Title: 'Frontend Technology',
