@@ -40,7 +40,8 @@ export async function GET(
             duration_seconds,
             bpm,
             key,
-            artwork_public_url
+            artwork_public_url,
+            waveform
           )
         )
       `)
@@ -68,6 +69,7 @@ export async function GET(
       bpm?: number;
       key?: string;
       artwork?: string;
+      waveform?: any;
     }
 
     const sortedTracks: TrackInfo[] = (playlist.playlist_tracks || [])
@@ -84,6 +86,7 @@ export async function GET(
         bpm: pt.analysis?.bpm,
         key: pt.analysis?.key,
         artwork: pt.analysis?.artwork_public_url,
+        waveform: pt.analysis?.waveform,
       }));
 
     // Bereken totale duur

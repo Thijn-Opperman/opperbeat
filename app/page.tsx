@@ -548,7 +548,7 @@ function QuickPlaylistWidget() {
 
   return (
     <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up stagger-11">
-      <Link href="/playlists" className="block h-full">
+      <Link href="/library" className="block h-full">
         <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift h-full flex flex-col">
           <div className="flex items-center gap-2 mb-4">
             <div className="p-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px]">

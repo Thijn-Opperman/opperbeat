@@ -210,6 +210,7 @@ export async function POST(request: NextRequest) {
           sampleRate: metadata?.format?.sampleRate || null,
         },
         waveform: analyzerResult?.waveform || null,
+        artworkUrl: null as string | null, // Wordt later gevuld als opgeslagen
       };
 
       // Als saveToDatabase = true, sla alles op in Supabase
@@ -297,6 +298,11 @@ export async function POST(request: NextRequest) {
 
           savedAnalysisId = dbData.id;
           console.log('✅ Analyse opgeslagen in database met ID:', savedAnalysisId);
+          
+          // Haal artwork URL op uit database
+          if (artworkResult?.publicUrl) {
+            analysisData.artworkUrl = artworkResult.publicUrl;
+          }
 
         } catch (saveError: unknown) {
           const errorMessage = saveError instanceof Error ? saveError.message : String(saveError);

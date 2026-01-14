@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { Music, Play, TrendingUp, TrendingDown, Minus, Loader2, RefreshCw, Check, X } from 'lucide-react';
+import { Music, Play, TrendingUp, TrendingDown, Minus, Loader2, RefreshCw, Check, X, Search } from 'lucide-react';
 import { getSetState, setCurrentTrack, updateSuggestions, addToHistory, clearSetState, type TrackSuggestion } from '@/lib/set-helpers';
 
 interface Track {
@@ -21,6 +21,7 @@ export default function SetSuggestionsPage() {
   const [currentTrackId, setCurrentTrackId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchTracks();
@@ -203,15 +204,21 @@ export default function SetSuggestionsPage() {
       <Sidebar />
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+          {/* Header */}
           <div className="mb-6 lg:mb-8 animate-fade-in-down">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-[var(--primary)]/10 rounded-lg">
+                <div className="p-2 bg-[var(--primary)]/10 rounded-lg border border-[var(--primary)]/20">
                   <Music className="w-6 h-6 text-[var(--primary)]" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-semibold text-primary tracking-tight">
-                  Set Suggestions
-                </h1>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-primary tracking-tight">
+                    Set Suggestions
+                  </h1>
+                  <p className="text-secondary text-sm mt-1">
+                    AI-powered track recommendations for your set
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => {
@@ -221,73 +228,93 @@ export default function SetSuggestionsPage() {
                     setSuggestions([]);
                   }
                 }}
-                className="px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--error)] border border-[var(--border)] rounded hover:bg-[var(--surface-hover)] transition-all"
+                className="px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--error)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-hover)] transition-all font-medium"
               >
                 Clear Set
               </button>
             </div>
-            <p className="text-secondary text-sm">
-              Select a current track to get AI-powered suggestions for your next tracks.
-            </p>
+            
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[var(--text-muted)]" />
+                <input
+                  type="text"
+                  placeholder="Zoek nummers op titel, artiest of album..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-12 py-3.5 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all text-base font-medium"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Current Track Section */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-primary mb-3">Current Track</h2>
-            {currentTrack ? (
-              <div className="bg-[var(--surface)] rounded-lg border border-[var(--border)] p-4 flex items-center gap-4">
+          {currentTrack && (
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-[var(--primary)]/10 to-[var(--primary)]/5 rounded-xl border border-[var(--primary)]/20 p-6 flex items-center gap-5 shadow-lg">
                 {currentTrack.artwork_public_url ? (
                   <img
                     src={currentTrack.artwork_public_url}
                     alt={currentTrack.title}
-                    className="w-16 h-16 rounded object-cover"
+                    className="w-20 h-20 rounded-lg object-cover shadow-md"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded bg-[var(--surface-elevated)] border border-[var(--border)] flex items-center justify-center">
-                    <Music className="w-8 h-8 text-[var(--text-muted)]" />
+                  <div className="w-20 h-20 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border)] flex items-center justify-center shadow-md">
+                    <Music className="w-10 h-10 text-[var(--text-muted)]" />
                   </div>
                 )}
                 <div className="flex-1">
-                  <h3 className="text-primary font-semibold text-lg">{currentTrack.title}</h3>
+                  <h3 className="text-primary font-bold text-xl mb-1">{currentTrack.title}</h3>
                   {currentTrack.artist && (
-                    <div className="text-secondary text-sm">{currentTrack.artist}</div>
+                    <div className="text-secondary text-base mb-2 font-medium">{currentTrack.artist}</div>
                   )}
-                  <div className="flex gap-4 mt-1 text-secondary text-xs">
-                    {currentTrack.bpm && <span>BPM: {currentTrack.bpm}</span>}
-                    {currentTrack.key && <span>Key: {currentTrack.key}</span>}
+                  <div className="flex gap-5 mt-2 text-secondary text-sm">
+                    {currentTrack.bpm && (
+                      <span className="px-3 py-1 bg-[var(--surface)] rounded-lg border border-[var(--border)] font-medium">
+                        {currentTrack.bpm} BPM
+                      </span>
+                    )}
+                    {currentTrack.key && (
+                      <span className="px-3 py-1 bg-[var(--surface)] rounded-lg border border-[var(--border)] font-medium">
+                        {currentTrack.key}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <button
                   onClick={() => generateSuggestions()}
                   disabled={generating}
-                  className="px-4 py-2 bg-[var(--primary)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded transition-all duration-200 flex items-center gap-2 button-press hover-scale"
+                  className="px-5 py-3 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all duration-200 flex items-center gap-2 button-press hover-scale shadow-md"
                 >
                   {generating ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-5 h-5 animate-spin" />
                       Generating...
                     </>
                   ) : (
                     <>
-                      <RefreshCw className="w-4 h-4" />
+                      <RefreshCw className="w-5 h-5" />
                       Refresh Suggestions
                     </>
                   )}
                 </button>
               </div>
-            ) : (
-              <div className="bg-[var(--surface)] rounded-lg border border-[var(--border)] border-dashed p-8 text-center">
-                <Music className="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3" />
-                <p className="text-secondary text-sm mb-4">No current track selected</p>
-                <p className="text-[var(--text-muted)] text-xs">Select a track from the list below to start</p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Suggestions Section */}
           {suggestions.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-primary mb-3">Next 5 Tracks</h2>
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-primary mb-4">Next 5 Tracks</h2>
               <div className="space-y-3">
                 {suggestions.map((suggestion, index) => {
                   const track = tracks.find(t => t.id === suggestion.trackId);
@@ -355,21 +382,29 @@ export default function SetSuggestionsPage() {
 
           {/* Track Selection */}
           <div>
-            <h2 className="text-lg font-semibold text-primary mb-3">
-              {currentTrack ? 'Select Different Track' : 'Select Current Track'}
-            </h2>
             {loading ? (
               <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-8 h-8 text-[var(--primary)] animate-spin" />
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tracks.slice(0, 12).map((track) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {tracks
+                  .filter((track) => {
+                    if (!searchQuery) return true;
+                    const query = searchQuery.toLowerCase();
+                    return (
+                      track.title.toLowerCase().includes(query) ||
+                      track.artist?.toLowerCase().includes(query) ||
+                      track.album?.toLowerCase().includes(query)
+                    );
+                  })
+                  .slice(0, 16)
+                  .map((track) => (
                   <div
                     key={track.id}
-                    className={`bg-[var(--surface)] rounded-lg border p-4 cursor-pointer transition-all hover:border-[var(--border-hover)] hover-lift ${
+                    className={`bg-[var(--surface)] rounded-xl border-2 p-4 cursor-pointer transition-all hover:border-[var(--primary)] hover:shadow-lg hover-lift ${
                       currentTrackId === track.id
-                        ? 'border-[var(--primary)] bg-[var(--primary)]/5'
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-md'
                         : 'border-[var(--border)]'
                     }`}
                     onClick={() => selectCurrentTrack(track.id)}
@@ -387,21 +422,31 @@ export default function SetSuggestionsPage() {
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-primary font-medium text-sm truncate mb-1">
+                        <h3 className="text-primary font-semibold text-sm truncate mb-1">
                           {track.title}
                         </h3>
                         {track.artist && (
-                          <div className="text-secondary text-xs truncate mb-2">
+                          <div className="text-secondary text-xs truncate mb-2 font-medium">
                             {track.artist}
                           </div>
                         )}
-                        <div className="flex gap-3 text-[var(--text-muted)] text-xs">
-                          {track.bpm && <span>{track.bpm} BPM</span>}
-                          {track.key && <span>{track.key}</span>}
+                        <div className="flex gap-2 flex-wrap">
+                          {track.bpm && (
+                            <span className="text-[var(--text-muted)] text-xs px-2 py-0.5 bg-[var(--background)] rounded font-medium">
+                              {track.bpm} BPM
+                            </span>
+                          )}
+                          {track.key && (
+                            <span className="text-[var(--text-muted)] text-xs px-2 py-0.5 bg-[var(--background)] rounded font-medium">
+                              {track.key}
+                            </span>
+                          )}
                         </div>
                       </div>
                       {currentTrackId === track.id && (
-                        <Check className="w-5 h-5 text-[var(--primary)] flex-shrink-0" />
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--primary)] flex items-center justify-center">
+                          <Check className="w-4 h-4 text-white" />
+                        </div>
                       )}
                     </div>
                   </div>

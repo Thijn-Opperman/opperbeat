@@ -91,11 +91,12 @@ export function confirmTrackTags(trackId: string): void {
 
 /**
  * Get all untagged track IDs from a list of tracks
+ * A track is considered tagged if it has tags (confirmed or not)
  */
 export function getUntaggedTracks(tracks: Array<{ id: string }>): string[] {
   const tagged = getTaggedTracks();
   return tracks
-    .filter(track => !tagged[track.id]?.confirmed)
+    .filter(track => !tagged[track.id])
     .map(track => track.id);
 }
 

@@ -112,18 +112,6 @@ export default function HelpPage() {
             />
 
             <FeaturePageCard
-              icon={<ListMusic className="w-5 h-5" />}
-              title={t.nav.playlistBuilder}
-              route="/playlists"
-              description={t.help.playlistsDescription}
-              features={[
-                t.help.playlistsFeature1,
-                t.help.playlistsFeature2,
-                t.help.playlistsFeature3
-              ]}
-            />
-
-            <FeaturePageCard
               icon={<Volume2 className="w-5 h-5" />}
               title={t.nav.soundSettings}
               route="/sound"

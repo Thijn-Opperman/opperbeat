@@ -170,6 +170,7 @@ export async function POST(request: NextRequest) {
         success: true,
         saved: true,
         analysisId: dbData.id,
+        artworkUrl: artworkResult?.publicUrl || null,
         message: 'Analyse succesvol opgeslagen',
       });
 
