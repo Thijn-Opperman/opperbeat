@@ -174,11 +174,6 @@ export default function HelpPage() {
               title={t.help.tagSuggestionsWidgetTitle}
               description={t.help.tagSuggestionsWidgetDescription}
             />
-            <FeatureCard
-              icon={<Sparkles className="w-5 h-5" />}
-              title={t.help.smartCratesWidgetTitle}
-              description={t.help.smartCratesWidgetDescription}
-            />
           </Section>
 
           {/* Technische Details voor Docenten */}

@@ -815,7 +815,7 @@ export default function AnalyzePage() {
 
           {/* Analysis Results Grid - Toon alleen wanneer er data is of tijdens batch analyse */}
           {(analysisData || (isUploading && batchFiles.length > 1)) && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 auto-rows-auto">
             {/* Audio Waveform */}
             {analysisData && (
               <div className="bg-[var(--surface)] rounded-[4px] p-4 sm:p-6 border border-[var(--border)] transition-all duration-200 hover:border-[var(--border-hover)] hover-lift animate-fade-in-up stagger-2">

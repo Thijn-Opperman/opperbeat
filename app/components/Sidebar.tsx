@@ -60,10 +60,10 @@ export default function Sidebar() {
       <div className="flex-1 p-3 md:p-4 space-y-1 overflow-y-auto">
         <NavItem href="/analyze" icon={<FileSearch className="w-4 h-4" />} label={t.nav.musicAnalysis} active={pathname === '/analyze'} />
         <NavItem href="/library" icon={<Library className="w-4 h-4" />} label={t.nav.library} active={pathname === '/library'} />
-        <NavItem href="/download" icon={<Download className="w-4 h-4" />} label="Download" active={pathname === '/download'} />
         <NavItem href="/mixes" icon={<Music className="w-4 h-4" />} label={t.nav.mixesSets} active={pathname === '/mixes'} />
-        <NavItem href="/set-suggestions" icon={<Music className="w-4 h-4" />} label="Set Suggestions" active={pathname === '/set-suggestions'} />
+        <NavItem href="/set-suggestions" icon={<ListMusic className="w-4 h-4" />} label="Set Suggestions" active={pathname === '/set-suggestions'} />
         <NavItem href="/analytics" icon={<TrendingUp className="w-4 h-4" />} label={t.nav.analytics} active={pathname === '/analytics'} />
+        <NavItem href="/download" icon={<Download className="w-4 h-4" />} label="Download" active={pathname === '/download'} />
         <NavItem href="/sound" icon={<Volume2 className="w-4 h-4" />} label={t.nav.soundSettings} active={pathname === '/sound'} />
         <NavItem href="/profile" icon={<Settings className="w-4 h-4" />} label={t.nav.profileSettings} active={pathname === '/profile'} />
         <NavItem href="/help" icon={<HelpCircle className="w-4 h-4" />} label={t.nav.help} active={pathname === '/help'} />

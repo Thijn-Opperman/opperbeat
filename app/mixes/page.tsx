@@ -407,8 +407,8 @@ export default function MixesPage() {
 
           {/* Create/Edit Modal */}
           {(showCreateModal || editingMix) && (
-            <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-6 max-w-md w-full animate-scale-in">
+            <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 sm:p-6 max-w-md w-full my-auto animate-scale-in max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-[var(--text-primary)] font-semibold text-lg">
                     {editingMix ? 'Mix bewerken' : 'Nieuwe mix'}
@@ -507,8 +507,8 @@ export default function MixesPage() {
 
           {/* Delete Confirmation Modal */}
           {deleteConfirm && (
-            <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-6 max-w-md w-full animate-scale-in">
+            <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+              <div className="bg-[var(--surface-elevated)] border border-[var(--border)] rounded-lg p-4 sm:p-6 max-w-md w-full my-auto animate-scale-in max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-[var(--error)]/20 rounded-lg">
                     <AlertCircle className="w-6 h-6 text-[var(--error)]" />

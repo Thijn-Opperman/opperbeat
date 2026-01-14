@@ -300,8 +300,6 @@ export interface Translations {
     cuePointsWidgetDescription: string;
     tagSuggestionsWidgetTitle: string;
     tagSuggestionsWidgetDescription: string;
-    smartCratesWidgetTitle: string;
-    smartCratesWidgetDescription: string;
     technicalTitle: string;
     technicalDescription: string;
     tech1Title: string;
@@ -594,8 +592,6 @@ export const translations: Record<Language, Translations> = {
       cuePointsWidgetDescription: 'Toont het aantal tracks zonder cue points. Klik om naar de bibliotheek te gaan en cue points toe te voegen.',
       tagSuggestionsWidgetTitle: 'Tag Suggestions Widget',
       tagSuggestionsWidgetDescription: 'Toont het aantal tracks zonder tags. Klik om naar de bibliotheek te gaan en tags toe te voegen voor betere organisatie.',
-      smartCratesWidgetTitle: 'Smart Crates Widget',
-      smartCratesWidgetDescription: 'Maak intelligente playlists op basis van regels (BPM, key, energy, datum). Exporteer naar Rekordbox M3U formaat.',
       technicalTitle: 'Technische Details (voor Docenten)',
       technicalDescription: 'Technische informatie over de architectuur en implementatie',
       tech1Title: 'Frontend Technologie',
@@ -886,8 +882,6 @@ export const translations: Record<Language, Translations> = {
       cuePointsWidgetDescription: 'Shows the number of tracks without cue points. Click to go to the library and add cue points.',
       tagSuggestionsWidgetTitle: 'Tag Suggestions Widget',
       tagSuggestionsWidgetDescription: 'Shows the number of tracks without tags. Click to go to the library and add tags for better organization.',
-      smartCratesWidgetTitle: 'Smart Crates Widget',
-      smartCratesWidgetDescription: 'Create intelligent playlists based on rules (BPM, key, energy, date). Export to Rekordbox M3U format.',
       technicalTitle: 'Technical Details (for Teachers)',
       technicalDescription: 'Technical information about the architecture and implementation',
       tech1Title: 'Frontend Technology',

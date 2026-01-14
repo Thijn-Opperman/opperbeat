@@ -10,7 +10,6 @@ import SetLengthCard from './components/SetLengthCard';
 import TagSuggestionsWidget from './components/TagSuggestionsWidget';
 import SetSuggestionsWidget from './components/SetSuggestionsWidget';
 import CuePointsWidget from './components/CuePointsWidget';
-import SmartCratesWidget from './components/SmartCratesWidget';
 import { useI18n } from '@/lib/i18n-context';
 import { useAuth } from '@/lib/auth-context';
 import { TrendingUp, Clock, User, Download, Music, Key, Gauge, ListMusic, ExternalLink, Play, Search } from 'lucide-react';
@@ -179,23 +178,23 @@ export default function Home() {
       <Sidebar />
       <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         {/* Top Bar */}
-        <div className="sticky top-0 z-40 bg-[var(--background)] border-b border-[var(--border)] px-4 sm:px-6 lg:px-8 py-4">
-          <div className="max-w-[1920px] mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-[var(--text-primary)]">{t.home.title}</h1>
+        <div className="sticky top-0 z-40 bg-[var(--background)] border-b border-[var(--border)] px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          <div className="max-w-[1920px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <h1 className="text-base sm:text-lg lg:text-xl font-semibold tracking-tight text-[var(--text-primary)]">{t.home.title}</h1>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
               <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-[4px] text-[var(--text-secondary)] text-sm w-64">
                 <Search className="w-4 h-4" />
                 <span>Search...</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center">
+              <div className="flex items-center gap-2 ml-auto sm:ml-0">
+                <div className="w-8 h-8 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center flex-shrink-0">
                   <User className="w-4 h-4 text-[var(--text-primary)]" />
                 </div>
                 <div className="hidden sm:block">
                   <div className="text-sm font-medium text-[var(--text-primary)]">{user?.name || 'Guest'}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">{user?.email || ''}</div>
+                  <div className="text-xs text-[var(--text-secondary)] truncate max-w-[150px]">{user?.email || ''}</div>
                 </div>
               </div>
             </div>
@@ -204,81 +203,76 @@ export default function Home() {
 
         <div className="max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8">
           {/* Unified Dashboard Grid - All widgets in one flowing grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 sm:gap-6 auto-rows-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 sm:gap-6 auto-rows-auto">
             {/* Library Card - Groot (4 kolommen, 2 rijen) */}
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-4 xl:row-span-2 animate-fade-in-up">
+            <div className="sm:col-span-2 lg:col-span-2 xl:col-span-4 xl:row-span-2 animate-fade-in-up">
               <LibraryCard />
             </div>
 
             {/* Quick Stats - Medium (2 kolommen, 1 rij) */}
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
               <QuickStatsWidget />
             </div>
 
             {/* Recent Activity - Medium (2 kolommen, 1 rij) */}
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
               <RecentActivityWidget />
             </div>
 
             {/* Music Analysis Card - Extra Groot (5 kolommen, 3 rijen) */}
-            <div className="md:col-span-2 lg:col-span-3 xl:col-span-5 xl:row-span-3 animate-fade-in-up">
+            <div className="sm:col-span-2 lg:col-span-3 xl:col-span-5 xl:row-span-3 animate-fade-in-up">
               <MusicAnalysisCard />
             </div>
 
             {/* Set Suggestions - Groot (3 kolommen, 3 rijen) */}
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-3 xl:row-span-3 animate-fade-in-up">
+            <div className="sm:col-span-2 lg:col-span-1 xl:col-span-3 xl:row-span-3 animate-fade-in-up">
               <SetSuggestionsWidget />
             </div>
 
             {/* Genres Card - Medium (3 kolommen, 2 rijen) */}
-            <div className="md:col-span-1 lg:col-span-2 xl:col-span-3 xl:row-span-2 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-2 xl:col-span-3 xl:row-span-2 animate-fade-in-up">
               <GenresCard />
             </div>
 
-            {/* Smart Crates - Groot (5 kolommen, 3 rijen) */}
-            <div className="md:col-span-1 lg:col-span-2 xl:col-span-5 xl:row-span-3 animate-fade-in-up">
-              <SmartCratesWidget />
-            </div>
-
             {/* Compact Widgets - Kleine widgets (1 kolom, 1 rij) */}
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <SetLengthCard />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <TagSuggestionsWidget />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <CuePointsWidget />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <BPMMatcherWidget />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <KeyMatcherWidget />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <QuickPlaylistWidget />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <ProfileWidget />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
               <DownloadWidget />
             </div>
 
             {/* External Services - Medium (2 kolommen, 1 rij) */}
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
               <SpotifyWidget />
             </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
               <SoundCloudWidget />
             </div>
           </div>

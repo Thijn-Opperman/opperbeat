@@ -115,7 +115,9 @@ opperbeat/
 ├── sql/                         # Database scripts
 │   ├── supabase_setup.sql      # Hoofd schema
 │   ├── playlists_setup.sql     # Playlist schema
-│   └── storage_policies.sql    # Storage policies
+│   ├── mixes_setup.sql         # Mixes schema
+│   ├── storage_policies.sql    # Storage policies
+│   └── fix_foreign_keys_simple.sql  # Foreign key fixes
 └── docs/                        # Documentatie (zie hieronder)
 ```
 
@@ -131,7 +133,9 @@ opperbeat/
 2. **Voer SQL scripts uit in Supabase SQL Editor:**
    - `sql/supabase_setup.sql` - Database schema en tabellen
    - `sql/playlists_setup.sql` - Playlist schema
+   - `sql/mixes_setup.sql` - Mixes schema
    - `sql/storage_policies.sql` - Storage bucket policies
+   - `sql/fix_foreign_keys_simple.sql` - Foreign key fixes (indien nodig)
 
 3. **Maak Storage Buckets:**
    - Ga naar Storage in Supabase Dashboard
@@ -178,9 +182,6 @@ Zie `RAILWAY_DEPLOYMENT.md` voor complete instructies.
 **Zie `SUPABASE_VERCEL_QUICK.md` voor exacte waarden en setup.**
 
 ## 📚 Documentatie
-
-### Uitgebreide Documentatie
-- **`PROJECT_DOCUMENTATIE.md`** - Complete project documentatie met alle details over architectuur, functionaliteiten, API endpoints en meer
 
 ### Setup & Deployment Guides
 - **`docs/VERCEL_DEPLOYMENT.md`** - Complete Vercel deployment guide
@@ -251,14 +252,6 @@ Dit project is ontwikkeld als schoolopdracht. De applicatie demonstreert:
 - Audio processing en analyse
 - Database design en management
 - User experience en interface design
-
-## 📄 License
-
-[Voeg licentie toe]
-
-## 🤝 Contributing
-
-Dit is een schoolopdracht project. Voor vragen of feedback, neem contact op met de ontwikkelaar.
 
 ---
 

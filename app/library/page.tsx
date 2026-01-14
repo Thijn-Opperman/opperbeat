@@ -760,8 +760,8 @@ export default function LibraryPage() {
   return (
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar />
-      {/* Playlists Sidebar */}
-      <div className="w-64 border-r border-theme bg-surface flex flex-col overflow-hidden">
+      {/* Playlists Sidebar - Hidden on mobile */}
+      <div className="hidden lg:flex w-64 border-r border-theme bg-surface flex-col overflow-hidden">
         <div className="px-4 py-3 border-b border-theme">
           <h2 className="text-sm font-semibold text-primary">Playlists</h2>
         </div>
@@ -982,9 +982,9 @@ export default function LibraryPage() {
 
           {/* Search and Filters Bar - Only show when not viewing playlist or set */}
           {!selectedPlaylistId && !selectedSetId && (
-          <div className="flex flex-wrap items-center gap-3 mb-3">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3 mb-3">
             {/* Search */}
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted" />
               <input
                 type="text"
@@ -995,49 +995,52 @@ export default function LibraryPage() {
               />
             </div>
 
-            {/* BPM Filter */}
-            <div className="flex items-center gap-2 bg-surface border border-theme rounded px-3 py-1.5">
-              <Filter className="w-3.5 h-3.5 text-tertiary" />
-              <input
-                type="number"
-                placeholder="BPM"
-                value={bpmFilter}
-                onChange={(e) => setBpmFilter(e.target.value)}
-                className="bg-transparent text-primary placeholder-muted focus:outline-none w-16 text-sm"
-              />
-            </div>
+            {/* Filters Row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* BPM Filter */}
+              <div className="flex items-center gap-2 bg-surface border border-theme rounded px-3 py-1.5">
+                <Filter className="w-3.5 h-3.5 text-tertiary" />
+                <input
+                  type="number"
+                  placeholder="BPM"
+                  value={bpmFilter}
+                  onChange={(e) => setBpmFilter(e.target.value)}
+                  className="bg-transparent text-primary placeholder-muted focus:outline-none w-16 text-sm"
+                />
+              </div>
 
-            {/* Key Filter */}
-            <div className="flex items-center gap-2 bg-surface border border-theme rounded px-3 py-1.5">
-              <input
-                type="text"
-                placeholder="Key"
-                value={keyFilter}
-                onChange={(e) => setKeyFilter(e.target.value)}
-                className="bg-transparent text-primary placeholder-muted focus:outline-none w-20 text-sm"
-              />
-            </div>
+              {/* Key Filter */}
+              <div className="flex items-center gap-2 bg-surface border border-theme rounded px-3 py-1.5">
+                <input
+                  type="text"
+                  placeholder="Key"
+                  value={keyFilter}
+                  onChange={(e) => setKeyFilter(e.target.value)}
+                  className="bg-transparent text-primary placeholder-muted focus:outline-none w-20 text-sm"
+                />
+              </div>
 
-            {/* Genre Filter */}
-            <div className="flex items-center gap-2 bg-surface border border-theme rounded px-3 py-1.5">
-              <input
-                type="text"
-                placeholder="Genre"
-                value={genreFilter}
-                onChange={(e) => setGenreFilter(e.target.value)}
-                className="bg-transparent text-primary placeholder-muted focus:outline-none w-24 text-sm"
-              />
-            </div>
+              {/* Genre Filter */}
+              <div className="flex items-center gap-2 bg-surface border border-theme rounded px-3 py-1.5">
+                <input
+                  type="text"
+                  placeholder="Genre"
+                  value={genreFilter}
+                  onChange={(e) => setGenreFilter(e.target.value)}
+                  className="bg-transparent text-primary placeholder-muted focus:outline-none w-20 sm:w-24 text-sm"
+                />
+              </div>
 
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-theme rounded text-primary text-sm hover:bg-surface-hover transition-all duration-200 button-press hover-scale animate-fade-in"
-              >
-                <X className="w-3.5 h-3.5" />
-                Clear
-              </button>
-            )}
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-theme rounded text-primary text-sm hover:bg-surface-hover transition-all duration-200 button-press hover-scale animate-fade-in"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Clear</span>
+                </button>
+              )}
+            </div>
           </div>
           )}
 
@@ -1096,115 +1099,184 @@ export default function LibraryPage() {
                   <span className="ml-3 text-primary">Tracks laden...</span>
                 </div>
               ) : (selectedPlaylistId ? playlistTracks : setTracks).length > 0 ? (
-                <div className="px-4 sm:px-6 lg:px-8">
-                  <table className="w-full border-collapse">
-                    <thead className="sticky top-0 bg-background z-10 border-b border-theme">
-                      <tr className="text-left text-xs font-medium text-tertiary uppercase tracking-wider">
-                        <th className="px-3 py-2 w-16">Artwork</th>
-                        <th className="px-3 py-2 w-32">Preview</th>
-                        <th className="px-3 py-2 min-w-[200px]">Track Title</th>
-                        <th className="px-3 py-2 min-w-[150px]">Artist</th>
-                        <th className="px-3 py-2 min-w-[150px]">Album</th>
-                        <th className="px-3 py-2 w-24">Genre</th>
-                        <th className="px-3 py-2 w-20 text-right">BPM</th>
-                        <th className="px-3 py-2 w-20">Key</th>
-                        <th className="px-3 py-2 w-20 text-right">Time</th>
-                        <th className="px-3 py-2 w-12"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(selectedPlaylistId ? playlistTracks : setTracks).map((track, index) => (
-                        <tr
-                          key={track.id || index}
-                          className="group hover:bg-surface transition-all duration-200 border-b border-theme"
-                        >
-                          <td className="px-3 py-2">
-                            <div className="w-12 h-12 bg-surface border border-theme rounded overflow-hidden flex items-center justify-center">
-                              {track.artwork ? (
-                                <img
-                                  src={track.artwork}
-                                  alt={track.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <Music className="w-6 h-6 text-muted" />
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="w-32 h-6 bg-[var(--background)] border border-[var(--border)] rounded overflow-hidden">
-                              {track.waveform ? (
-                                <WaveformPreview waveform={track.waveform} />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className="text-xs text-[var(--text-muted)]">—</span>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="text-primary text-sm font-medium truncate group-hover:text-[var(--primary)] transition-colors">
+                <>
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden px-4 py-4 space-y-4">
+                    {(selectedPlaylistId ? playlistTracks : setTracks).map((track, index) => (
+                      <div
+                        key={track.id || index}
+                        className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)] hover:border-[var(--border-hover)] transition-all duration-200"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-16 h-16 bg-[var(--surface)] border border-[var(--border)] rounded overflow-hidden flex items-center justify-center flex-shrink-0">
+                            {track.artwork ? (
+                              <img
+                                src={track.artwork}
+                                alt={track.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <Music className="w-6 h-6 text-muted" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-medium text-[var(--text-primary)] truncate mb-1">
                               {track.title || 'Unknown'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="text-secondary text-sm truncate">
-                              {track.artist || '—'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="text-secondary text-sm truncate">
-                              {track.album || '—'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="text-secondary text-sm truncate">
-                              {track.genre || '—'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2 text-right">
-                            <div className="text-secondary text-sm">
-                              {track.bpm || '—'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="text-secondary text-sm">
-                              {track.key || '—'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2 text-right">
-                            <div className="text-secondary text-sm">
-                              {track.duration || '—'}
-                            </div>
-                          </td>
-                          <td className="px-3 py-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (track.id) {
-                                  if (selectedPlaylistId) {
-                                    handleDeletePlaylistTrack(track.id);
-                                  } else if (selectedSetId) {
-                                    handleDeleteSetTrack(track.id);
-                                  }
-                                }
-                              }}
-                              disabled={(selectedPlaylistId ? deletingPlaylistTrackId : deletingSetTrackId) === track.id}
-                              className="p-1.5 hover:bg-surface-hover rounded transition-colors text-secondary hover:text-[var(--error)] disabled:opacity-50"
-                              title={selectedPlaylistId ? "Verwijder uit playlist" : "Verwijder uit set"}
-                            >
-                              {(selectedPlaylistId ? deletingPlaylistTrackId : deletingSetTrackId) === track.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="w-4 h-4" />
+                            </h3>
+                            {track.artist && (
+                              <p className="text-xs text-[var(--text-secondary)] truncate mb-1">
+                                {track.artist}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-2 flex-wrap">
+                              {track.bpm && (
+                                <span className="font-mono">BPM: {track.bpm}</span>
                               )}
-                            </button>
-                          </td>
+                              {track.key && (
+                                <span>Key: {track.key}</span>
+                              )}
+                              {track.duration && (
+                                <span className="font-mono">{track.duration}</span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (track.id) {
+                                if (selectedPlaylistId) {
+                                  handleDeletePlaylistTrack(track.id);
+                                } else if (selectedSetId) {
+                                  handleDeleteSetTrack(track.id);
+                                }
+                              }
+                            }}
+                            disabled={(selectedPlaylistId ? deletingPlaylistTrackId : deletingSetTrackId) === track.id}
+                            className="p-2 hover:bg-surface-hover rounded transition-colors text-secondary hover:text-[var(--error)] disabled:opacity-50 flex-shrink-0"
+                            title={selectedPlaylistId ? "Verwijder uit playlist" : "Verwijder uit set"}
+                          >
+                            {(selectedPlaylistId ? deletingPlaylistTrackId : deletingSetTrackId) === track.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block px-4 sm:px-6 lg:px-8">
+                    <table className="w-full border-collapse">
+                      <thead className="sticky top-0 bg-background z-10 border-b border-theme">
+                        <tr className="text-left text-xs font-medium text-tertiary uppercase tracking-wider">
+                          <th className="px-3 py-2 w-16">Artwork</th>
+                          <th className="px-3 py-2 w-32">Preview</th>
+                          <th className="px-3 py-2 min-w-[200px]">Track Title</th>
+                          <th className="px-3 py-2 min-w-[150px]">Artist</th>
+                          <th className="px-3 py-2 min-w-[150px]">Album</th>
+                          <th className="px-3 py-2 w-24">Genre</th>
+                          <th className="px-3 py-2 w-20 text-right">BPM</th>
+                          <th className="px-3 py-2 w-20">Key</th>
+                          <th className="px-3 py-2 w-20 text-right">Time</th>
+                          <th className="px-3 py-2 w-12"></th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {(selectedPlaylistId ? playlistTracks : setTracks).map((track, index) => (
+                          <tr
+                            key={track.id || index}
+                            className="group hover:bg-surface transition-all duration-200 border-b border-theme"
+                          >
+                            <td className="px-3 py-2">
+                              <div className="w-12 h-12 bg-surface border border-theme rounded overflow-hidden flex items-center justify-center">
+                                {track.artwork ? (
+                                  <img
+                                    src={track.artwork}
+                                    alt={track.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <Music className="w-6 h-6 text-muted" />
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="w-32 h-6 bg-[var(--background)] border border-[var(--border)] rounded overflow-hidden">
+                                {track.waveform ? (
+                                  <WaveformPreview waveform={track.waveform} />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <span className="text-xs text-[var(--text-muted)]">—</span>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="text-primary text-sm font-medium truncate group-hover:text-[var(--primary)] transition-colors">
+                                {track.title || 'Unknown'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="text-secondary text-sm truncate">
+                                {track.artist || '—'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="text-secondary text-sm truncate">
+                                {track.album || '—'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="text-secondary text-sm truncate">
+                                {track.genre || '—'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <div className="text-secondary text-sm">
+                                {track.bpm || '—'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="text-secondary text-sm">
+                                {track.key || '—'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 text-right">
+                              <div className="text-secondary text-sm">
+                                {track.duration || '—'}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (track.id) {
+                                    if (selectedPlaylistId) {
+                                      handleDeletePlaylistTrack(track.id);
+                                    } else if (selectedSetId) {
+                                      handleDeleteSetTrack(track.id);
+                                    }
+                                  }
+                                }}
+                                disabled={(selectedPlaylistId ? deletingPlaylistTrackId : deletingSetTrackId) === track.id}
+                                className="p-1.5 hover:bg-surface-hover rounded transition-colors text-secondary hover:text-[var(--error)] disabled:opacity-50"
+                                title={selectedPlaylistId ? "Verwijder uit playlist" : "Verwijder uit set"}
+                              >
+                                {(selectedPlaylistId ? deletingPlaylistTrackId : deletingSetTrackId) === track.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4" />
+                                )}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12">
                   <ListMusic className="w-16 h-16 text-muted mb-4" />
@@ -1246,24 +1318,280 @@ export default function LibraryPage() {
               </Link>
             </div>
           ) : (
-            <div className="px-4 sm:px-6 lg:px-8">
-              {/* Table */}
-              <table className="w-full border-collapse">
-                <thead className="sticky top-0 bg-background z-10 border-b border-theme">
-                  <tr className="text-left text-xs font-medium text-tertiary uppercase tracking-wider">
-                    <th className="px-3 py-2 w-12"></th>
-                    <th className="px-3 py-2 w-16">Artwork</th>
-                    <th className="px-3 py-2 w-32">Preview</th>
-                    <th className="px-3 py-2 min-w-[200px]">Track Title</th>
-                    <th className="px-3 py-2 min-w-[150px]">Artist</th>
-                    <th className="px-3 py-2 min-w-[150px]">Album</th>
-                    <th className="px-3 py-2 w-24">Genre</th>
-                    <th className="px-3 py-2 w-20 text-right">BPM</th>
-                    <th className="px-3 py-2 w-20">Key</th>
-                    <th className="px-3 py-2 w-20 text-right">Time</th>
-                    <th className="px-3 py-2 w-12"></th>
-                  </tr>
-                </thead>
+            <>
+              {/* Mobile Card View */}
+              <div className="lg:hidden px-4 py-4 space-y-4">
+                {analyses.map((analysis, index) => {
+                  const isExpanded = expandedRows.has(analysis.id);
+                  const trackTags = getTrackTags(analysis.id);
+                  const trackCuePoints = getTrackCuePoints(analysis.id);
+
+                  return (
+                    <div
+                      key={analysis.id}
+                      className="bg-[var(--surface)] rounded-[4px] p-4 border border-[var(--border)] hover:border-[var(--border-hover)] transition-all duration-200"
+                    >
+                      <div
+                        onClick={() => toggleRow(analysis.id)}
+                        className="flex items-start gap-3 cursor-pointer"
+                      >
+                        <div className="w-16 h-16 bg-[var(--surface)] border border-[var(--border)] rounded overflow-hidden flex items-center justify-center flex-shrink-0">
+                          {analysis.artwork_public_url ? (
+                            <img
+                              src={analysis.artwork_public_url}
+                              alt={analysis.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <Music className="w-6 h-6 text-muted" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h3 className="text-sm font-medium text-[var(--text-primary)] truncate">
+                              {analysis.title || 'Unknown'}
+                            </h3>
+                            {isExpanded ? (
+                              <ChevronDown className="w-4 h-4 text-[var(--primary)] flex-shrink-0" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
+                            )}
+                          </div>
+                          {analysis.artist && (
+                            <p className="text-xs text-[var(--text-secondary)] truncate mb-1">
+                              {analysis.artist}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] mt-2">
+                            {analysis.bpm && (
+                              <span className="font-mono">BPM: {Math.round(analysis.bpm)}</span>
+                            )}
+                            {analysis.key && (
+                              <span>Key: {analysis.key}</span>
+                            )}
+                            {analysis.duration_formatted && (
+                              <span className="font-mono">{analysis.duration_formatted}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      {isExpanded && (
+                        <div className="mt-4 pt-4 border-t border-[var(--border)] space-y-4">
+                          {/* Waveform with Cue Points */}
+                          <div className="space-y-2">
+                            <div className="w-full h-16 bg-[var(--background)] border border-[var(--border)] rounded overflow-hidden">
+                              {analysis.waveform ? (
+                                <WaveformPreview waveform={analysis.waveform} />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className="text-xs text-[var(--text-muted)]">No waveform</span>
+                                </div>
+                              )}
+                            </div>
+                            {trackCuePoints && trackCuePoints.cuePoints.length > 0 ? (
+                              <div className="flex flex-wrap gap-2">
+                                {trackCuePoints.cuePoints.map((cue) => {
+                                  const isEditing = editingCueId?.trackId === analysis.id && editingCueId?.cueId === cue.id;
+                                  return (
+                                    <div
+                                      key={cue.id}
+                                      className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium border ${getCueTypeColor(cue.type)}`}
+                                    >
+                                      {isEditing ? (
+                                        <>
+                                          <input
+                                            type="text"
+                                            value={editingCueTime || formatTime(cue.time)}
+                                            onChange={(e) => {
+                                              setEditingCueTime(e.target.value);
+                                              const parsed = parseTimeInput(e.target.value);
+                                              if (parsed !== null && trackCuePoints) {
+                                                const updated = trackCuePoints.cuePoints.map(c =>
+                                                  c.id === cue.id ? { ...c, time: parsed } : c
+                                                ).sort((a, b) => a.time - b.time);
+                                                saveTrackCuePoints(analysis.id, trackCuePoints.duration, updated);
+                                              }
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="w-16 px-1.5 py-0.5 bg-[var(--surface-elevated)] border border-[var(--border)] rounded text-primary text-xs"
+                                            placeholder="M:SS"
+                                          />
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const parsed = parseTimeInput(editingCueTime);
+                                              if (parsed !== null) {
+                                                handleUpdateCuePoint(analysis.id, cue.id, parsed);
+                                              }
+                                            }}
+                                            className="p-0.5 hover:bg-[var(--surface-hover)] rounded"
+                                          >
+                                            <Check className="w-3 h-3" />
+                                          </button>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setEditingCueId(null);
+                                              setEditingCueTime('');
+                                            }}
+                                            className="p-0.5 hover:bg-[var(--surface-hover)] rounded"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span>{getCueTypeLabel(cue.type)} {formatTime(cue.time)}</span>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setEditingCueId({ trackId: analysis.id, cueId: cue.id });
+                                              setEditingCueTime(formatTime(cue.time));
+                                            }}
+                                            className="p-0.5 hover:bg-[var(--surface-hover)] rounded ml-1"
+                                            title="Edit time"
+                                          >
+                                            <Edit2 className="w-3 h-3" />
+                                          </button>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleDeleteCuePoint(analysis.id, cue.id);
+                                            }}
+                                            className="p-0.5 hover:bg-red-500/20 rounded ml-0.5"
+                                            title="Delete"
+                                          >
+                                            <X className="w-3 h-3 text-red-400" />
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div className="text-xs text-[var(--text-muted)]">No cue points available</div>
+                            )}
+                          </div>
+
+                          {/* Tags */}
+                          {trackTags && (
+                            <div className="space-y-3 border-t border-theme pt-3">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Tag className="w-4 h-4 text-[var(--primary)]" />
+                                <h4 className="text-sm font-medium text-primary">Tags</h4>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                {/* Energy */}
+                                <div className="space-y-1">
+                                  <label className="text-xs text-[var(--text-muted)]">Energy</label>
+                                  <select
+                                    value={trackTags.tags.energy || ''}
+                                    onChange={(e) => handleUpdateTag(analysis.id, 'energy', e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-full px-2 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded text-xs text-primary focus:outline-none focus:border-[var(--primary)]"
+                                  >
+                                    <option value="">Select energy</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                  </select>
+                                </div>
+
+                                {/* Mood */}
+                                <div className="space-y-1">
+                                  <label className="text-xs text-[var(--text-muted)]">Mood</label>
+                                  <select
+                                    value={trackTags.tags.mood || ''}
+                                    onChange={(e) => handleUpdateTag(analysis.id, 'mood', e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-full px-2 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded text-xs text-primary focus:outline-none focus:border-[var(--primary)]"
+                                  >
+                                    <option value="">Select mood</option>
+                                    <option value="neutral">Neutral</option>
+                                    <option value="energetic">Energetic</option>
+                                    <option value="chill">Chill</option>
+                                    <option value="melancholic">Melancholic</option>
+                                    <option value="uplifting">Uplifting</option>
+                                    <option value="aggressive">Aggressive</option>
+                                  </select>
+                                </div>
+
+                                {/* Vocal Type */}
+                                <div className="space-y-1">
+                                  <label className="text-xs text-[var(--text-muted)]">Vocal Type</label>
+                                  <select
+                                    value={trackTags.tags.vocalType || ''}
+                                    onChange={(e) => handleUpdateTag(analysis.id, 'vocalType', e.target.value as 'vocal' | 'instrumental' | 'mixed')}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-full px-2 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded text-xs text-primary focus:outline-none focus:border-[var(--primary)]"
+                                  >
+                                    <option value="">Select vocal type</option>
+                                    <option value="vocal">Vocal</option>
+                                    <option value="instrumental">Instrumental</option>
+                                    <option value="mixed">Mixed</option>
+                                  </select>
+                                </div>
+
+                                {/* Era */}
+                                <div className="space-y-1">
+                                  <label className="text-xs text-[var(--text-muted)]">Era</label>
+                                  <select
+                                    value={trackTags.tags.era || ''}
+                                    onChange={(e) => handleUpdateTag(analysis.id, 'era', e.target.value || null)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="w-full px-2 py-1.5 bg-[var(--surface)] border border-[var(--border)] rounded text-xs text-primary focus:outline-none focus:border-[var(--primary)]"
+                                  >
+                                    <option value="">Select era</option>
+                                    <option value="90s">90s</option>
+                                    <option value="00s">00s</option>
+                                    <option value="10s">10s</option>
+                                    <option value="20s">20s</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              {/* Instrumentation display */}
+                              {trackTags.tags.instrumentation && trackTags.tags.instrumentation.length > 0 && (
+                                <div className="space-y-1">
+                                  <label className="text-xs text-[var(--text-muted)]">Instrumentation</label>
+                                  <div className="flex flex-wrap gap-2">
+                                    {trackTags.tags.instrumentation.map((inst, idx) => (
+                                      <span key={idx} className="px-2 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded text-xs font-medium">
+                                        {inst}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden lg:block px-4 sm:px-6 lg:px-8">
+                {/* Table */}
+                <table className="w-full border-collapse">
+                  <thead className="sticky top-0 bg-background z-10 border-b border-theme">
+                    <tr className="text-left text-xs font-medium text-tertiary uppercase tracking-wider">
+                      <th className="px-3 py-2 w-12"></th>
+                      <th className="px-3 py-2 w-16">Artwork</th>
+                      <th className="px-3 py-2 w-32">Preview</th>
+                      <th className="px-3 py-2 min-w-[200px]">Track Title</th>
+                      <th className="px-3 py-2 min-w-[150px]">Artist</th>
+                      <th className="px-3 py-2 min-w-[150px]">Album</th>
+                      <th className="px-3 py-2 w-24">Genre</th>
+                      <th className="px-3 py-2 w-20 text-right">BPM</th>
+                      <th className="px-3 py-2 w-20">Key</th>
+                      <th className="px-3 py-2 w-20 text-right">Time</th>
+                      <th className="px-3 py-2 w-12"></th>
+                    </tr>
+                  </thead>
                 <tbody>
                   {analyses.map((analysis, index) => {
                     const isExpanded = expandedRows.has(analysis.id);
@@ -1572,25 +1900,26 @@ export default function LibraryPage() {
                 </tbody>
               </table>
 
-              {/* Load More */}
-              {hasMore && (
-                <div className="py-4 text-center border-t border-theme">
-                  <button
-                    onClick={() => fetchAnalyses(false)}
-                    className="px-6 py-2 bg-surface hover:bg-surface-hover border border-theme text-primary text-sm font-medium rounded transition-all duration-200 button-press hover-scale"
-                  >
-                    Load More
-                  </button>
-                </div>
-              )}
-            </div>
+                {/* Load More */}
+                {hasMore && (
+                  <div className="py-4 text-center border-t border-theme">
+                    <button
+                      onClick={() => fetchAnalyses(false)}
+                      className="px-6 py-2 bg-surface hover:bg-surface-hover border border-theme text-primary text-sm font-medium rounded transition-all duration-200 button-press hover-scale"
+                    >
+                      Load More
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
 
         {/* Create Playlist Modal */}
         {showCreatePlaylistModal && (
-          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-surface-elevated border border-theme rounded-lg p-6 max-w-md w-full animate-scale-in">
+          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+            <div className="bg-surface-elevated border border-theme rounded-lg p-4 sm:p-6 max-w-md w-full my-auto animate-scale-in max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-primary font-semibold text-lg">Nieuwe Playlist</h3>
                 <button
@@ -1674,8 +2003,8 @@ export default function LibraryPage() {
 
         {/* Create Folder Modal */}
         {showCreateFolderModal && (
-          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-surface-elevated border border-theme rounded-lg p-6 max-w-md w-full animate-scale-in">
+          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+            <div className="bg-surface-elevated border border-theme rounded-lg p-4 sm:p-6 max-w-md w-full my-auto animate-scale-in max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-primary font-semibold text-lg">Nieuwe Map</h3>
                 <button
@@ -1742,8 +2071,8 @@ export default function LibraryPage() {
 
         {/* Delete Confirmation Modal */}
         {deleteConfirm && (
-          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in">
-            <div className="bg-surface-elevated border border-theme rounded-lg p-6 max-w-md w-full animate-scale-in">
+          <div className="fixed inset-0 bg-black/70 dark:bg-black/70 light:bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
+            <div className="bg-surface-elevated border border-theme rounded-lg p-4 sm:p-6 max-w-md w-full my-auto animate-scale-in max-h-[90vh] overflow-y-auto">
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 bg-[var(--error)]/20 rounded-lg">
                   <AlertCircle className="w-6 h-6 text-[var(--error)]" />
