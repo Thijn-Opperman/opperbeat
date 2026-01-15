@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Masonry from 'react-masonry-css';
 import Sidebar from './components/Sidebar';
 import MusicAnalysisCard from './components/MusicAnalysisCard';
 import LibraryCard from './components/LibraryCard';
@@ -202,80 +203,90 @@ export default function Home() {
         </div>
 
         <div className="max-w-[1920px] mx-auto p-4 sm:p-6 lg:p-8">
-          {/* Unified Dashboard Grid - All widgets in one flowing grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 sm:gap-6 auto-rows-auto">
-            {/* Library Card - Groot (4 kolommen, 2 rijen) */}
-            <div className="sm:col-span-2 lg:col-span-2 xl:col-span-4 xl:row-span-2 animate-fade-in-up">
+          {/* Masonry Grid Dashboard */}
+          <Masonry
+            breakpointCols={{
+              default: 4,
+              1920: 4,
+              1280: 3,
+              1024: 2,
+              640: 1
+            }}
+            className="masonry-grid"
+            columnClassName="masonry-grid_column"
+          >
+            {/* Library Card - Groot */}
+            <div className="animate-fade-in-up">
               <LibraryCard />
             </div>
 
-            {/* Quick Stats - Medium (2 kolommen, 1 rij) */}
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            {/* Quick Stats */}
+            <div className="animate-fade-in-up">
               <QuickStatsWidget />
             </div>
 
-            {/* Recent Activity - Medium (2 kolommen, 1 rij) */}
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            {/* Recent Activity */}
+            <div className="animate-fade-in-up">
               <RecentActivityWidget />
             </div>
 
-            {/* Music Analysis Card - Extra Groot (5 kolommen, 3 rijen) */}
-            <div className="sm:col-span-2 lg:col-span-3 xl:col-span-5 xl:row-span-3 animate-fade-in-up">
+            {/* Music Analysis Card - Extra Groot */}
+            <div className="animate-fade-in-up">
               <MusicAnalysisCard />
             </div>
 
-            {/* Set Suggestions - Groot (3 kolommen, 3 rijen) */}
-            <div className="sm:col-span-2 lg:col-span-1 xl:col-span-3 xl:row-span-3 animate-fade-in-up">
+            {/* Set Suggestions - Groot */}
+            <div className="animate-fade-in-up">
               <SetSuggestionsWidget />
             </div>
 
-            {/* Genres Card - Medium (3 kolommen, 2 rijen) */}
-            <div className="sm:col-span-1 lg:col-span-2 xl:col-span-3 xl:row-span-2 animate-fade-in-up">
+            {/* Genres Card */}
+            <div className="animate-fade-in-up">
               <GenresCard />
             </div>
 
-            {/* Compact Widgets - Kleine widgets (1 kolom, 1 rij) */}
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            {/* Compact Widgets */}
+            <div className="animate-fade-in-up">
               <SetLengthCard />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <TagSuggestionsWidget />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <CuePointsWidget />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <BPMMatcherWidget />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <KeyMatcherWidget />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <QuickPlaylistWidget />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <ProfileWidget />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-1 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <DownloadWidget />
             </div>
 
-            {/* External Services - Medium (2 kolommen, 1 rij) */}
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            {/* External Services */}
+            <div className="animate-fade-in-up">
               <SpotifyWidget />
             </div>
 
-            <div className="sm:col-span-1 lg:col-span-1 xl:col-span-2 animate-fade-in-up">
+            <div className="animate-fade-in-up">
               <SoundCloudWidget />
             </div>
-          </div>
+          </Masonry>
         </div>
       </div>
     </div>
