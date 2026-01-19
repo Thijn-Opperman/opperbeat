@@ -11,7 +11,8 @@ import {
   Loader2, 
   AlertCircle,
   Edit2,
-  Trash2
+  Trash2,
+  Download
 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n-context';
 
@@ -103,17 +104,68 @@ export default function MixViewPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSet, setIsSet] = useState(false);
   const [setData, setSetData] = useState<any>(null);
+  const [exporting, setExporting] = useState(false);
+  const [isApiMix, setIsApiMix] = useState(false);
 
   useEffect(() => {
     fetchMix();
   }, [mixId]);
 
-  const fetchMix = () => {
+  const fetchMix = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Check eerst in mixes
+      // Probeer eerst API (als mixId een UUID is)
+      if (mixId && mixId.length === 36) {
+        try {
+          const response = await fetch(`/api/mixes/${mixId}`);
+          const data = await response.json();
+          
+          if (response.ok && data.success && data.data) {
+            const apiMix = data.data;
+            setIsApiMix(true);
+            setMix({
+              id: apiMix.id,
+              name: apiMix.name,
+              description: apiMix.description || undefined,
+              venue: apiMix.venue || undefined,
+              event_date: apiMix.event_date || undefined,
+              date: apiMix.date || '',
+              tracks: apiMix.trackCount || 0,
+              duration: apiMix.duration || '0:00',
+              durationSeconds: apiMix.durationSeconds || 0,
+              created_at: apiMix.created_at,
+              updated_at: apiMix.updated_at,
+            });
+            
+            const sortedTracks: MixTrack[] = (apiMix.tracks || []).map((t: any) => ({
+              id: t.id || '',
+              position: t.position !== undefined ? t.position : 0,
+              title: t.title,
+              artist: t.artist,
+              album: t.album,
+              genre: t.genre,
+              duration: t.duration,
+              durationSeconds: t.durationSeconds,
+              bpm: t.bpm,
+              key: t.key,
+              artwork: t.artwork,
+              transition_type: t.transition_type,
+              transition_start_time: t.transition_start_time,
+              notes: t.notes,
+            })).sort((a: MixTrack, b: MixTrack) => a.position - b.position);
+            
+            setTracks(sortedTracks);
+            setIsSet(false);
+            return;
+          }
+        } catch (apiError) {
+          // API call failed, fallback to localStorage
+        }
+      }
+
+      // Check eerst in mixes (localStorage)
       const mixes = getMixesFromStorage();
       const foundMix = mixes.find(m => m.id === mixId);
 
@@ -123,6 +175,7 @@ export default function MixViewPage() {
         const sortedTracks = (foundMix._tracks || []).sort((a, b) => a.position - b.position);
         setTracks(sortedTracks);
         setIsSet(false);
+        setIsApiMix(false);
       } else {
         // Check in sets
         const sets = getSetsFromStorage();
@@ -174,6 +227,7 @@ export default function MixViewPage() {
           // Sorteer tracks op position
           const sortedTracks = (finalMix._tracks || []).sort((a, b) => a.position - b.position);
           setTracks(sortedTracks);
+          setIsApiMix(false);
         } else {
           setError('Mix of set niet gevonden');
         }
@@ -183,6 +237,47 @@ export default function MixViewPage() {
       setError(err instanceof Error ? err.message : 'Onbekende fout');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportRekordbox = async () => {
+    if (!mix || !mixId) return;
+
+    try {
+      setExporting(true);
+      setError(null);
+      
+      // Probeer te exporteren via API (werkt alleen voor mixes in database met UUID)
+      const response = await fetch(`/api/export/rekordbox/mix/${mixId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Export mislukt' }));
+        
+        // Als het geen UUID is of mix niet in database staat, geef duidelijke foutmelding
+        if (response.status === 404 || response.status === 400) {
+          throw new Error('Deze mix staat niet in de database. Export is alleen beschikbaar voor mixes die opgeslagen zijn in de database.');
+        }
+        
+        throw new Error(errorData.error || 'Export mislukt');
+      }
+
+      // Download het XML bestand
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${mix.name.replace(/[^a-z0-9]/gi, '_')}_rekordbox.xml`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      setError(null);
+    } catch (err) {
+      console.error('Error exporting to Rekordbox:', err);
+      setError(err instanceof Error ? err.message : 'Fout bij exporteren naar Rekordbox');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -220,6 +315,26 @@ export default function MixViewPage() {
                 </p>
               </div>
             </div>
+            {mix && tracks.length > 0 && (
+              <button
+                onClick={handleExportRekordbox}
+                disabled={exporting}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm sm:text-base font-medium rounded-[4px] transition-all duration-200 button-press hover-scale"
+                title="Export naar Rekordbox XML"
+              >
+                {exporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="hidden xs:inline">Exporteren...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span className="hidden xs:inline">Export Rekordbox</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Error Message */}

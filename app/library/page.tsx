@@ -190,7 +190,6 @@ export default function LibraryPage() {
         throw new Error(data.error || 'Fout bij ophalen van analyses');
       }
 
-      // Debug: check waveform data
       if (data.data && data.data.length > 0) {
         const withWaveform = data.data.filter((a: MusicAnalysis) => a.waveform).length;
         console.log(`📊 Library: ${data.data.length} analyses, ${withWaveform} met waveform`);

@@ -28,7 +28,7 @@ Open `.env.local` en controleer:
 ## 📋 2. Database Schema
 
 ### Check: Database tabellen bestaan
-1. Ga naar [Supabase Dashboard](https://supabase.com/dashboard/project/kitirbgzeiwupoyovcra)
+1. Ga naar [Supabase Dashboard](https://supabase.com/dashboard) en selecteer je project
 2. Klik op **Table Editor** in de sidebar
 3. Controleer:
    - [ ] Tabel `music_analyses` bestaat

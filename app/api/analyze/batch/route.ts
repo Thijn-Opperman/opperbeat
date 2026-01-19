@@ -93,11 +93,6 @@ async function analyzeSingleFile(file: File, saveToDatabase: boolean, userId: st
     const metadataDuration = metadata?.format?.duration ? Math.round(metadata.format.duration) : null;
     const analyzerDuration = analyzerResult?.duration ? Math.round(analyzerResult.duration) : null;
     
-    // Debug logging om te zien welke duur wordt gebruikt
-    console.log(`📊 Duur voor ${file.name}:`);
-    console.log(`   - Metadata duur: ${metadataDuration ? `${Math.floor(metadataDuration / 60)}:${(metadataDuration % 60).toString().padStart(2, '0')}` : 'niet beschikbaar'}`);
-    console.log(`   - Analyzer duur: ${analyzerDuration ? `${Math.floor(analyzerDuration / 60)}:${(analyzerDuration % 60).toString().padStart(2, '0')}` : 'niet beschikbaar'}`);
-    
     // Gebruik metadata duur als beschikbaar (meest betrouwbaar voor originele duur)
     // Alleen als metadata geen duur heeft, gebruik analyzer resultaat
     const duration = metadataDuration || analyzerDuration || 0;

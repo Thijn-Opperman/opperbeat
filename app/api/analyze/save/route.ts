@@ -51,10 +51,8 @@ export async function POST(request: NextRequest) {
     let userId: string | null = null;
     try {
       userId = await getUserId(request, true);
-      console.log('📝 User ID:', userId || 'null (anonymous)');
     } catch (authError) {
-      // Voor development: gebruik null
-      console.warn('⚠️ Auth error (using null):', authError);
+      // Voor development: gebruik null als auth niet werkt
       userId = null;
     }
 

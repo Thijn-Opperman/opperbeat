@@ -392,7 +392,7 @@ export default function MixesPage() {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Implementeer mix afspelen
+                        // Mix playback functionality not implemented
                       }}
                       className="p-2 bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--surface-hover)] hover:border-[var(--primary)] rounded-[4px] transition-all duration-200 button-press hover-scale"
                       title="Afspelen"

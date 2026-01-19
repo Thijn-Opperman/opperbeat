@@ -63,3 +63,6 @@ logs/
 tmp/
 temp/
 *.tmp
+
+# Test data (should not be committed)
+data/*.json

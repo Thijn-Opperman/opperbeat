@@ -48,9 +48,9 @@ Klik op **"Environment Variables"** en voeg toe:
 
 #### Supabase Variables (VERPLICHT):
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://kitirbgzeiwupoyovcra.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpdGlyYmd6ZWl3dXBveW92Y3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4NTU2NzUsImV4cCI6MjA4MzQzMTY3NX0.OLNW6p_EZFOlBPh3BFDjvbeVGkGmAp3viiprLY0J24A
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpdGlyYmd6ZWl3dXBveW92Y3JhIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Nzg1NTY3NSwiZXhwIjoyMDgzNDMxNjc1fQ.f1r851T59F_YzLeq1nTsthoYlnvA0zjCcIHoAPFdcJE
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 ```
 
 **Voor elke variable:**

@@ -1,56 +1,66 @@
-# 🎵 Opperbeat - DJ Music Analysis Platform
+# Opperbeat - DJ Music Analysis Platform
 
-Een moderne, professionele webapplicatie voor DJ's om muziek te analyseren, organiseren en beheren. Opperbeat biedt automatische BPM- en key-detectie, een uitgebreide bibliotheek, playlistfunctionaliteit en een dashboard met real-time statistieken.
+Opperbeat is een webapplicatie voor DJ's om muziek te analyseren, organiseren en beheren. De applicatie biedt automatische BPM- en key-detectie, een uitgebreide bibliotheek, playlistfunctionaliteit en een dashboard met statistieken.
 
-## ✨ Hoofdfunctionaliteiten
+## Hoofdfunctionaliteiten
 
-### 🎯 Muziekanalyse
-- **BPM Detectie** - Automatische BPM analyse met confidence scores
-- **Key Detectie** - Toonsoort detectie (majeur/minor) met Krumhansl-Schmuckler algoritme
-- **Metadata Extractie** - Automatische extractie van titel, artiest, album, genre
-- **Artwork Extractie** - Automatische extractie van album artwork
-- **Waveform Visualisatie** - Audio waveform data voor visualisatie
-- **Batch Analyse** - Analyseer meerdere bestanden tegelijk
+### Muziekanalyse
+- Automatische BPM detectie met confidence scores
+- Toonsoort detectie (majeur/minor) met Krumhansl-Schmuckler algoritme
+- Metadata extractie (titel, artiest, album, genre)
+- Album artwork extractie
+- Waveform visualisatie data
+- Batch analyse voor meerdere bestanden tegelijk
 
-### 📚 Bibliotheek & Organisatie
-- **Muziekbibliotheek** - Centrale bibliotheek met alle geanalyseerde tracks
-- **Zoeken & Filteren** - Zoek op titel, artiest, album, BPM, key, genre
-- **Playlist Builder** - Maak en beheer playlists
-- **Track Management** - Organiseer en beheer je muziekcollectie
+### Bibliotheek & Organisatie
+- Centrale bibliotheek met alle geanalyseerde tracks
+- Zoeken en filteren op titel, artiest, album, BPM, key, genre
+- Grid- en lijstweergave met sorteeropties
+- Track detailweergave met volledige metadata
+- Playlist builder voor het maken en beheren van playlists
+- Mix/set builder voor het voorbereiden van DJ sets
+- Track management voor het organiseren van je muziekcollectie
 
-### 📊 Dashboard & Analytics
-- **Widget Dashboard** - Overzichtelijk dashboard met verschillende widgets
-- **Real-time Statistieken** - Library insights, genre breakdown, BPM/key matching
-- **Activity Timeline** - Overzicht van activiteit over tijd
-- **Quick Actions** - Snelle toegang tot belangrijke functies
+### Dashboard & Analytics
+- Interactief dashboard met masonry grid layout
+- Widgets met real-time statistieken:
+  - Library overzicht met totale tracks en totale speelduur
+  - Genre breakdown met visuele grafieken
+  - BPM/key matching statistieken
+  - Set lengte calculator
+  - Tag suggesties
+  - Set suggesties op basis van BPM/key matching
+  - Cue points overzicht
+- Activity timeline voor overzicht van recente activiteit
+- Quick actions voor snelle toegang tot belangrijke functies
 
-### 🔐 Gebruikersfunctionaliteiten
-- **Authenticatie** - Email/password login en registratie
-- **Profielbeheer** - Persoonlijke profielinstellingen
-- **Multi-language** - Ondersteuning voor Nederlands en Engels
-- **Theme Support** - Light/Dark theme met system preference
+### Gebruikersfunctionaliteiten
+- Email/password authenticatie (login en registratie)
+- Profielbeheer
+- Multi-language support (Nederlands en Engels)
+- Light/Dark theme met system preference detectie
 
-### 💾 Cloud Opslag
-- **Supabase Integratie** - Veilige cloud opslag voor audio en metadata
-- **Database Opslag** - PostgreSQL database voor alle analyses
-- **Storage Buckets** - Gescheiden opslag voor audio en artwork
+### Cloud Opslag
+- Supabase integratie voor veilige cloud opslag
+- PostgreSQL database voor alle analyses
+- Gescheiden storage buckets voor audio en artwork
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Development Setup
 
-1. **Clone repository:**
+1. Clone het repository:
    ```bash
    git clone <repository-url>
    cd opperbeat
    ```
 
-2. **Installeer dependencies:**
+2. Installeer dependencies:
    ```bash
    npm install
    ```
 
-3. **Maak `.env.local` bestand:**
+3. Maak een `.env.local` bestand aan met de volgende variabelen:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
@@ -59,17 +69,14 @@ Een moderne, professionele webapplicatie voor DJ's om muziek te analyseren, orga
    NEXT_PUBLIC_PYTHON_API_URL=https://your-railway-app.up.railway.app/api/analyze
    ```
 
-4. **Start development server:**
+4. Start de development server:
    ```bash
    npm run dev
    ```
 
-5. **Open in browser:**
-   ```
-   http://localhost:3000
-   ```
+5. Open de applicatie in je browser op `http://localhost:3000`
 
-## 📁 Project Structuur
+## Project Structuur
 
 ```
 opperbeat/
@@ -121,104 +128,105 @@ opperbeat/
 └── docs/                        # Documentatie (zie hieronder)
 ```
 
-## 🗄️ Database Setup
+## Database Setup
 
 ### Supabase Database Schema
 
-1. **Maak Supabase project:**
+1. Maak een Supabase project:
    - Ga naar [supabase.com](https://supabase.com)
-   - Maak een nieuw project
+   - Maak een nieuw project aan
    - Noteer je project URL en API keys
 
-2. **Voer SQL scripts uit in Supabase SQL Editor:**
+2. Voer de SQL scripts uit in de Supabase SQL Editor:
    - `sql/supabase_setup.sql` - Database schema en tabellen
    - `sql/playlists_setup.sql` - Playlist schema
    - `sql/mixes_setup.sql` - Mixes schema
    - `sql/storage_policies.sql` - Storage bucket policies
    - `sql/fix_foreign_keys_simple.sql` - Foreign key fixes (indien nodig)
 
-3. **Maak Storage Buckets:**
-   - Ga naar Storage in Supabase Dashboard
-   - Maak bucket: `audio-files` (public: false)
-   - Maak bucket: `album-artwork` (public: true)
+3. Maak de Storage Buckets aan:
+   - Ga naar Storage in het Supabase Dashboard
+   - Maak bucket `audio-files` aan (public: false)
+   - Maak bucket `album-artwork` aan (public: true)
 
-4. **Check checklist:** Zie `docs/VERIFICATIE_CHECKLIST.md` voor volledige setup verificatie
+4. Voor een volledige setup verificatie, zie `docs/VERIFICATIE_CHECKLIST.md`
 
-## 🚀 Deployment
+## Deployment
 
 ### Vercel Deployment (Frontend)
 
-Zie `VERCEL_DEPLOYMENT.md` voor complete instructies.
+Voor complete instructies, zie `docs/VERCEL_DEPLOYMENT.md`.
 
-**Quick steps:**
-1. Push code naar GitHub
-2. Import project in Vercel
-3. Voeg environment variables toe (zie `SUPABASE_VERCEL_QUICK.md`)
+Kort samengevat:
+1. Push de code naar GitHub
+2. Import het project in Vercel
+3. Voeg de environment variables toe (zie `docs/VERCEL_DEPLOYMENT.md` voor details)
 4. Deploy
 
 ### Railway Deployment (Python API)
 
-Zie `RAILWAY_DEPLOYMENT.md` voor complete instructies.
+Voor complete instructies, zie `docs/RAILWAY_DEPLOYMENT.md`.
 
-**Quick steps:**
-1. Maak Railway account
-2. Deploy from GitHub repo
-3. Railway detecteert automatisch Python service
-4. Kopieer Railway URL naar Vercel environment variables
+Kort samengevat:
+1. Maak een Railway account aan
+2. Deploy vanuit GitHub repository
+3. Railway detecteert automatisch de Python service
+4. Kopieer de Railway URL naar de Vercel environment variables
 
-## 🔧 Environment Variables
+## Environment Variables
 
-### Verplicht voor Supabase:
+### Verplicht voor Supabase
 
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Public anon key
-- `SUPABASE_SERVICE_ROLE_KEY` - Private service role key (server-side only)
+- `SUPABASE_SERVICE_ROLE_KEY` - Private service role key (alleen server-side)
 
-### Optioneel (Python API):
+### Optioneel (Python API)
 
 - `PYTHON_API_URL` - Railway Python API URL
 - `NEXT_PUBLIC_PYTHON_API_URL` - Public Railway API URL
 
-**Zie `SUPABASE_VERCEL_QUICK.md` voor exacte waarden en setup.**
+## Documentatie
 
-## 📚 Documentatie
+Alle documentatie is beschikbaar in de `docs/` folder:
 
-### Setup & Deployment Guides
-- **`docs/VERCEL_DEPLOYMENT.md`** - Complete Vercel deployment guide
-- **`docs/RAILWAY_DEPLOYMENT.md`** - Railway Python API deployment guide
-- **`docs/SUPABASE_VERCEL_QUICK.md`** - Quick reference voor Supabase environment variables
-- **`docs/VERIFICATIE_CHECKLIST.md`** - Checklist voor verificatie van setup
-- **`docs/PLAYLISTS_SETUP_INSTRUCTIES.md`** - Playlist setup instructies
-- **`docs/VERCEL_BUILD_FIX.md`** - Troubleshooting voor Vercel build issues
+### Project Documentatie
+- **`docs/PROCESVERSLAG.md`** - Volledig procesverslag van het project met alle ontwikkelfasen, beslissingen en reflecties
 
-## 🛠️ Technologie Stack
+### Setup & Deployment
+- **`docs/VERCEL_DEPLOYMENT.md`** - Complete Vercel deployment guide voor de frontend
+- **`docs/RAILWAY_DEPLOYMENT.md`** - Railway deployment guide voor de Python API
+- **`docs/VERIFICATIE_CHECKLIST.md`** - Checklist voor verificatie van de complete setup
+- **`docs/PLAYLISTS_SETUP_INSTRUCTIES.md`** - Instructies voor playlist setup en gebruik
+
+## Technologie Stack
 
 ### Frontend
-- **Framework:** Next.js 16.1.1 (App Router)
-- **UI:** React 19.2.3, TypeScript 5.x
-- **Styling:** Tailwind CSS 4
-- **Icons:** Lucide React
-- **Charts:** Recharts
-- **State Management:** React Context API
+- Next.js 16.1.1 (App Router)
+- React 19.2.3, TypeScript 5.x
+- Tailwind CSS 4
+- Lucide React (icons)
+- Recharts (charts)
+- React Context API (state management)
 
 ### Backend
-- **API:** Next.js API Routes
-- **Python API:** FastAPI (voor grote bestanden)
-- **Database:** Supabase (PostgreSQL)
-- **Storage:** Supabase Storage
-- **Authentication:** Supabase Auth
+- Next.js API Routes
+- Python FastAPI (voor grote bestanden)
+- Supabase (PostgreSQL database)
+- Supabase Storage
+- Supabase Auth
 
 ### Audio Processing
-- **Python:** librosa, numpy, mutagen
-- **Node.js:** music-metadata, music-tempo, realtime-bpm-analyzer
-- **FFmpeg:** ffmpeg-static, fluent-ffmpeg
+- Python: librosa, numpy, mutagen
+- Node.js: music-metadata, music-tempo, realtime-bpm-analyzer
+- FFmpeg: ffmpeg-static, fluent-ffmpeg
 
 ### Deployment
-- **Frontend:** Vercel
-- **Python API:** Railway
-- **Database:** Supabase Cloud
+- Frontend: Vercel
+- Python API: Railway
+- Database: Supabase Cloud
 
-## 📝 Scripts
+## Scripts
 
 ```bash
 # Development
@@ -230,32 +238,38 @@ npm run start        # Start productie server
 npm run lint         # Run ESLint
 ```
 
-## 🧪 Testing
+## Testing & Debugging
 
-Test endpoints:
-- `/api/test-supabase` - Test Supabase connectie
-- `/api/debug-supabase` - Debug Supabase setup
+### Test Endpoints
 
-## 🎓 Schoolopdracht Informatie
+Voor setup verificatie zijn de volgende endpoints beschikbaar:
+- **`GET /api/test-supabase`** - Test Supabase connectie, database schema en storage buckets
+- **`GET /api/debug-supabase`** - Uitgebreide diagnostic tool voor Supabase problemen
 
-Dit project is ontwikkeld als schoolopdracht. De applicatie demonstreert:
+Deze endpoints zijn bedoeld voor development en kunnen gebruikt worden om te controleren of alles correct is ingesteld. Zie `docs/VERIFICATIE_CHECKLIST.md` voor meer details.
 
-- **Moderne Web Development:** Next.js, React, TypeScript
-- **Full-Stack Development:** Frontend, Backend, Database integratie
-- **Cloud Services:** Supabase, Vercel, Railway
-- **Audio Processing:** Python libraries voor muziekanalyse
-- **UI/UX Design:** Responsive design, dark/light themes, multi-language support
+## Over dit Project
 
-### Project Doelen
-- Demonstreren van moderne web development technieken
-- Integratie van verschillende services en APIs
-- Audio processing en analyse
-- Database design en management
-- User experience en interface design
+Opperbeat is een full-stack webapplicatie ontwikkeld als schoolopdracht. De applicatie demonstreert moderne web development technieken en best practices:
+
+- **Frontend Development**: Next.js 16 met App Router, React 19, TypeScript, en Tailwind CSS
+- **Backend Development**: Next.js API Routes en Python FastAPI voor audio processing
+- **Database & Storage**: Supabase (PostgreSQL) met Row Level Security en cloud storage
+- **Authentication**: Supabase Auth met email/password authenticatie
+- **Cloud Deployment**: Vercel voor frontend, Railway voor Python API
+- **Audio Processing**: Geavanceerde BPM- en key-detectie met Python (librosa) en Node.js libraries
+- **User Experience**: Multi-language support (NL/EN), dark/light theme, responsive design
+
+### Hoofddoelen
+
+De applicatie is ontworpen om DJ's te helpen bij:
+- Het analyseren van muziekbestanden met automatische BPM- en key-detectie
+- Het organiseren van hun muziekcollectie in een centrale bibliotheek
+- Het voorbereiden van mixes en sets met intelligente suggesties
+- Het krijgen van inzicht in hun collectie via analytics en statistieken
+
+Voor een volledig overzicht van het ontwikkelproces, technische beslissingen en reflecties, zie `docs/PROCESVERSLAG.md`.
 
 ---
 
-**Gemaakt met ❤️ voor muziek analyse**
-
-**Versie:** 1.0  
-**Laatste update:** 2025-01-09
+**Versie 1.0** - Januari 2025
