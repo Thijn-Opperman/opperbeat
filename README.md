@@ -272,4 +272,4 @@ Voor een volledig overzicht van het ontwikkelproces, technische beslissingen en 
 
 ---
 
-**Versie 1.0** - Januari 2025
+**Versie 4.0** -  19 Januari 2026
